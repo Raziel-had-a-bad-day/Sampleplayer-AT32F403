@@ -20,7 +20,7 @@ void next_sample(void){
 	uint16_t temp_out;
 	//uint32_t multi=8;
 	//if(ADSR_counter_position[0]>cc_76)  pointer=in_sample_holder_2;
-	ADSR_out_1=64000;
+	//ADSR_out_1=64000;
 	/////////// sound 0 ///////////////
 	if (counter>(cycle_length-1)) counter=counter&127; // just in case
 	if (counter<2) zero_cross=1; else zero_cross=0;   // this needs some changes

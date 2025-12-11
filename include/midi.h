@@ -7,12 +7,18 @@
 		if(pc_value) sample_select[0]=pc_value*1200;  // try to catch as lots of zero ??
 		sample_select[1]=sample_select[0];
 
-		//HAL_Delay(20); // DO NOT REMOVIE , needs this or it goes bad
-		memcpy(in_sample_holder,out_bin+sample_select[0],1200);
-	//	flash_read(sample_select[1],1200,test_sample ); // grab from ext flash ,needed initially
-	//	memcpy(in_sample_holder,test_sample+4,1200);
+		uint16_t i=0;
+		int16_t temp[600];
+		uint32_t read_adr= user_data_start+sample_select[0];
 
 
+	for (i=0;i<600;i++){   // reading ok now
+
+		temp[i]=*(int16_t*)(read_adr);
+		  read_adr += 2;
+	}
+		memcpy(in_sample_holder,temp,1200);
+		memcpy(in_sample_holder_2,temp,1200);
 	}
 
 	void control_change(uint8_t cc , uint8_t value){       // midi control change processing, needs a fifo buffer of som etype to avoid too much process
@@ -27,7 +33,7 @@
 	if(cc_75) {sample_select[2]=cc_75*1200;
 	//HAL_Delay(20); // DO NOT REMOVIE , needs this or it goes bad
 	//flash_read(sample_select[2],1200,test_sample ); // grab from ext flash ,needed initially
-	memcpy(in_sample_holder_2,out_bin+sample_select[2],1200);
+	//memcpy(in_sample_holder_2,out_bin+sample_select[2],1200);
 	//memcpy(in_sample_holder_2,test_sample+4,1200); // a second sample for decay
 	}}
 	if(cc==76)  cc_76=value&127;
@@ -111,11 +117,11 @@ uint8_t incoming_message[3];    //
 
 
 		if (midi_note_hold[3]==4)   { //HAL_GPIO_TogglePin (GPIOC,LED_Pin);
-
+			if (midi_note_hold[1]<127){   // skip if bad data
 		note_trigger=midi_note_hold[1]&127;   // needs zones
 		//HAL_GPIO_TogglePin (GPIOC,LED_Pin);
 		at32_led_toggle(LED2);
-		memset(midi_note_hold,0,4);}  // play note and clear
+		memset(midi_note_hold,0,4);}}  // play note and clear
 
 
 		if (midi_pc_hold[3]==4)   {

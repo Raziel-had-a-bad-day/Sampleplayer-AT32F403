@@ -3,6 +3,8 @@
 #define MIDI_NOTE_ON 144
 #define c_change 176
 #define usart_buffer_size 3
+#define user_data_start 0x080E0000
+#define settings_data   0x080EF000  // the last 256 byte
 
 #define cpu_clock    84000000
 #define uart_receive 3     // uart buffer size ,needs at least 3 to work properly
@@ -86,7 +88,9 @@ uint8_t stutter_flip=0;
 float output_gain=1;   // settles around 0.7
 float output_gain2=1;   // 1 is ok  0.85 with full feedback
 int16_t multi=128;
-
+uint8_t settings_write_flag=0;
+uint8_t all_settings[256]={255,255,255,255};
+uint32_t save_timer;
 
 
 

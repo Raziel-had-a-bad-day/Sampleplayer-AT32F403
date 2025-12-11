@@ -34,12 +34,12 @@
 #include "string.h"
 #include <ctype.h>
 #include "math.h"
-#include "out.bin.h"
+//#include "out.bin.h"     // only enable for initial upload
 
 #include "variables.h"
 
 #include "maincode.h"
-
+#include "flash.h"
 #include "audio.h"
 #include "midi.h"
 
@@ -62,32 +62,39 @@ int main(void)
   usart_config();
 
 	midi_note_pwm_calculator();  // issues with float
+
+	waves();
+
+	uint16_t i;
+	int16_t temp[600];
+	uint32_t read_adr= settings_data;
+
+	for (i=0;i<256;i++){   // reading ok now
+		//temp[i]=*(uint8_t*)(read_adr);
+		all_settings[i]=*(uint8_t*)(read_adr);
+		  read_adr += 1;
+	}
+	if (all_settings[0]!=255)	settings_storage();   // only reads once there is data
 	envelopes_preprocess(0);
 	envelopes_preprocess(1);
 	envelopes_preprocess(2);
 	envelopes_preprocess(3);
-	waves();
 
-	uint16_t i;
-	int16_t temp;
-	uint32_t read_adr= 0x8020000;
-	//memcpy(temp,sine12bit,32);
-	//flash_read(0x8020000,in_sample_holder,600);
+read_adr= user_data_start+sample_select[0];
 
-/*for (i=0;i<600;i++){
+for (i=0;i<600;i++){   // reading ok now
 
-	//temp=(sine12bit[i&31]<<4)-33767;
-
-	in_sample_holder[i]=*(int16_t*)(read_adr);
+	temp[i]=*(int16_t*)(read_adr);
 	  read_adr += 2;
-}*/
+}
 
-memcpy(in_sample_holder,out_bin,1200);
-
+memcpy(in_sample_holder,temp,1200);
 
 memcpy(in_sample_holder_2,in_sample_holder,1200);
  //    while(usart_flag_get(USART2, USART_RDBF_FLAG) == RESET);       // while receiving
 
+
+//if (all_settings[0]!=255)	settings_storage(); // check and load settings
 
 
 
@@ -98,19 +105,18 @@ memcpy(in_sample_holder_2,in_sample_holder,1200);
 
 
 
-
-	//  if ( (tmr_counter_value_get(TMR6)&127)==0)  next_sample();
-	 // if ( spi_dma_ready==1)  {memcpy(in_sample_holder,test_sample+4,1200); spi_dma_ready=0;}
+	  	  if (save_timer>60000) {settings_write_flag=1;settings_storage();flash_settings_write();save_timer=0; }  // saves every ten minutes
 	 	  if (next_sample_ready==1) next_sample(); // grab sample
 	 	  if( midi_in_clear) midi_incoming(); // process midi incoming
-	 	 if((!ADSR_timer_flag) && ((tmr_counter_value_get(TMR6)) >8200))  {  ADSR_TIM_writer(); ADSR_timer_flag=1;} //process ADSR
+	 	 if((!ADSR_timer_flag) && ((tmr_counter_value_get(TMR6)) >8200))  {  ADSR_TIM_writer(); ADSR_timer_flag=1;save_timer++;} //process ADSR
 	 	  if((ADSR_timer_flag) && ((tmr_counter_value_get(TMR6))<100)) ADSR_timer_flag=0;   //reset
 
 	 	  if(zero_cross){     // sends note to isr when enabled ,fairly reliable
 	 			if(note_trigger ){    // this needs to wait for zero cross
 
-	 				if (note_trigger>72) note_pitch_shift=-12+(note_trigger-72);  // stary from -12
-	 				if ((note_trigger>47) && (note_trigger<73))							{   // keyboard split
+	 			//	if (note_trigger>72) note_pitch_shift=-12+(note_trigger-72);  // stary from -12
+	 			//	if ((note_trigger>47) && (note_trigger<73))
+	 					if ((note_trigger>47) )	{   // keyboard split
 	 					CNT_list_selected[0]=CNT_list[note_trigger+note_pitch_shift];  // add value for ccr
 	 					CNT_list_selected[1]=CNT_list[note_trigger+5+note_pitch_shift];  // add value for ccr ,freq
 	 					ADSR_counter_position[0]=0;
