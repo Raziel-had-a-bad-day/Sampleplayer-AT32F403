@@ -1,4 +1,49 @@
 
+uint8_t note_fifo(uint8_t incoming,uint8_t read_enable){     // returns last incoming note ,simple fifo
+
+	uint8_t temp=0;
+	uint8_t note_fifo_read=0;
+	uint8_t count_up=0;
+
+	if (!read_enable) {      // simply count down to -1
+		note_fifo_buf[note_fifo_write]=incoming;note_fifo_write=(note_fifo_write+1)&15;
+				return 1 ;}   //0,,1,2,3,4
+
+	while ((!temp) && (note_fifo_read<16)) {    // read until finds value then exit
+		count_up=(note_fifo_read+note_fifo_write)&15;  // starts from the last written pos +1 for 16 steps
+		temp=note_fifo_buf[count_up];note_fifo_buf[count_up]=0;  // clear
+		note_fifo_read++;
+	}
+		return temp;
+}
+
+
+
+uint8_t midi_fifo(uint8_t* incoming,uint8_t read_enable){     // returns last midi message ,simple fifo
+
+
+	uint8_t note_fifo_read=0;
+	uint8_t count_up=0;
+
+	if (!read_enable) {      // write then reset uart nvic
+				memcpy(midi_fifo_buf+midi_fifo_write,incoming,3);
+				midi_fifo_buf[midi_fifo_write+3]=1; // sets flag for later
+				midi_fifo_write=(midi_fifo_write+4)&31;  // copy 3 bytes into every 4
+
+				midi_buf_flag=1;
+				midi_in_clear=0;
+				memset(usart2_rx_buffer,0,uart_receive);
+				usart_interrupt_enable(USART2, USART_RDBF_INT, TRUE);
+
+				return 0 ;}   //0,,1,2,3,4
+
+	while ((!midi_fifo_temp[3]) && (note_fifo_read<32)) {    // read until finds value then exit
+		count_up=(note_fifo_read+midi_fifo_write)&31;  // starts from the last written pos +1 for 16 steps
+		memcpy(midi_fifo_temp,midi_fifo_buf+count_up,4);memset(midi_fifo_buf+count_up,0,4);  // clear
+		note_fifo_read+=4;
+	}
+		return midi_fifo_temp[3];
+}
 
 
 	void program_change(uint8_t pc_value){  // this is ok , getting garbage from seq
@@ -9,7 +54,7 @@
 
 		uint16_t i=0;
 		int16_t temp[600];
-		uint32_t read_adr= user_data_start+sample_select[0];
+		uint32_t read_adr=  user_data_start+sample_select[0];
 
 
 	for (i=0;i<600;i++){   // reading ok now
@@ -48,10 +93,12 @@ uint8_t incoming_message[3];    //
 
 			// reasonable
 
-//uint32_t countup=tmr_counter_value_get(TMR6);
 		uint16_t start=4;
+		if (midi_fifo(0,1))
+		{memcpy(incoming_message,midi_fifo_temp,3);
+		memset(midi_fifo_temp,0,4);
 
-		memcpy(incoming_message,usart2_rx_buffer,3);
+		} else {midi_buf_flag=0;return;}    // quit if no data
 
 
 		uint8_t message1[4]={0,0,0,0};
@@ -117,8 +164,8 @@ uint8_t incoming_message[3];    //
 
 
 		if (midi_note_hold[3]==4)   { //HAL_GPIO_TogglePin (GPIOC,LED_Pin);
-			if (midi_note_hold[1]<127){   // skip if bad data
-		note_trigger=midi_note_hold[1]&127;   // needs zones
+			if (midi_note_hold[1]<80){   // too many high values still
+				note_fifo(midi_note_hold[1],0);
 		//HAL_GPIO_TogglePin (GPIOC,LED_Pin);
 		at32_led_toggle(LED2);
 		memset(midi_note_hold,0,4);}}  // play note and clear
@@ -141,21 +188,10 @@ uint8_t incoming_message[3];    //
 			start=4;   // empty ,return
 		}
 
-		start=4;
 
-					if (start==4)  // always runs
-
-					{memset(usart2_rx_buffer,0,uart_receive);
-					usart_interrupt_enable(USART2, USART_RDBF_INT, TRUE);
-
-					midi_in_clear=0;
-					return;
-
-					}// if no info reload ;
 
 
 }
-
 
 
 

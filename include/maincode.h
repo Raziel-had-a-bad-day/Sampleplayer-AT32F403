@@ -125,5 +125,83 @@ void usart_config(void){
 
 }
 
+void wk_spim_init(void)   // spim setup
+{
+  /* add user code begin spim_init 0 */
+
+  /* add user code end spim_init 0 */
+
+  gpio_init_type gpio_init_struct;
+  gpio_default_para_init(&gpio_init_struct);
+
+  /* add user code begin spim_init 1 */
+
+  /* add user code end spim_init 1 */
+
+  /* configure the CS pin */
+  gpio_init_struct.gpio_drive_strength = GPIO_DRIVE_STRENGTH_MODERATE;
+  gpio_init_struct.gpio_out_type = GPIO_OUTPUT_PUSH_PULL;
+  gpio_init_struct.gpio_mode = GPIO_MODE_MUX;
+  gpio_init_struct.gpio_pins = GPIO_PINS_8;
+  gpio_init_struct.gpio_pull = GPIO_PULL_NONE;
+  gpio_init(GPIOA, &gpio_init_struct);
+
+  /* configure the SCK pin */
+  gpio_init_struct.gpio_drive_strength = GPIO_DRIVE_STRENGTH_MODERATE;
+  gpio_init_struct.gpio_out_type = GPIO_OUTPUT_PUSH_PULL;
+  gpio_init_struct.gpio_mode = GPIO_MODE_MUX;
+  gpio_init_struct.gpio_pins = GPIO_PINS_1;
+  gpio_init_struct.gpio_pull = GPIO_PULL_NONE;
+  gpio_init(GPIOB, &gpio_init_struct);
+
+  /* configure the IO0 pin */
+  gpio_init_struct.gpio_drive_strength = GPIO_DRIVE_STRENGTH_MODERATE;
+  gpio_init_struct.gpio_out_type = GPIO_OUTPUT_PUSH_PULL;
+  gpio_init_struct.gpio_mode = GPIO_MODE_MUX;
+  gpio_init_struct.gpio_pins = GPIO_PINS_11;
+  gpio_init_struct.gpio_pull = GPIO_PULL_NONE;
+  gpio_init(GPIOA, &gpio_init_struct);
+
+  /* configure the IO1 pin */
+  gpio_init_struct.gpio_drive_strength = GPIO_DRIVE_STRENGTH_MODERATE;
+  gpio_init_struct.gpio_out_type = GPIO_OUTPUT_PUSH_PULL;
+  gpio_init_struct.gpio_mode = GPIO_MODE_MUX;
+  gpio_init_struct.gpio_pins = GPIO_PINS_12;
+  gpio_init_struct.gpio_pull = GPIO_PULL_NONE;
+  gpio_init(GPIOA, &gpio_init_struct);
+
+  /* configure the IO2 pin */
+  gpio_init_struct.gpio_drive_strength = GPIO_DRIVE_STRENGTH_MODERATE;
+  gpio_init_struct.gpio_out_type = GPIO_OUTPUT_PUSH_PULL;
+  gpio_init_struct.gpio_mode = GPIO_MODE_MUX;
+  gpio_init_struct.gpio_pins = GPIO_PINS_7;
+  gpio_init_struct.gpio_pull = GPIO_PULL_NONE;
+  gpio_init(GPIOB, &gpio_init_struct);
+
+  /* configure the IO3 pin */
+  gpio_init_struct.gpio_drive_strength = GPIO_DRIVE_STRENGTH_MODERATE;
+  gpio_init_struct.gpio_out_type = GPIO_OUTPUT_PUSH_PULL;
+  gpio_init_struct.gpio_mode = GPIO_MODE_MUX;
+  gpio_init_struct.gpio_pins = GPIO_PINS_6;
+  gpio_init_struct.gpio_pull = GPIO_PULL_NONE;
+  gpio_init(GPIOB, &gpio_init_struct);
+
+  gpio_pin_remap_config(EXT_SPIM_GMUX_1000, TRUE);
+
+  /* configure param */
+  flash_spim_model_select(FLASH_SPIM_MODEL1);
+
+  /* unlock the spim flash program erase controller */
+  while(flash_flag_get(FLASH_SPIM_OBF_FLAG));
+ flash_spim_unlock();
+  //while(FLASH->ctrl3_bit.oplk);       // problems unlocking
+
+  /* if the data written to spim flash need to be scrambled, please specify the scrambled range */
+  flash_spim_encryption_range_set(0x0);
+
+  /* add user code begin spim_init 2 */
+
+  /* add user code end spim_init 2 */
+}
 
 

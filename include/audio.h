@@ -23,7 +23,7 @@ void next_sample(void){
 	//ADSR_out_1=64000;
 	/////////// sound 0 ///////////////
 	if (counter>(cycle_length-1)) counter=counter&127; // just in case
-	if (counter<2) zero_cross=1; else zero_cross=0;   // this needs some changes
+
 	counter=(counter*2);
 	temp_sample=pointer[counter];   //casting the correct way
 	temp2=((temp_sample*ADSR_out_1)>>17);   // modify signal with adsr signed * unsigned
@@ -37,9 +37,10 @@ void next_sample(void){
 	//////////////////   sound 2  //////////
 	counter=wav_pointer[2]>>8;
 	if (counter>(cycle_length-1)) counter=counter&127; // just in case
+
 	counter=(counter*2);
 	temp_sample=pointer[counter];
-	temp3=((temp_sample*ADSR_out_1)>>17);
+	temp3=((temp_sample*ADSR_out_2)>>17);
 
 	////////   mixer  ////
 
@@ -79,13 +80,13 @@ void next_sample(void){
 
 	for (i=0;i<poly;i++){ // advance data pointer, for freq generation , all notes
 
-		if (wav_pointer[i]>(256*cycle_length)) wav_pointer[i]=0; else wav_pointer[i]=wav_pointer[i]+CNT_list_selected[i];
+		if (wav_pointer[i]>wav_multi) {wav_pointer[i]=wav_pointer[i]-wav_multi;zero_cross[i]=1; }  else wav_pointer[i]=wav_pointer[i]+CNT_list_selected[i];
 
 
 	}
 
 	next_sample_ready=2;
-}
+		}
 
 
 
