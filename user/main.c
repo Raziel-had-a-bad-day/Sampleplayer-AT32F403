@@ -116,16 +116,19 @@ memcpy(in_sample_holder_2,in_sample_holder,1200);
 	 	  if (next_sample_ready==1) next_sample(); // grab sample
 	 	//  if( midi_in_clear) midi_incoming(); // process midi incoming
 	 	 if((!ADSR_timer_flag) && ((tmr_counter_value_get(TMR6)) >8200))  {  ADSR_TIM_writer(); ADSR_timer_flag=1;save_timer++;} //process ADSR
-	 	  if((ADSR_timer_flag) && ((tmr_counter_value_get(TMR6))<100)) ADSR_timer_flag=0;   //reset
+	 	  if((ADSR_timer_flag) && ((tmr_counter_value_get(TMR6))<100)) ADSR_timer_flag=0;   //reset   , can miss starts might have sync with notes or trigger more often
 
-	 	  if(zero_cross[0]&& note_trigger){     // sends note to isr when enabled ,fairly reliable
-	 		 if ((note_trigger>47) ){    // this needs to wait for zero cross
+	 	  if(zero_cross[0]&& note_trigger){     // sends note to isr when enabled ,fairly reliable , zero cross works ok
+
+	 		// if ((note_trigger>47) ){  {  // this needs to wait for zero cross
+	 		  if ((note_trigger>47) ){    // this needs to wait for zero cross
 
 	 				 					  // keyboard split
-	 					CNT_list_selected[0]=CNT_list[note_trigger+note_pitch_shift];  // add value for ccr
-	 					CNT_list_selected[1]=CNT_list[note_trigger+5+note_pitch_shift];  // add value for ccr ,freq
+	 					CNT_list_selected[0]=CNT_list[note_trigger];  // add value for ccr
+	 					CNT_list_selected[1]=CNT_list[note_trigger+5];  // add value for ccr ,freq
 	 					ADSR_counter_position[0]=0;
-	 					ADSR_out_1=envelopes_store[0];
+	 					ADSR_out_1=envelopes_store[0];   // this reall should be elsewhere
+	 					//ADSR_out_1=(ADSR_out_1*current_velocity)>>8;
 	 					stutter_flip=0;
 	 					stutter_toggle=0;
 	 					note_trigger=0;
@@ -136,9 +139,9 @@ memcpy(in_sample_holder_2,in_sample_holder,1200);
 		 		// if(note_trigger){     // sends note to isr when enabled ,fairly reliable
 	 					if (note_trigger<48){
 	 					CNT_list_selected[2]=CNT_list[note_trigger];  // add value for ccr ,freq  , 36
-	 					ADSR_counter_position[1]=256; 					// trigger note
-	 					ADSR_out_2=envelopes_store[256];
-
+	 					ADSR_counter_position[1]=255; 					// trigger note
+	 					ADSR_out_2=envelopes_store[255];
+	 					//ADSR_out_2=(ADSR_out_2*current_velocity)>>8;
 
 	 					note_trigger=0;
 	 					zero_cross[2]=0;
@@ -155,13 +158,24 @@ void USART2_IRQHandler(void)  //works
   if(usart_interrupt_flag_get(USART2, USART_RDBF_FLAG) != RESET)
   {
     /* read one byte from the receive data register */
-    usart2_rx_buffer[usart2_rx_counter++] = usart_data_receive(USART2);
+	//  usart2_rx_buffer[usart2_rx_counter++] = usart_data_receive(USART2);
 
-    if(usart2_rx_counter == usart_buffer_size)
+
+	  usart2_rx_buffer[usart2_rx_counter] = usart_data_receive(USART2);  // filter midi channel here first
+	  if (usart2_rx_buffer[0]==note_on+midi_channel)  usart2_rx_counter++;   // try to get note on message start , no cc atm ,stops some random  notes
+	  if (usart2_rx_buffer[0]==c_change+4)
+		  usart2_rx_counter++;
+	//  usart_interrupt_enable(USART2, USART_RDBF_INT, FALSE);
+	// usart2_rx_buffer[usart2_rx_counter++] = usart_data_receive(USART2);
+
+    if(usart2_rx_counter >(usart_buffer_size-1))
     {
       /* disable the usart2 receive interrupt */
-      usart_interrupt_enable(USART2, USART_RDBF_INT, FALSE);
+      usart_interrupt_enable(USART2, USART_RDBF_INT, FALSE); // not ideal
       midi_in_clear=1;usart2_rx_counter=0;
+  //	ADSR_counter_position[0]=0;
+  	 			//		ADSR_out_1=64000;
+
     }
   }
 
@@ -171,11 +185,12 @@ void TMR7_GLOBAL_IRQHandler(void)  // works
 {
   if(tmr_interrupt_flag_get(TMR7, TMR_OVF_FLAG) != RESET)
   {
-		uint32_t	temp=temp_ccr;;
-		if(next_sample_ready==2) temp=ccr2_out;  // only update if ready
-
+		uint16_t	temp=temp_ccr;;
+		uint16_t	temp2=temp_ccr;;
+		if(next_sample_ready==2) temp=ccr2_out; temp2=ccr1_out; // only update if ready
+	//	temp=ccr2_out;
 			next_sample_ready=1;
-			dac_dual_data_set(DAC_DUAL_12BIT_RIGHT, temp, temp);
+			dac_dual_data_set(DAC_DUAL_12BIT_RIGHT, temp, temp2);
 			 dac_dual_software_trigger_generate();
 			 temp_ccr=ccr2_out;
 

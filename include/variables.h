@@ -22,8 +22,8 @@
 #define poly 8   // polyphony- spell check doesn't know this word ,retarded
 #define note_on 144
 #define p_change 192
-#define midi_channel 4   // current midi channel
-#define delay_buffer_size 8192
+#define midi_channel 4  // current midi channel
+#define delay_buffer_size 8192 //int16
 #define wav_multi 256*cycle_length
 
 
@@ -32,7 +32,7 @@ uint32_t flash_memory_record[64]={};   // keep track of memory blocks start-end 
 
 uint8_t memory_record_error_flag=0;  // activate if anything wrong with memory record , then proceed to restore
 
-uint32_t  sample_select[poly];
+uint32_t  sample_select[poly]={1200,1200};
 
 
 int16_t delay_buffer[delay_buffer_size]; //200ms 10khz 16 bit
@@ -51,7 +51,7 @@ uint16_t envelopes_store[256*note_count];  // holds envelopes data 1 byte = 100m
 uint8_t ADSR_settings [4*note_count]={1,20,0,0,1,20,0,0,20,20,20,50,20,20,20,50,}; // keeps settings for 4 notes
 uint8_t ADSR_sustain[note_count]={32,32,32,32}; // sustain levels
 uint8_t ADSR_timer_flag; // sets up adsr process every 100ms
-uint16_t ADSR_counter_position[note_count]={0,256,512,768};   // sets position per note
+uint16_t ADSR_counter_position[note_count]={0,255,511,767};   // sets position per note
 uint16_t last_CCR;
 int16_t triangle[128]; // holds 8 bit triangle
 uint32_t wav_pointer[poly]={0,0,0,0,0,0,0,0}; // points to triangle wav
@@ -64,7 +64,8 @@ uint8_t note_trigger;  // holds value for note out until cleared when zero cross
 
 uint8_t midi_fifo_pointer_1; // for midi_fifo, for buffer
 uint8_t midi_fifo_pointer_2; // for midi_fifo, for midi processing
-uint32_t ccr2_out;
+volatile uint32_t ccr2_out;
+volatile uint32_t ccr1_out;
 uint8_t next_sample_ready=0;
 uint8_t midi_note_hold[4]; // holds incoming midi note
 uint8_t midi_pc_hold[4];  // holds program change data
@@ -99,6 +100,8 @@ int8_t midi_fifo_write=0;
 uint8_t midi_fifo_buf[32];
 uint8_t midi_buf_flag=0;  // high until all cleared
 uint8_t midi_fifo_temp[4];
+uint8_t current_velocity=0; // just holds last velocity
+int32_t delay_filter;
 
 
 void midi_note_pwm_calculator(void){    // calculates counter values for pwm

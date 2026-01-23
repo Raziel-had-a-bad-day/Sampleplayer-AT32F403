@@ -72,11 +72,23 @@ uint8_t midi_fifo(uint8_t* incoming,uint8_t read_enable){     // returns last mi
 	// 73 -Attack ,   72 -Release ,71 -VCF REsonance , 74 -VCF cutoff freq,  91 -Reverb , 84-portamento, 94-detune, 95-phaser, 70-sound variation,
 	//92 -tremolo, 75-79 generic fx settings , may use it for delay unit
 	if (cc==72)  {ADSR_settings[1]=value&127;memset(envelopes_store,0,256);envelopes_preprocess(0);}// this will have to be fully recalculated ,will be slow
-	if(cc==91)  delay_time=value&127;
-	if(cc==75)  {		cc_75=value&127;
+	if(cc==5)  delay_time=value&127;
+	if((cc==75) && (cc_75!=value&127))  {		cc_75=value&127;
 	if (cc_75>total_samples) cc_75=total_samples;
-	if(cc_75) {sample_select[2]=cc_75*1200;
-	//HAL_Delay(20); // DO NOT REMOVIE , needs this or it goes bad
+	if(cc_75) {sample_select[0]=cc_75*1200;
+	sample_select[1]=sample_select[0];
+	uint16_t i;
+	int16_t temp[600];
+	uint32_t read_adr= settings_data;
+	read_adr= user_data_start +sample_select[0];
+
+	for (i=0;i<600;i++){   // reading ok now
+
+		temp[i]=*(int16_t*)(read_adr);
+		  read_adr += 2;
+	}
+	memcpy(in_sample_holder,temp,1200);
+	memcpy(in_sample_holder_2,temp,1200);//HAL_Delay(20); // DO NOT REMOVIE , needs this or it goes bad
 	//flash_read(sample_select[2],1200,test_sample ); // grab from ext flash ,needed initially
 	//memcpy(in_sample_holder_2,out_bin+sample_select[2],1200);
 	//memcpy(in_sample_holder_2,test_sample+4,1200); // a second sample for decay
@@ -91,7 +103,7 @@ uint8_t midi_fifo(uint8_t* incoming,uint8_t read_enable){     // returns last mi
 void midi_incoming(void){     // midi processing when triggered,  not good with time code yet
 uint8_t incoming_message[3];    //
 
-			// reasonable
+			// reasonable  , might try to catch during irq
 
 		uint16_t start=4;
 		if (midi_fifo(0,1))
@@ -165,7 +177,7 @@ uint8_t incoming_message[3];    //
 
 		if (midi_note_hold[3]==4)   { //HAL_GPIO_TogglePin (GPIOC,LED_Pin);
 			if (midi_note_hold[1]<80){   // too many high values still
-				note_fifo(midi_note_hold[1],0);
+				note_fifo(midi_note_hold[1],0);current_velocity=midi_note_hold[2]&127;
 		//HAL_GPIO_TogglePin (GPIOC,LED_Pin);
 		at32_led_toggle(LED2);
 		memset(midi_note_hold,0,4);}}  // play note and clear
