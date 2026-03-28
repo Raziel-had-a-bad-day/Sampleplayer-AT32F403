@@ -1,4 +1,4 @@
-
+void note_process(void);
 uint8_t note_fifo(uint8_t incoming,uint8_t read_enable){     // returns last incoming note ,simple fifo
 
 	uint8_t temp=0;
@@ -72,7 +72,13 @@ uint8_t midi_fifo(uint8_t* incoming,uint8_t read_enable){     // returns last mi
 	// 73 -Attack ,   72 -Release ,71 -VCF REsonance , 74 -VCF cutoff freq,  91 -Reverb , 84-portamento, 94-detune, 95-phaser, 70-sound variation,
 	//92 -tremolo, 75-79 generic fx settings , may use it for delay unit
 	if (cc==72)  {ADSR_settings[1]=value&127;memset(envelopes_store,0,256);envelopes_preprocess(0);}// this will have to be fully recalculated ,will be slow
-	if(cc==5)  delay_time=value&127;
+	// pot 1
+
+
+	if(cc==5)  delay_time=value&127; // delay length
+	//pot2
+
+
 	if((cc==75) && (cc_75!=value&127))  {		cc_75=value&127;
 	if (cc_75>total_samples) cc_75=total_samples;
 	if(cc_75) {sample_select[0]=cc_75*1200;
@@ -93,8 +99,8 @@ uint8_t midi_fifo(uint8_t* incoming,uint8_t read_enable){     // returns last mi
 	//memcpy(in_sample_holder_2,out_bin+sample_select[2],1200);
 	//memcpy(in_sample_holder_2,test_sample+4,1200); // a second sample for decay
 	}}
-	if(cc==76)  cc_76=value&127;
-	if(cc==77)  cc_77=value&127;
+	if(cc==76)  cc_76=value&127;// feedback
+	if(cc==77)  cc_77=value&127;// pot 4 , stutter or second note pitch
 
 	} // 5, 75,76,77
 
@@ -205,7 +211,40 @@ uint8_t incoming_message[3];    //
 
 }
 
+void note_process(void){ // deals with assigning notes for sounds , basic for now
+	uint8_t i;
+	uint8_t current_poly=2;// sets number of notes to process for now
+	for (i=0;i<current_poly;i++){
+	if ((sound_triggers[i]==0) && zero_cross[i]) sound_triggers[i]=note_trigger; // adds note_trigger to sound on zero cross
+	 if(zero_cross[i] && (sound_triggers[i]==128)) zero_cross[i]=0; // clears zero cross when it retriggers
 
+	  	  	  if(zero_cross[i]&& sound_triggers[i]){     // sends note to isr when enabled ,fairly reliable , zero cross works ok
+
+
+				 					  // keyboard split
+					CNT_list_selected[i]=CNT_list[sound_triggers[i]];  // first note
+					if(i==1 )	CNT_list_selected[i]=CNT_list[(sound_triggers[i]+cc_77)&127];  // modified note
+					ADSR_counter_position[i]=0;
+					ADSR_out[i]=envelopes_store[i];   // this really should be elsewhere
+					//ADSR_out_1=(ADSR_out_1*current_velocity)>>8;
+					stutter_flip=0;
+					stutter_toggle=0;
+					sound_triggers[i]=128;
+					zero_cross[i]=0;
+		 }// end of zero cross*/
+	}
+
+
+
+	  		if ((sound_triggers[0]>127) && (sound_triggers[1]>127)) {sound_triggers[0]=0;sound_triggers[1]=0;note_trigger=0; } // after playing both notes its off
+
+
+
+
+
+
+
+}
 
 
 

@@ -34,7 +34,7 @@ user/main.o: ../user/main.c ../include/at32f403a_407_board.h \
  ../include/libraries/drivers/inc/at32f403a_407_usb.h \
  ../include/libraries/drivers/inc/at32f403a_407_emac.h \
  ../include/at32f403a_407_clock.h ../include/out.bin.h \
- ../include/variables.h ../include/maincode.h \
+ ../include/variables.h ../include/ram.h ../include/maincode.h \
  ../include/at32f403a_407_board.h ../include/at32f403a_407_clock.h \
  ../include/flash.h ../include/audio.h ../include/midi.h
 ../include/at32f403a_407_board.h:
@@ -75,6 +75,7 @@ user/main.o: ../user/main.c ../include/at32f403a_407_board.h \
 ../include/at32f403a_407_clock.h:
 ../include/out.bin.h:
 ../include/variables.h:
+../include/ram.h:
 ../include/maincode.h:
 ../include/at32f403a_407_board.h:
 ../include/at32f403a_407_clock.h:
