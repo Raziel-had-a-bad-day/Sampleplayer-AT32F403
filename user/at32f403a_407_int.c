@@ -24,7 +24,7 @@
 
 /* includes ------------------------------------------------------------------*/
 #include "at32f403a_407_int.h"
-
+#include "systick.h"
 /** @addtogroup AT32F403A_periph_template
   * @{
   */
@@ -128,7 +128,10 @@ void PendSV_Handler(void)
   */
 void SysTick_Handler(void)
 {
+    systick_ms++;
+ 
 }
+
 
 /**
   * @}

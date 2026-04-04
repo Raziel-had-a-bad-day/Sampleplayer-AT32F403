@@ -24,14 +24,12 @@
 
 /* includes ------------------------------------------------------------------*/
 #include "at32f403a_407_clock.h"
+static void wait_stbl(uint32_t delay)
+{
+  volatile uint32_t i;
 
-/** @addtogroup AT32F403A_periph_template
-  * @{
-  */
-
-/** @addtogroup 403A_System_clock_configuration System_clock_configuration
-  * @{
-  */
+  for(i = 0; i < delay; i++);
+}
 
 /**
   * @brief  system clock config program
@@ -39,35 +37,36 @@
   *         system clock (sclk)   = hext / 2 * pll_mult
   *         system clock source   = pll (hext)
   *         - hext                = HEXT_VALUE
-  *         - sclk                = 240000000
+  *         - sclk                = 120000000
   *         - ahbdiv              = 1
-  *         - ahbclk              = 240000000
+  *         - ahbclk              = 120000000
   *         - apb2div             = 2
-  *         - apb2clk             = 120000000
+  *         - apb2clk             = 60000000
   *         - apb1div             = 2
-  *         - apb1clk             = 120000000
-  *         - pll_mult            = 60
+  *         - apb1clk             = 60000000
+  *         - pll_mult            = 30
   *         - pll_range           = GT72MHZ (greater than 72 mhz)
   * @param  none
   * @retval none
   */
 void system_clock_config(void)
-{
+
+ {
   /* reset crm */
   crm_reset();
 
   crm_clock_source_enable(CRM_CLOCK_SOURCE_HEXT, TRUE);
 
-   /* wait till hext is ready */
+  /* wait for hext stable */
+  wait_stbl(HEXT_STABLE_DELAY);
+
+  /* wait till hext is ready */
   while(crm_hext_stable_wait() == ERROR)
   {
   }
 
   /* config pll clock resource */
-  crm_pll_config(CRM_PLL_SOURCE_HEXT_DIV, CRM_PLL_MULT_60, CRM_PLL_OUTPUT_RANGE_GT72MHZ);
-
-  /* config hext division */
-  crm_hext_clock_div_set(CRM_HEXT_DIV_2);
+  crm_pll_config(CRM_PLL_SOURCE_HEXT_DIV, CRM_PLL_MULT_48, CRM_PLL_OUTPUT_RANGE_GT72MHZ);
 
   /* enable pll */
   crm_clock_source_enable(CRM_CLOCK_SOURCE_PLL, TRUE);
@@ -77,17 +76,14 @@ void system_clock_config(void)
   {
   }
 
-  /* config ahbclk */
-  crm_ahb_div_set(CRM_AHB_DIV_1);
-
-  /* config apb2clk, the maximum frequency of APB1/APB2 clock is 120 MHz */
+  /* config apb2clk, the maximum frequency of APB1/APB2 clock is 100 MHz  */
   crm_apb2_div_set(CRM_APB2_DIV_2);
 
-  /* config apb1clk, the maximum frequency of APB1/APB2 clock is 120 MHz  */
+  /* config apb1clk, the maximum frequency of APB1/APB2 clock is 100 MHz  */
   crm_apb1_div_set(CRM_APB1_DIV_2);
 
-  /* enable auto step mode */
-  crm_auto_step_mode_enable(TRUE);
+  /* 1step: config ahbclk div8 */
+  crm_ahb_div_set(CRM_AHB_DIV_8);
 
   /* select pll as system clock source */
   crm_sysclk_switch(CRM_SCLK_PLL);
@@ -97,18 +93,18 @@ void system_clock_config(void)
   {
   }
 
-  /* disable auto step mode */
-  crm_auto_step_mode_enable(FALSE);
+  /* delay */
+  wait_stbl(PLL_STABLE_DELAY);
+
+  /* 2step: config ahbclk div2 */
+  crm_ahb_div_set(CRM_AHB_DIV_2);
+
+  /* delay */
+  wait_stbl(PLL_STABLE_DELAY);
+
+  /* 3step: config ahbclk to target div */
+  crm_ahb_div_set(CRM_AHB_DIV_1);
 
   /* update system_core_clock global variable */
   system_core_clock_update();
 }
-
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
-

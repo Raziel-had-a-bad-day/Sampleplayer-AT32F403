@@ -59,7 +59,6 @@ extern "C" {
 #define HICK_VALUE                       ((uint32_t)8000000) /*!< value of the high speed internal clock in hz */
 #define LEXT_VALUE                       ((uint32_t)32768)   /*!< value of the low speed external clock in hz */
 
-/* module define -------------------------------------------------------------*/
 #define CRM_MODULE_ENABLED
 #define TMR_MODULE_ENABLED
 #define RTC_MODULE_ENABLED
@@ -85,8 +84,6 @@ extern "C" {
 #define ACC_MODULE_ENABLED
 #define MISC_MODULE_ENABLED
 #define EMAC_MODULE_ENABLED
-
-/* includes ------------------------------------------------------------------*/
 #ifdef CRM_MODULE_ENABLED
 #include "at32f403a_407_crm.h"
 #endif

@@ -1,4 +1,5 @@
-user/main.o: ../user/main.c ../include/at32f403a_407_board.h \
+user/sampler_loader.o: ../user/sampler_loader.c \
+ ../include/sampler_loader.h \
  ../include/libraries/cmsis/cm4/device_support/at32f403a_407.h \
  ../include/libraries/cmsis/cm4/core_support/core_cm4.h \
  ../include/libraries/cmsis/cm4/core_support/cmsis_version.h \
@@ -32,13 +33,8 @@ user/main.o: ../user/main.c ../include/at32f403a_407_board.h \
  ../include/libraries/drivers/inc/at32f403a_407_acc.h \
  ../include/libraries/drivers/inc/at32f403a_407_misc.h \
  ../include/libraries/drivers/inc/at32f403a_407_usb.h \
- ../include/libraries/drivers/inc/at32f403a_407_emac.h \
- ../include/at32f403a_407_clock.h ../include/systick.h \
- ../include/out.bin.h ../include/variables.h ../include/sampler_loader.h \
- ../include/ram.h ../include/maincode.h ../include/at32f403a_407_board.h \
- ../include/at32f403a_407_clock.h ../include/flash.h ../include/audio.h \
- ../include/midi.h
-../include/at32f403a_407_board.h:
+ ../include/libraries/drivers/inc/at32f403a_407_emac.h
+../include/sampler_loader.h:
 ../include/libraries/cmsis/cm4/device_support/at32f403a_407.h:
 ../include/libraries/cmsis/cm4/core_support/core_cm4.h:
 ../include/libraries/cmsis/cm4/core_support/cmsis_version.h:
@@ -73,15 +69,3 @@ user/main.o: ../user/main.c ../include/at32f403a_407_board.h \
 ../include/libraries/drivers/inc/at32f403a_407_misc.h:
 ../include/libraries/drivers/inc/at32f403a_407_usb.h:
 ../include/libraries/drivers/inc/at32f403a_407_emac.h:
-../include/at32f403a_407_clock.h:
-../include/systick.h:
-../include/out.bin.h:
-../include/variables.h:
-../include/sampler_loader.h:
-../include/ram.h:
-../include/maincode.h:
-../include/at32f403a_407_board.h:
-../include/at32f403a_407_clock.h:
-../include/flash.h:
-../include/audio.h:
-../include/midi.h:

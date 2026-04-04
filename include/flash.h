@@ -56,3 +56,49 @@ void flash_settings_write(void){  // sector = 2k
 
 
 }
+
+/*void read_busy(void){
+	uint8_t temp[2]={0x05};
+	uint8_t  temp2[2]={0,0};
+	uint8_t volatile flag=1;  // this is needed as it can stuck here , something with gpio toggling
+
+	 while (flag) {
+		HAL_GPIO_WritePin(CS1_GPIO_Port, CS1_Pin, 0);  // when readin low till the end
+		HAL_SPI_TransmitReceive (&hspi1,temp,temp2,2, 10); // request data , always leave extra room (clock) , works
+		spi_i2s_data_transmit(SPI4, 0x05);
+
+		HAL_GPIO_WritePin(CS1_GPIO_Port, CS1_Pin, 1);  // high end
+		flag=temp2[1]&1;
+
+	 }
+
+}*/
+void flash_read(uint32_t address,int16_t* mem){     // reads as int16
+	//trying fast read, first received byte needs to be skipped though
+	address=address<<1;
+	uint8_t transmit[136]={0x03,(uint8_t)(address>>16),(uint8_t)(address>>8),(uint8_t)(address),121,122,123,124 };
+
+	uint8_t rec_2[136];
+	uint8_t t_counter=0;
+
+
+	SPI4_CS_LOW;
+	while (t_counter<(128+6)){
+		while(spi_i2s_flag_get(SPI4, SPI_I2S_TDBE_FLAG) == RESET);  // wait for flag
+		spi_i2s_data_transmit(SPI4, transmit[t_counter]);
+		while(spi_i2s_flag_get(SPI4, SPI_I2S_RDBF_FLAG) == RESET);
+		rec_2[t_counter] = spi_i2s_data_receive(SPI4);
+
+		t_counter++;
+
+	}
+	while(spi_i2s_flag_get(SPI4, SPI_I2S_BF_FLAG) != RESET);
+	SPI4_CS_HIGH;
+	memcpy(mem,rec_2+5,128);  // modified for fast read
+
+
+
+
+} // end of while loop
+
+

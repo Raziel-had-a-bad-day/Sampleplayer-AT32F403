@@ -6,7 +6,7 @@
 #define user_data_start 0x080E0000
 #define settings_data   0x080EF000  // the last 256 byte
 #define SPIM_address  0x08400000   // default 16MB
-#define cpu_clock    84000000
+#define cpu_clock    120000000
 #define uart_receive 3     // uart buffer size ,needs at least 3 to work properly
 #define cpu_clock_prescaler 1  // for pwm
 #define TIM_counter_CNT 2048  //  41khz sampple rate ,320hz  at +1
@@ -15,6 +15,7 @@
 #define cycle_length  600  // one cycle sample rate
 #define ADSR_CCR 1680000
 #define sample_location 0x08020000       // stored samples start location on internal flash
+#define SPIM_START_ADDR      0x08400000
 
 #define flash_last_byte 0xFFFFFF // 16 777 215
 #define flash_record_backup 0xFFEF00// page address should always start on 00  !!!!
@@ -23,12 +24,17 @@
 #define note_on 144
 #define p_change 192
 #define midi_channel 4  // current midi channel
-#define delay_buffer_size 8192 //int16
+#define delay_buffer_size 16384 //int16
 #define wav_multi 256*cycle_length
+#define delay_time_multiplier delay_buffer_size/32
 
-
-#define SPI2_CS_HIGH   	GPIOB->scr = GPIO_PINS_7;
-#define SPI2_CS_LOW    GPIOB->clr = GPIO_PINS_7;
+#define SPI2_CS_HIGH   	GPIOB->scr = GPIO_PINS_5;
+#define SPI2_CS_LOW    GPIOB->clr = GPIO_PINS_5;
+#define SPI4_CS_HIGH   	GPIOB->scr = GPIO_PINS_6;
+#define SPI4_CS_LOW    GPIOB->clr = GPIO_PINS_6;
+#define ram_buffer_size 40   // in bytes , 16 samples +8 bytes error correct
+#define audio_buffer_size 64
+#define one_shot_size 80000 // size in word 16 bit
 
 
 uint8_t countSetBits(uint8_t number) { // count bits in byte
@@ -38,6 +44,10 @@ uint8_t countSetBits(uint8_t number) { // count bits in byte
         number >>= 1;        // Right shift n by 1
     }
     return count;}
+
+
+
+
 uint8_t usart3_rx_buffer[16]; // uart 3 rx buffer
 uint8_t usart3_rx_counter;
 uint32_t flash_memory_record[64]={};   // keep track of memory blocks start-end ,start-end, if empty then disable all flash writes ,
@@ -46,11 +56,16 @@ uint32_t flash_memory_record[64]={};   // keep track of memory blocks start-end 
 uint8_t memory_record_error_flag=0;  // activate if anything wrong with memory record , then proceed to restore
 
 uint32_t  sample_select[poly]={1200,1200};
-
+uint32_t systick_hold;
 
 int16_t delay_buffer[delay_buffer_size]; //200ms 10khz 16 bit.  using psram now
+int16_t delay_buffer_2[260]; //200ms 10khz 16 bit.  using psram now
+
+
 uint16_t delay_pointer[3];   // sets read and write for various fx
 uint8_t delay_time=0;  //sets delaytime
+int16_t delay_in_buf[256];
+int16_t delay_out_buf[256];
 
 // SWING - even numbered notes are shifted left or right
 uint8_t serial_temp[uart_receive];
@@ -78,9 +93,18 @@ uint8_t note_trigger;  // holds value for note out until cleared when zero cross
 
 uint8_t midi_fifo_pointer_1; // for midi_fifo, for buffer
 uint8_t midi_fifo_pointer_2; // for midi_fifo, for midi processing
-volatile uint32_t ccr2_out;
-volatile uint32_t ccr1_out;
+
+volatile uint8_t ccr_counter; // keeps track
+uint8_t ccr_counter_2;
+uint32_t ccr_buf[audio_buffer_size];
+uint32_t ccr2_out;
+uint32_t ccr1_out;
+int16_t ram_in[128]; // delay audio data to be sent to ram
+int16_t ram_out[132];// delay audio date from ram
+uint8_t next_sample_tracker; // tracks process count
+
 uint8_t next_sample_ready=0;
+
 uint8_t midi_note_hold[4]; // holds incoming midi note
 uint8_t midi_pc_hold[4];  // holds program change data
 uint8_t midi_cc_hold[4]; // holds incoming cc data
@@ -120,6 +144,29 @@ uint16_t spi_buf[512];
 uint16_t spi_counter_2=0;
 int32_t temp_wave;
 uint8_t sound_triggers[8]; // note_trigger for invidiual sounds
+int16_t one_shot_wav[296]; // holds incoming data for one shot sample
+uint32_t one_shot_pointer=0; // points to current byte location in wav
+
+uint32_t one_shot_playback_rate=0xFFFF;
+uint32_t one_shot_position;// use to calc pos , 1<<17 is one full step
+uint8_t temp_store[256];  // delete this
+uint8_t ram_page_read_buf[256];
+uint8_t ram_test_buf[270];
+uint8_t ram_page_write_buf[256];
+int8_t test_byte[256];
+volatile uint32_t spi_transmit_counter=0;
+uint32_t spi_receive_counter=0;
+uint8_t tmr_counter[32];
+int16_t flash_sample_buf[128];
+volatile uint8_t spi_read_flag=0;  // clear on irq
+volatile uint8_t spi_write_flag=0;  // clear on irq
+uint8_t spi_message_cue; // keeps track of spi messages
+int16_t sine_testing[156];
+uint8_t spi_adder=0;
+
+
+
+
 
 const uint16_t sine_lut[600]={
 

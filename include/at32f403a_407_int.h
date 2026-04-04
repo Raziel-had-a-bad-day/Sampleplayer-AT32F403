@@ -47,7 +47,9 @@ void SVC_Handler(void);
 void DebugMon_Handler(void);
 void PendSV_Handler(void);
 void SysTick_Handler(void);
-
+void DMA1_Channel2_IRQHandler(void);
+void DMA1_Channel3_IRQHandler(void);
+void TMR7_GLOBAL_IRQHandler(void);
 #ifdef __cplusplus
 }
 #endif

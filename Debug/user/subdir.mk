@@ -6,17 +6,23 @@
 C_SRCS += \
 ../user/at32f403a_407_clock.c \
 ../user/at32f403a_407_int.c \
-../user/main.c 
+../user/main.c \
+../user/sampler_loader.c \
+../user/systick.c 
 
 OBJS += \
 ./user/at32f403a_407_clock.o \
 ./user/at32f403a_407_int.o \
-./user/main.o 
+./user/main.o \
+./user/sampler_loader.o \
+./user/systick.o 
 
 C_DEPS += \
 ./user/at32f403a_407_clock.d \
 ./user/at32f403a_407_int.d \
-./user/main.d 
+./user/main.d \
+./user/sampler_loader.d \
+./user/systick.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

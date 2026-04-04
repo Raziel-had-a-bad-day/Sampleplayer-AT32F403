@@ -33,7 +33,8 @@ user/at32f403a_407_int.o: ../user/at32f403a_407_int.c \
  ../include/libraries/drivers/inc/at32f403a_407_acc.h \
  ../include/libraries/drivers/inc/at32f403a_407_misc.h \
  ../include/libraries/drivers/inc/at32f403a_407_usb.h \
- ../include/libraries/drivers/inc/at32f403a_407_emac.h
+ ../include/libraries/drivers/inc/at32f403a_407_emac.h \
+ ../include/systick.h
 ../include/at32f403a_407_int.h:
 ../include/libraries/cmsis/cm4/device_support/at32f403a_407.h:
 ../include/libraries/cmsis/cm4/core_support/core_cm4.h:
@@ -69,3 +70,4 @@ user/at32f403a_407_int.o: ../user/at32f403a_407_int.c \
 ../include/libraries/drivers/inc/at32f403a_407_misc.h:
 ../include/libraries/drivers/inc/at32f403a_407_usb.h:
 ../include/libraries/drivers/inc/at32f403a_407_emac.h:
+../include/systick.h:

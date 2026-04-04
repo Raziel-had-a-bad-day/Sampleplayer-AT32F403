@@ -1,23 +1,27 @@
+
+void delay_calc(void);
+static inline int16_t resample_hermite(const int16_t* sample_data, uint32_t phase);
+static inline int16_t resample_linear(const int16_t* sample_data,   // your sample in RAM/Flash
+                                       uint32_t phase);               // 16.16 fixed point phase
+static inline int16_t resample_hermite_float(const int16_t* sample_data, uint32_t phase);
+
 void next_sample(void){
 
 
-	delay_pointer[0]++;
-	delay_pointer[0] &=(delay_buffer_size-1);
-	//delay_pointer[0] &=8191;
 	uint32_t counter=wav_pointer[0]>>8;  // /256
+	uint32_t one_shot_counter=one_shot_position &0x3FFFFF;// limit to 63
 	int32_t temp=0;
 	uint8_t i;
 	int32_t temp3=0;
 	int32_t temp2=0;
 	int32_t temp_sample=0;
-	uint16_t delay=delay_pointer[0];
-	uint16_t delay_pointer=delay+(delay_time*256);  // set max delay time
-
-	uint16_t delay_2=delay_pointer&(delay_buffer_size-1);
-	uint16_t delay_3=(delay_pointer+256)&(delay_buffer_size-1);
-	//float feedback=cc_76*0.007;
+	one_shot_playback_rate=0xFFFF-(cc_76<<8);  // use feedback pot for now
 	int16_t* pointer = in_sample_holder;
 	int16_t* pointer2 = in_sample_holder_2;
+	//uint32_t pointer3=SPIM_START_ADDR+one_shot_pointer;
+	//int32_t pointer3=user_data_start+one_shot_pointer;
+
+
 	int32_t feedback=cc_76;
 	uint16_t temp_out;
 	//uint32_t multi=8;
@@ -41,18 +45,23 @@ void next_sample(void){
 	temp_sample=pointer2[counter];
 
 	temp=((temp_sample*ADSR_out[1])>>17);
-	//////////////////   sound 2  //////////
-/*	counter=wav_pointer[2]>>8;
-		if (counter>(cycle_length-1)) counter=599; // just in case
+	//////////////////   one shot wave playback   //////////
 
-	counter=(counter*2);
-	temp_sample=pointer[counter];*/
+	temp3=resample_hermite_float(flash_sample_buf,one_shot_counter);
+	//temp3= resample_linear(flash_sample_buf,one_shot_counter);
+	//temp3=flash_sample_buf[next_sample_tracker];   // grab sample from flash
+	temp3*=2;// needs gain setting
+	//temp=pointer3[one_shot_counter/2]>>8;
+	//temp=((pointer3[one_shot_counter/2]&255)<<8)+temp;
+
+	//one_shot_pointer++;// advance one shot pointer
 	//temp3=((temp_sample*ADSR_out_2)>>17);
+
 
 	////////   mixer  ////
 
 	//temp=temp2; //testing
-	temp=((temp2+temp+temp3  ));
+	temp=((temp2+temp+temp3 )); // only with fx
 
 //	if (temp>(1<<22))     {multi-=4; }
 
@@ -62,12 +71,12 @@ void next_sample(void){
 
 	if (stutter_flip) temp=0;
 
-	temp3=temp;
+	temp2=temp3;
 
-
-
+feedback=50; // testing
+delay_time=60;  //testing
 #define SHIFT 7     // ×128 / ÷128
-	if (delay_time) {
+	if (delay_time) {     // bit heavy
 
 		//temp=(temp*(128-(feedback/4)))+(delayed*feedback);  // reduces signal of feedback
 
@@ -75,96 +84,60 @@ void next_sample(void){
 		//if ((temp>32767) || (temp<-32767))  {output_gain*=0.9;}
 
 
-		int32_t delayed = (int16_t) ram_read(delay);
-		//int32_t delayed = delay_buffer[delay];
-		int32_t delayed_2 = (int16_t) ram_read(delay_3);
-		//int32_t delayed_2 = delay_buffer[delay_3];
+		//int32_t delayed = (int16_t) ram_read(delay);  // major slow down needs to be different
+		int32_t delayed = ram_out[next_sample_tracker];  // for reading
+		//int32_t delayed_2 = (int16_t) ram_read(delay_3);
+
+
+		int32_t delayed_2 = delayed;  // for reading
 
 		int32_t fb_contrib = delayed * (int32_t)feedback;
 		int32_t accumulator = (int32_t)temp* (128-(feedback/4));
 		accumulator += fb_contrib;
 		temp3=accumulator>>SHIFT;
-		temp3*=output_gain2;
+		temp3*=output_gain2; //
 		if (temp3>(1<<15)) output_gain2*=0.8;
 		if (temp3>(1<<14)) output_gain2*=0.9; // delay input limiter
 
 		delay_filter=(delay_filter+temp3)/2;
 
-	//	delay_buffer[delay_2]=delay_filter; // write back stops here
-		ram_write(delay_2,(int16_t) delay_filter); // write back stops here
-		int32_t dry  = (int32_t)temp   * 43;
-		int32_t wet  =delayed      * 85;
+		ram_in[next_sample_tracker]=delay_filter; // write back stops here
+		//ram_write(delay_2,(int16_t) delay_filter); // write back stops here
+		int32_t dry  = (int32_t)temp   * 50;
+		int32_t wet  =delayed      * 50;
 		int32_t mix  = dry + wet;
-		int32_t wet_2  =delayed_2      * 85;
+		int32_t wet_2  =delayed_2      * 50;
 		int32_t mix_2  = dry + wet_2;
 		temp3=mix>>6;
-		temp=mix>>6;
+		temp=mix_2>>6;
+
+
 
 	}  // Delay read
 
-
-
-
-
-
-/*
-if (delay_time) {
-    int32_t delayed = delay_buffer[delay];           // old value
-
-    // Write new value into delay line
-    int32_t fb_contrib = delayed * (int32_t)feedback;           // 0..127 * sample
-    int32_t accumulator = (int32_t)temp << SHIFT;               // input ×128
-    accumulator += fb_contrib;
-
-    int16_t new_sample = (int16_t)(accumulator >> SHIFT);
-    // optional: soft saturate if you want extra safety
-    // if (new_sample > 32767) new_sample = 32767;
-    //if (new_sample < -32768) new_sample = -32768;
-	temp=new_sample;
-    temp*=output_gain2;
-	if (temp>(1<<15)) output_gain2*=0.7;
-	if (temp>(1<<14)) output_gain2*=0.9;
-
-	delay_buffer[delay_2] = temp;
-
-    // Output = dry + wet × delayed
-    // Using ~2/3 wet to match your 85/128 feeling
-    int32_t dry  = (int32_t)temp   * 43;
-    int32_t wet  = delayed         * 85;
-    int32_t mix  = dry + wet;
-
-
-
-    temp = (int16_t)(mix >> SHIFT);
-}
-*/
-
-
-
-
-
-
-
-
-
+	temp+=temp2;// mix back
+	temp3+=temp2;
 	//temp_out=(temp>>5)+2048;
 	temp=(temp*current_velocity)>>12; // basic note velocity , not exact based on last value sent
 	//temp=temp>>5;
-	temp3=(temp3*current_velocity)>>12;
-	//ccr1_out=temp3+2048;// to unsigned
-//	if ((temp<300) && (temp>-300)) {zero_cross[0]=1;zero_cross[2]=1;} else {zero_cross[0]=0;zero_cross[2]=0;}// needs to be better
-//
 
-	//
-	//if ((temp3<300) && (temp3>-300)) {zero_cross[0]=1;zero_cross[2]=1;} else {zero_cross[0]=0;zero_cross[2]=0;}// needs to be better
+		temp3=(temp3*current_velocity)>>12;
+
 	temp+=2048;
 	temp3+=2048;
 
-	ccr2_out=(ccr2_out+temp)>>1;
-	ccr1_out=(ccr1_out+temp3)>>1;
+	//ccr2_out=(ccr2_out+temp)>>1;
+	//ccr1_out=(ccr1_out+temp3)>>1;
+	ccr2_out=temp;
+	ccr1_out=temp3;
+
+
+	ccr_buf[ccr_counter_2]=((uint32_t)ccr2_out << 16) | (uint32_t)ccr1_out;
+	//ccr_buf[ccr_counter_2+1]=ccr1_out;
+
 
 	//ccr1_out=temp3+2048;// for testing
-	for (i=0;i<poly;i++){ // advance data pointer, for freq generation , all notes
+	for (i=0;i<3;i++){ // advance data pointer, for freq generation , all notes
 
 		if (wav_pointer[i]>wav_multi) {wav_pointer[i]=wav_pointer[i]-wav_multi; }  else wav_pointer[i]=wav_pointer[i]+CNT_list_selected[i];
 
@@ -176,6 +149,18 @@ if (delay_time) {
 	//ADSR_counter_position[0]=0;
 	//ADSR_out_1=envelopes_store[0];
 	next_sample_ready=2;
+
+   //if ((delay_pointer[0]&127)==0)  {ram_page_read(delay_pointer[0]); memcpy (delay_buffer,ram_page_read_buf,256);} // ream from ram
+
+//	 if ((delay_pointer[1]&127)==0)  { memcpy (ram_page_write_buf+4,delay_buffer_2,256);ram_page_write(0);} //write to ram
+	//if ((delay_pointer[0]&127)==0)  {ram_page_read(0); memcpy (delay_buffer,ram_page_read_buf,256);} // ream from ram
+
+  // if ((delay_pointer[1]&127)==0)  { memcpy (ram_page_write_buf+4,delay_buffer_2,256);ram_page_write(delay_pointer[1]);} //write to ram
+	one_shot_position+=one_shot_playback_rate;  // use this now calculate playback position
+
+
+
+
 		}
 
 
@@ -213,5 +198,218 @@ void ADSR_TIM_writer(void){   // single note for now  20ms ,16 bit ,could be smo
 
 
 }
+	void delay_calc(void){
 
+		delay_pointer[0]+=audio_buffer_size;  //reading
+		delay_pointer[0] &=(delay_buffer_size-1);
 
+		uint32_t delay=delay_pointer[0]; // reading
+		uint32_t delay_pointer1=delay+(delay_time*delay_time_multiplier);  // adds length between read and write for write back
+
+		uint32_t delay_2=delay_pointer1&(delay_buffer_size-1); // loops pointer number , for writing back
+		uint32_t delay_3=(delay_pointer1+delay_time_multiplier)&(delay_buffer_size-1); // extra position for writing back
+		//uint16_t delay_3=delay_pointer1&(delay_buffer_size-1);
+		delay_pointer[1]=delay_2; // write back
+
+	}
+
+	// 4-point Hermite interpolation (recommended)
+	// 4-point Hermite interpolation for int16_t samples
+	// phase is 16.16 fixed-point (integer part = sample index, frac = 0..65535)
+	static inline int16_t resample_hermite(const int16_t* sample_data, uint32_t phase)
+	{
+	    uint32_t idx  = phase >> 16;      // integer sample index
+	    uint32_t frac = phase & 0xFFFF;   // fractional part (0..65535)
+
+	    // Read 4 surrounding samples with safe clamping at boundaries
+	    int32_t x0 = sample_data[idx - 1];
+	    int32_t x1 = sample_data[idx];
+	    int32_t x2 = sample_data[idx + 1];
+	    int32_t x3 = sample_data[idx + 2];
+
+	    // Hermite coefficients
+	    int32_t c0 = x1;
+	    int32_t c1 = (x2 - x0) >> 1;                                 // tangent at x1
+	    int32_t c2 = x0 - ((5 * x1) >> 1) + (x2 << 1) - (x3 >> 1);   // curvature
+	    int32_t c3 = ((x3 - x0) >> 1) + (((3 * (x1 - x2)) >> 1));    // sharper curvature
+
+	    // t = frac / 65536.0   → fixed point
+	    int32_t t  = frac;
+	    int32_t t2 = (t * t) >> 16;
+	    int32_t t3 = (t2 * t) >> 16;
+
+	    // Hermite polynomial: c0 + c1*t + c2*t² + c3*t³
+	    int32_t result = c0
+	                   + ((c1 * t)  >> 16)
+	                   + ((c2 * t2) >> 16)
+	                   + ((c3 * t3) >> 16);
+
+	    // Clamp to int16_t range
+	    if (result > 32767)  return 32767;
+	    if (result < -32768) return -32768;
+
+	    return (int16_t)result;
+	}
+	// Returns 12-bit sample (0..4095)
+	static inline int16_t resample_linear(const int16_t* sample_data,   // your sample in RAM/Flash
+	                                       uint32_t phase)               // 16.16 fixed point phase
+	{
+	    uint32_t idx = phase >> 16;                    // integer part
+	    uint32_t frac = phase & 0xFFFF;                // fractional part (0..65535)
+
+	    int32_t a = sample_data[idx];
+	    int32_t b = sample_data[(idx + 1)];
+
+	    // Linear:   a + (b - a) * frac / 65536
+	    return (int16_t)(a + (((b - a) * frac) >> 16));
+	}
+	static inline int16_t resample_hermite_float(const int16_t* sample_data, uint32_t phase)
+	{
+	    float idx_f = (float)(phase >> 16) + (float)(phase & 0xFFFF) / 65536.0f;
+	    uint32_t idx = (uint32_t)idx_f;
+	    float frac = idx_f - (float)idx;
+
+	    float x0 = sample_data[idx - 1];
+	    float x1 = sample_data[idx];
+	    float x2 = sample_data[idx + 1];
+	    float x3 = sample_data[idx + 2];
+
+	    float c0 = x1;
+	    float c1 = 0.5f * (x2 - x0);
+	    float c2 = x0 - 2.5f*x1 + 2.0f*x2 - 0.5f*x3;
+	    float c3 = 0.5f*(x3 - x0) + 1.5f*(x1 - x2);
+
+	    float result = c0 + c1*frac + c2*frac*frac + c3*frac*frac*frac;
+
+	    // Clamp
+	    if (result >  32767.0f) return 32767;
+	    if (result < -32768.0f) return -32768;
+
+	    return (int16_t)result;
+	}
+
+	// Hermite interpolation for one-shot samples
+	// Returns 0 when sample has finished playing
+	int16_t resample_hermite_oneshot(const int16_t* sample_data,
+	                                 uint32_t sample_length,
+	                                 uint32_t* phase,          // 16.16 fixed point
+	                                 uint32_t increment)
+	{
+	    uint32_t idx = *phase >> 16;
+
+	    // Sample has ended → return silence and stop advancing
+	    if (idx >= sample_length - 2) {       // -2 because we need 2 samples after idx
+	        *phase = 0;                       // optional: reset phase
+	        return 0;
+	    }
+
+	    uint32_t frac = *phase & 0xFFFF;
+
+	    // Read 4 surrounding samples (safe near the end)
+	    int32_t x0 = sample_data[idx - 1];
+	    int32_t x1 = sample_data[idx];
+	    int32_t x2 = sample_data[idx + 1];
+	    int32_t x3 = sample_data[idx + 2];
+
+	    // Hermite coefficients
+	    int32_t c0 = x1;
+	    int32_t c1 = (x2 - x0) >> 1;
+	    int32_t c2 = x0 - ((5 * x1) >> 1) + (x2 << 1) - (x3 >> 1);
+	    int32_t c3 = ((x3 - x0) >> 1) + ((3 * (x1 - x2)) >> 1);
+
+	    int32_t t  = frac;
+	    int32_t t2 = (t * t) >> 16;
+	    int32_t t3 = (t2 * t) >> 16;
+
+	    int32_t result = c0
+	                   + ((c1 * t)  >> 16)
+	                   + ((c2 * t2) >> 16)
+	                   + ((c3 * t3) >> 16);
+
+	    // Update phase
+	    *phase += increment;
+
+	    // Clamp
+	    if (result > 32767)  return 32767;
+	    if (result < -32768) return -32768;
+
+	    return (int16_t)result;
+	}
+	int16_t resample_linear_oneshot(const int16_t* sample_data,
+	                                uint32_t sample_length,
+	                                uint32_t* phase,
+	                                uint32_t increment)
+	{
+	    uint32_t idx = *phase >> 16;
+
+	    if (idx >= sample_length - 1) {
+	        *phase = 0;
+	        return 0;
+	    }
+
+	    uint32_t frac = *phase & 0xFFFF;
+
+	    int32_t a = sample_data[idx];
+	    int32_t b = sample_data[idx + 1];
+
+	    int32_t result = a + (((b - a) * frac) >> 16);
+
+	    *phase += increment;
+
+	    if (result > 32767)  return 32767;
+	    if (result < -32768) return -32768;
+
+	    return (int16_t)result;
+	}
+
+	// Returns interpolated int16_t sample with forward looping
+	// phase is 16.16 fixed point
+	int16_t resample_hermite_loop(const int16_t* sample_data,
+	                              uint32_t sample_length,      // length in samples
+	                              uint32_t* phase,             // pointer to phase accumulator
+	                              uint32_t increment)          // pitch/speed
+	{
+	    uint32_t idx = *phase >> 16;
+	    uint32_t frac = *phase & 0xFFFF;
+
+	    // Handle looping
+	    if (idx >= sample_length) {
+	        idx %= sample_length;                    // forward loop
+	        *phase = (idx << 16) | frac;             // keep fractional part
+	    }
+
+	    // Read 4 points with proper wrapping
+	    uint32_t i0 = (idx == 0) ? sample_length - 1 : idx - 1;
+	    uint32_t i1 = idx;
+	    uint32_t i2 = (idx + 1) % sample_length;
+	    uint32_t i3 = (idx + 2) % sample_length;
+
+	    int32_t x0 = sample_data[i0];
+	    int32_t x1 = sample_data[i1];
+	    int32_t x2 = sample_data[i2];
+	    int32_t x3 = sample_data[i3];
+
+	    // Hermite coefficients
+	    int32_t c0 = x1;
+	    int32_t c1 = (x2 - x0) >> 1;
+	    int32_t c2 = x0 - ((5 * x1) >> 1) + (x2 << 1) - (x3 >> 1);
+	    int32_t c3 = ((x3 - x0) >> 1) + ((3 * (x1 - x2)) >> 1);
+
+	    int32_t t  = frac;
+	    int32_t t2 = (t * t) >> 16;
+	    int32_t t3 = (t2 * t) >> 16;
+
+	    int32_t result = c0
+	                   + ((c1 * t)  >> 16)
+	                   + ((c2 * t2) >> 16)
+	                   + ((c3 * t3) >> 16);
+
+	    // Update phase
+	    *phase += increment;
+
+	    // Clamp output
+	    if (result > 32767)  return 32767;
+	    if (result < -32768) return -32768;
+
+	    return (int16_t)result;
+	}
