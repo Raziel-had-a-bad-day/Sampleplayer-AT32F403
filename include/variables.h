@@ -34,7 +34,7 @@
 #define SPI4_CS_LOW    GPIOB->clr = GPIO_PINS_6;
 #define ram_buffer_size 40   // in bytes , 16 samples +8 bytes error correct
 #define audio_buffer_size 64
-#define one_shot_size 80000 // size in word 16 bit
+#define one_shot_size 160364/2 // size in word 16 bit
 
 
 uint8_t countSetBits(uint8_t number) { // count bits in byte
@@ -121,12 +121,14 @@ uint8_t total_samples=80; // max samples in current bank atm no more than 105 pe
 uint8_t cc_75=0;
 uint8_t cc_76=0;
 uint8_t cc_77=0;  // incoming cc
+uint8_t cc_78=0;
 uint16_t release_start[note_count]={5,261,517,773}; // points to release start pos in envelopes_store
 uint8_t stutter_rate=0;
 uint8_t stutter_toggle=0;
 uint8_t stutter_flip=0;
 float output_gain=1;   // settles around 0.7
 float output_gain2=1;   // 1 is ok  0.85 with full feedback
+float side_gain=1; // sidechain
 int16_t multi=128;
 uint8_t settings_write_flag=0;
 uint8_t all_settings[256]={255,255,255,255};
@@ -163,8 +165,11 @@ volatile uint8_t spi_write_flag=0;  // clear on irq
 uint8_t spi_message_cue; // keeps track of spi messages
 int16_t sine_testing[156];
 uint8_t spi_adder=0;
-
-
+uint16_t lfo1_counter=0; // simple lfo upcount 0-127(for triangle)  << 8  (slower rates)
+uint8_t lfo1_depth=127;  // 0-127;
+uint16_t lfo1_rate=255;  //  basic rate multiplier , might make it  a lut
+uint16_t lfo1_out=0;  // max sample count for now , not actual wave
+uint8_t ch; // delete
 
 
 
@@ -246,6 +251,18 @@ const uint16_t sine_lut[600]={
 		27303, 27642, 27981, 28320, 28661, 29001, 29342, 29684,
 		30026, 30368, 30710, 31053, 31395, 31738, 32081, 32424
 
+
+};
+
+uint16_t sine_wave[128]={
+		512, 537, 562, 587, 611, 636, 660, 684, 707, 730, 753, 774, 796, 816, 836, 855,
+		873, 890, 907, 922, 937, 950, 963, 974, 984, 993, 1001, 1008, 1013, 1017, 1021, 1022,
+		1023, 1022, 1021, 1017, 1013, 1008, 1001, 993, 984, 974, 963, 950, 937, 922, 907, 890,
+		873, 855, 836, 816, 796, 774, 753, 730, 707, 684, 660, 636, 611, 587, 562, 537,
+		512, 486, 461, 436, 412, 387, 363, 339, 316, 293, 270, 249, 227, 207, 187, 168,
+		150, 133, 116, 101, 86, 73, 60, 49, 39, 30, 22, 15, 10, 6, 2, 1,
+		0, 1, 2, 6, 10, 15, 22, 30, 39, 49, 60, 73, 86, 101, 116, 133,
+		150, 168, 187, 207, 227, 249, 270, 293, 316, 339, 363, 387, 412, 436, 461, 486,
 
 };
 

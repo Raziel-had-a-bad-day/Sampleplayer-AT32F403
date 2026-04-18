@@ -1,4 +1,5 @@
 void note_process(void);
+#include "math.h"
 uint8_t note_fifo(uint8_t incoming,uint8_t read_enable){     // returns last incoming note ,simple fifo
 
 	uint8_t temp=0;
@@ -101,8 +102,20 @@ uint8_t midi_fifo(uint8_t* incoming,uint8_t read_enable){     // returns last mi
 	}}
 	if(cc==76)  cc_76=value&127;// feedback
 	if(cc==77)  cc_77=value&127;// pot 4 , stutter or second note pitch
+	if(cc==78)  cc_78=value&127;// pot 4 , stutter or second note pitch
+	lfo1_rate=(cc_77<<4)+1;
+	float depth=cc_78;
 
-	} // 5, 75,76,77
+	depth=pow(1.04,depth);  // smooth log 1.04 is about the best for 128,  1.022 for 255
+	lfo1_depth=depth;
+
+
+	if(lfo1_depth>127) lfo1_depth=127;
+	//lfo1_depth=127-lfo1_depth;
+
+
+
+	} //  cc= 72,5,76,77,78, these work for now ,       79,80   current available controllers
 
 
 

@@ -37,12 +37,14 @@ void dac_config(void){
 
 	 for(idx = 0; idx < 32; idx++)
 	   {
-	     ccr_buf[idx] = (sine12bit[idx] << 16) + (sine12bit[idx]);
+
+
+		 ccr_buf[idx] = (sine12bit[idx] << 16) + (sine12bit[idx]);
 	   }
 
 
 	 for(idx = 0; idx < 128; idx++){
-		sine_testing[idx]=(idx*4)-256;
+		sine_testing[idx]=(sine12bit[idx&31]-2047);
 	 }
 
 	 //  at32_board_init();void audio_dac_dma_init(void)
@@ -115,7 +117,7 @@ void dac_config(void){
 	     dma_interrupt_enable(DMA1_CHANNEL1, DMA_FDT_INT, TRUE);
 
 	     nvic_priority_group_config(NVIC_PRIORITY_GROUP_4);
-	     nvic_irq_enable(DMA1_Channel1_IRQn, 1, 0);
+	     nvic_irq_enable(DMA1_Channel1_IRQn, 0, 0);
 
 	     dma_init(DMA1_CHANNEL1, &dma_init_struct);
 
@@ -392,6 +394,8 @@ void wk_nvic_config(void)
 	{
 	  /* add user code begin usart3_init 0 */
 		  crm_periph_clock_enable(CRM_USART3_PERIPH_CLOCK, TRUE);
+		  crm_periph_clock_enable(CRM_GPIOB_PERIPH_CLOCK, TRUE);
+		  crm_periph_clock_enable(CRM_IOMUX_PERIPH_CLOCK, TRUE);
 	  /* add user code end usart3_init 0 */
 
 	  gpio_init_type gpio_init_struct;
@@ -406,13 +410,13 @@ void wk_nvic_config(void)
 	  gpio_init_struct.gpio_out_type = GPIO_OUTPUT_PUSH_PULL;
 	  gpio_init_struct.gpio_mode = GPIO_MODE_MUX;
 	  gpio_init_struct.gpio_pins = GPIO_PINS_10;
-	  gpio_init_struct.gpio_pull = GPIO_PULL_NONE;
+	  gpio_init_struct.gpio_pull = GPIO_PULL_UP;
 	  gpio_init(GPIOB, &gpio_init_struct);
 
 	  /* configure the RX pin */
 	  gpio_init_struct.gpio_drive_strength = GPIO_DRIVE_STRENGTH_MODERATE;
 	  gpio_init_struct.gpio_out_type  = GPIO_OUTPUT_PUSH_PULL;
-	  gpio_init_struct.gpio_mode = GPIO_MODE_INPUT;
+	  gpio_init_struct.gpio_mode = GPIO_MODE_MUX;
 	  gpio_init_struct.gpio_pins = GPIO_PINS_11;
 	  gpio_init_struct.gpio_pull = GPIO_PULL_NONE;
 	  gpio_init(GPIOB, &gpio_init_struct);
@@ -424,13 +428,13 @@ void wk_nvic_config(void)
 	  usart_parity_selection_config(USART3, USART_PARITY_NONE);
 
 	  nvic_priority_group_config(NVIC_PRIORITY_GROUP_4);
-	  nvic_irq_enable(USART3_IRQn, 2, 0);
-
+	  nvic_irq_enable(USART3_IRQn, 0, 0);
+	  usart_interrupt_enable(USART3, USART_RDBF_INT, TRUE);
 
 	  usart_hardware_flow_control_set(USART3, USART_HARDWARE_FLOW_NONE);
 
 	  /* enable receive data buffer full interrupt */
-	  usart_interrupt_enable(USART3, USART_RDBF_INT, TRUE);
+	//
 
 	  /* add user code begin usart3_init 2 */
 
@@ -441,4 +445,61 @@ void wk_nvic_config(void)
 	  /* add user code begin usart3_init 3 */
 
 	  /* add user code end usart3_init 3 */
+	}
+	void wk_uart4_init(void)
+	{
+	  /* add user code begin uart4_init 0 */
+		  crm_periph_clock_enable(CRM_UART4_PERIPH_CLOCK, TRUE);
+		  crm_periph_clock_enable(CRM_GPIOA_PERIPH_CLOCK, TRUE);
+	  /* add user code end uart4_init 0 */
+
+	  gpio_init_type gpio_init_struct;
+	  gpio_default_para_init(&gpio_init_struct);
+
+	  /* add user code begin uart4_init 1 */
+
+	  /* add user code end uart4_init 1 */
+
+	  /* configure the TX pin */
+	  gpio_init_struct.gpio_drive_strength = GPIO_DRIVE_STRENGTH_MODERATE;
+	  gpio_init_struct.gpio_out_type = GPIO_OUTPUT_PUSH_PULL;
+	  gpio_init_struct.gpio_mode = GPIO_MODE_MUX;
+	  gpio_init_struct.gpio_pins = GPIO_PINS_0;
+	  gpio_init_struct.gpio_pull = GPIO_PULL_NONE;
+	  gpio_init(GPIOA, &gpio_init_struct);
+
+	  /* configure the RX pin */
+	  gpio_init_struct.gpio_drive_strength = GPIO_DRIVE_STRENGTH_MODERATE;
+	  gpio_init_struct.gpio_out_type  = GPIO_OUTPUT_PUSH_PULL;
+	  gpio_init_struct.gpio_mode = GPIO_MODE_INPUT;
+	  gpio_init_struct.gpio_pins = GPIO_PINS_1;
+	  gpio_init_struct.gpio_pull = GPIO_PULL_UP;
+	  gpio_init(GPIOA, &gpio_init_struct);
+
+	  gpio_pin_remap_config(UART4_GMUX_0010, TRUE);
+
+	  /* configure param */
+	  usart_init(UART4, 9600, USART_DATA_8BITS, USART_STOP_1_BIT);
+	  usart_transmitter_enable(UART4, TRUE);
+	  usart_receiver_enable(UART4, TRUE);
+	  usart_parity_selection_config(UART4, USART_PARITY_NONE);
+
+	  usart_hardware_flow_control_set(UART4, USART_HARDWARE_FLOW_NONE);
+
+
+	  nvic_priority_group_config(NVIC_PRIORITY_GROUP_4);
+	  nvic_irq_enable(UART4_IRQn, 0, 0);
+
+	  /* enable receive data buffer full interrupt */
+	  usart_interrupt_enable(UART4, USART_RDBF_INT, TRUE);
+
+	  /* add user code begin uart4_init 2 */
+
+	  /* add user code end uart4_init 2 */
+
+	  usart_enable(UART4, TRUE);
+
+	  /* add user code begin uart4_init 3 */
+
+	  /* add user code end uart4_init 3 */
 	}

@@ -148,3 +148,8 @@ void uart_receive_char(char c)
         cmd_buffer[cmd_idx++] = c;
     }
 }
+
+
+void play_sample(uint8_t id){
+return;
+};

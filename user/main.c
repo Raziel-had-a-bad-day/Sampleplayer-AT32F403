@@ -38,12 +38,14 @@
 #include "out.bin.h"     // only enable for initial upload, binary ->.h file for samples
 
 #include "variables.h"
-#include "sampler_loader.h"
+
 #include "ram.h"
 #include "maincode.h"
 #include "flash.h"
 #include "audio.h"
 #include "midi.h"
+#include "sampler_loader.h"
+
 
 uint8_t data_count=0;
 int32_t start_time=0;
@@ -70,8 +72,8 @@ int main(void)
    usart_config();
   // spi_config();
    spi4_init();
-   wk_usart3_init();
-
+   //wk_usart3_init();
+   wk_uart4_init();
 
 	SPI2_CS_HIGH;  // disable for ram for now
 
@@ -157,7 +159,21 @@ uint8_t tmr_end=0;
   while(1)
   {
 
- 	  if(ccr_counter==audio_buffer_size) {  // process 16*2 samples
+
+/*
+	  if (usart_flag_get(USART3, USART_RDBF_FLAG) != RESET)
+	  {
+	       ch = usart_data_receive(USART3);
+	      if (ch) at32_led_toggle(LED2);
+
+	      // toggle LED or printf via USART2
+	  }
+*/
+
+
+
+
+	  if(ccr_counter==audio_buffer_size) {  // process 16*2 samples
 
  			// basic sound is 180us ,delay adds 50us
  		 		delay_calc();
@@ -193,7 +209,7 @@ uint8_t tmr_end=0;
 
 		 	//	spi4_polling_rx(ram_page_write_buf,132);
 		 		one_shot_pointer+=(one_shot_position>>16); //add final count up
-		 		if (one_shot_pointer >one_shot_size) one_shot_pointer=0; // reset one shot pointer
+		 		if (one_shot_pointer >(one_shot_size-64)) one_shot_pointer=0; // reset one shot pointer
 		 		one_shot_position&=0xFFFF; // reduce to zero
 
 
@@ -210,10 +226,12 @@ uint8_t tmr_end=0;
  	  switch(spi_message_cue){  // cue spi messages here
  	  case 0:spi_message_cue=1;
 
- 	  ram_page_read(one_shot_pointer,128,0);break;				////////120us with /8 and 80 /4
- 	  case 3: memcpy(flash_sample_buf,ram_page_read_buf+1,128);
+ 	  ram_page_read(one_shot_pointer,132,0);break;				////////120us with /8 and 80 /4
+ 	  case 3:
+ 		  //memcpy(ram_page_read_buf+1,sine_testing,128);
+ 		  memcpy(flash_sample_buf,ram_page_read_buf+3,128);
  	  spi_message_cue=4;spi_adder=0; break;// +1 needed , send to end for now as ram no go
- 	  case 4:  spi_message_cue=5;ram_page_read(delay_pointer[0] , 128, 1);break;
+ 	  case 4:  spi_message_cue=5;ram_page_read(delay_pointer[0] , 130, 1);break;
  	  case 7:  spi_message_cue=8;memcpy(ram_out + (spi_adder ), ram_page_read_buf + 5, 128); break;
  	  case 8 : spi_message_cue=9; ram_page_write(delay_pointer[1], ram_in );break;
 
@@ -271,7 +289,7 @@ uint8_t tmr_end=0;
  	  if (save_timer>60000) {settings_write_flag=1;settings_storage();flash_settings_write();save_timer=0; }  // saves every ten minutes
 
  	  if((!ADSR_timer_flag) && ((tmr_counter_value_get(TMR6)) >8200))  {  ADSR_TIM_writer();  // about 10ms
- 	  ADSR_timer_flag=1;save_timer++;
+ 	  ADSR_timer_flag=1;save_timer++;lfo1_out=lfo_out();
 
  	  } //process ADSR
  	  if((ADSR_timer_flag) && ((tmr_counter_value_get(TMR6))<100)) ADSR_timer_flag=0;   //reset   , can miss starts might have sync with notes or trigger more often
@@ -318,21 +336,44 @@ void USART2_IRQHandler(void)  // midi in
 
 
 	}
-void USART3_IRQHandler(void)  //file transfer
+/*void USART3_IRQHandler(void)  //file transfer
 {
   if(usart_interrupt_flag_get(USART3, USART_RDBF_FLAG) != RESET)
   {
-
+	  at32_led_toggle(LED2);
 	//  usart2_rx_buffer[usart2_rx_counter++] = usart_data_receive(USART2);
 	  usart3_rx_buffer[usart3_rx_counter++] = usart_data_receive(USART3);  // filter midi channel here first
 
 
+	 uart_receive_char(usart3_rx_buffer[usart3_rx_counter++] );
+
     if(usart3_rx_counter >15)
     {
-      /* disable the usart2 receive interrupt */
+       disable the usart2 receive interrupt
       usart_interrupt_enable(USART3, USART_RDBF_INT, FALSE); // not ideal
 
     }
+  }
+
+
+	}*/
+void UART4_IRQHandler(void)  //file transfer
+{
+  if(usart_interrupt_flag_get(UART4, USART_RDBF_FLAG) != RESET)
+  {
+	  at32_led_toggle(LED2);
+	//  usart2_rx_buffer[usart2_rx_counter++] = usart_data_receive(USART2);
+	  usart3_rx_buffer[usart3_rx_counter++] = usart_data_receive(UART4);  // filter midi channel here first
+	  usart3_rx_counter&=15;
+
+	 uart_receive_char(usart3_rx_buffer[usart3_rx_counter++] );
+
+ /*   if(usart3_rx_counter >15)
+    {
+       disable the usart2 receive interrupt
+      usart_interrupt_enable(UART4, USART_RDBF_INT, FALSE); // not ideal
+
+    }*/
   }
 
 
