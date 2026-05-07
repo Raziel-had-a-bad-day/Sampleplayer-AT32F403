@@ -33,15 +33,15 @@ uint8_t midi_fifo(uint8_t* incoming,uint8_t read_enable){     // returns last mi
 
 				midi_buf_flag=1;
 				midi_in_clear=0;
-				memset(usart2_rx_buffer,0,uart_receive);
-				usart_interrupt_enable(USART2, USART_RDBF_INT, TRUE);
+				memset(usart2_rx_buffer,0,uart_receive);  // clear for irq
+				usart_interrupt_enable(USART2, USART_RDBF_INT, TRUE); // restart irq
 
 				return 0 ;}   //0,,1,2,3,4
 
 	while ((!midi_fifo_temp[3]) && (note_fifo_read<32)) {    // read until finds value then exit
 		count_up=(note_fifo_read+midi_fifo_write)&31;  // starts from the last written pos +1 for 16 steps
 		memcpy(midi_fifo_temp,midi_fifo_buf+count_up,4);memset(midi_fifo_buf+count_up,0,4);  // clear
-		note_fifo_read+=4;
+		note_fifo_read+=4; // goes up by 4 bytes
 	}
 		return midi_fifo_temp[3];
 }
@@ -72,37 +72,43 @@ uint8_t midi_fifo(uint8_t* incoming,uint8_t read_enable){     // returns last mi
 	//	0 	Bank Select (MSB)  for patch banks , 7-volume, 5-portamento time
 	// 73 -Attack ,   72 -Release ,71 -VCF REsonance , 74 -VCF cutoff freq,  91 -Reverb , 84-portamento, 94-detune, 95-phaser, 70-sound variation,
 	//92 -tremolo, 75-79 generic fx settings , may use it for delay unit
-	if (cc==72)  {ADSR_settings[1]=value&127;memset(envelopes_store,0,256);envelopes_preprocess(0);}// this will have to be fully recalculated ,will be slow
+	if (value<4) value=0; //compansate for bad pots
+
+
+		if (cc==72)  {ADSR_settings[1]=value&127;memset(envelopes_store,0,256);envelopes_preprocess(0);}// this will have to be fully recalculated ,will be slow
 	// pot 1
 
 
 	if(cc==5)  delay_time=value&127; // delay length
 	//pot2
+	if (cc==7) cc_7=value&127; // audio level
 
-
-	if((cc==75) && (cc_75!=value&127))  {		cc_75=value&127;
-	if (cc_75>total_samples) cc_75=total_samples;
-	if(cc_75) {sample_select[0]=cc_75*1200;
-	sample_select[1]=sample_select[0];
-	uint16_t i;
-	int16_t temp[600];
-	uint32_t read_adr= settings_data;
-	read_adr= user_data_start +sample_select[0];
-
-	for (i=0;i<600;i++){   // reading ok now
-
-		temp[i]=*(int16_t*)(read_adr);
-		  read_adr += 2;
-	}
-	memcpy(in_sample_holder,temp,1200);
-	memcpy(in_sample_holder_2,temp,1200);//HAL_Delay(20); // DO NOT REMOVIE , needs this or it goes bad
-	//flash_read(sample_select[2],1200,test_sample ); // grab from ext flash ,needed initially
-	//memcpy(in_sample_holder_2,out_bin+sample_select[2],1200);
-	//memcpy(in_sample_holder_2,test_sample+4,1200); // a second sample for decay
-	}}
+//	if((cc==75) && (cc_75!=value&127))  {		cc_75=value&127;
+//	if (cc_75>total_samples) cc_75=total_samples;
+//	if(cc_75) {sample_select[0]=cc_75*1200;
+//	sample_select[1]=sample_select[0];
+//	uint16_t i;
+//	int16_t temp[600];
+//	uint32_t read_adr= settings_data;
+//	read_adr= user_data_start +sample_select[0];
+//
+//	for (i=0;i<600;i++){   // reading ok now
+//
+//		temp[i]=*(int16_t*)(read_adr);
+//		  read_adr += 2;
+//	}
+//	memcpy(in_sample_holder,temp,1200);
+//	memcpy(in_sample_holder_2,temp,1200);//HAL_Delay(20); // DO NOT REMOVIE , needs this or it goes bad
+//	//flash_read(sample_select[2],1200,test_sample ); // grab from ext flash ,needed initially
+//	//memcpy(in_sample_holder_2,out_bin+sample_select[2],1200);
+//	//memcpy(in_sample_holder_2,test_sample+4,1200); // a second sample for decay
+//	}}
 	if(cc==76)  cc_76=value&127;// feedback
 	if(cc==77)  cc_77=value&127;// pot 4 , stutter or second note pitch
 	if(cc==78)  cc_78=value&127;// pot 4 , stutter or second note pitch
+	current_playing_sample=cc_77>>3;
+
+
 	lfo1_rate=(cc_77<<4)+1;
 	float depth=cc_78;
 
@@ -126,7 +132,7 @@ uint8_t incoming_message[3];    //
 
 		uint16_t start=4;
 		if (midi_fifo(0,1))
-		{memcpy(incoming_message,midi_fifo_temp,3);
+		{memcpy(incoming_message,midi_fifo_temp,3);   // still has midi channel info
 		memset(midi_fifo_temp,0,4);
 
 		} else {midi_buf_flag=0;return;}    // quit if no data
@@ -161,6 +167,7 @@ uint8_t incoming_message[3];    //
 		if (incoming_message[0]>127){  // test first byte , this assumes that there are no extra leftovers from timecode etc, will deal that later
 		switch(incoming_message[0]){
 		case note_on+midi_channel:memcpy(midi_note_hold,incoming_message,3); midi_note_hold[3]=4;break;  // midi note full
+		case note_on+9:memcpy(midi_note_hold,incoming_message,3); midi_note_hold[3]=4;break;
 		case p_change+midi_channel:memcpy(midi_pc_hold,incoming_message,3);midi_pc_hold[3]=4; break; // this one is finished
 		case c_change+midi_channel:memcpy(midi_cc_hold,incoming_message,3);midi_cc_hold[3]=4; break;
 		default:break;
@@ -173,6 +180,7 @@ uint8_t incoming_message[3];    //
 		if (incoming_message[1]>127){	// test second byte
 			switch(incoming_message[1]){
 			case note_on+midi_channel:message1[0]=incoming_message[1];message1[1]=incoming_message[2];message1[3]=1;break;  // midi note partial
+			case note_on+9:message1[0]=incoming_message[1];message1[1]=incoming_message[2];message1[3]=1;break;
 			case p_change+midi_channel:message2[0]=incoming_message[1];message2[1]=incoming_message[2];message2[3]=1; break; // cc partial ,needs 1 more value
 			case c_change+midi_channel:message3[0]=incoming_message[1];message3[1]=incoming_message[2];message3[3]=1; break;
 			default:break;
@@ -186,6 +194,7 @@ uint8_t incoming_message[3];    //
 				switch(incoming_message[1]){
 				case note_on+midi_channel:message1[0]=incoming_message[1];message1[3]=2;break;  // midi note partial, needs 2 more values
 				case p_change+midi_channel:message2[0]=incoming_message[1];message2[3]=2; break; // cc partial ,needs 2 more values
+				case note_on+9:message1[0]=incoming_message[1];message1[3]=2;break;
 				case c_change+midi_channel:message3[0]=incoming_message[1];message3[3]=2; break;
 				default:break;
 
@@ -195,11 +204,25 @@ uint8_t incoming_message[3];    //
 
 
 		if (midi_note_hold[3]==4)   { //HAL_GPIO_TogglePin (GPIOC,LED_Pin);
-			if (midi_note_hold[1]<80){   // too many high values still
-				note_fifo(midi_note_hold[1],0);current_velocity=midi_note_hold[2]&127;
-		//HAL_GPIO_TogglePin (GPIOC,LED_Pin);
-		at32_led_toggle(LED2);
-		memset(midi_note_hold,0,4);}}  // play note and clear
+			if (midi_note_hold[1]<80){
+
+				if (midi_note_hold[0]==148){ //channel 5
+
+					// too many high values still
+					note_fifo(midi_note_hold[1],0);current_velocity=midi_note_hold[2]&127;
+					//HAL_GPIO_TogglePin (GPIOC,LED_Pin);
+					at32_led_toggle(LED2);
+					memset(midi_note_hold,0,4);}
+			}
+
+			if (midi_note_hold[0]==153){  // channel ten
+
+				memcpy(drum_note_hold,midi_note_hold,3);
+				ADSR_counter_position[2]=0;  // delete , only temp trigger
+				at32_led_toggle(LED2);
+				memset(midi_note_hold,0,4);}
+
+		}  // play drums
 
 
 		if (midi_pc_hold[3]==4)   {
@@ -226,23 +249,25 @@ uint8_t incoming_message[3];    //
 
 void note_process(void){ // deals with assigning notes for sounds , basic for now
 	uint8_t i;
-	uint8_t current_poly=2;// sets number of notes to process for now
+	uint8_t current_poly=2;// sets number of notes to process for now , samples done elsewhere
 	for (i=0;i<current_poly;i++){
-	if ((sound_triggers[i]==0) && zero_cross[i]) sound_triggers[i]=note_trigger; // adds note_trigger to sound on zero cross
-	 if(zero_cross[i] && (sound_triggers[i]==128)) zero_cross[i]=0; // clears zero cross when it retriggers
 
-	  	  	  if(zero_cross[i]&& sound_triggers[i]){     // sends note to isr when enabled ,fairly reliable , zero cross works ok
+
+		if ((sound_triggers[i]==0) && zero_cross[i]) sound_triggers[i]=note_trigger; // adds note_trigger to sound on zero cross
+		if(zero_cross[i] && (sound_triggers[i]==128)) zero_cross[i]=0; // clears zero cross when it retriggers
+
+		if(zero_cross[i]&& sound_triggers[i]){     // sends note to isr when enabled ,fairly reliable , zero cross works ok
 
 
 				 					  // keyboard split
 					CNT_list_selected[i]=CNT_list[sound_triggers[i]];  // first note
-					if(i==1 )	CNT_list_selected[i]=CNT_list[(sound_triggers[i]+cc_77)&127];  // modified note
-					ADSR_counter_position[i]=0;
-					ADSR_out[i]=envelopes_store[i];   // this really should be elsewhere
-					//ADSR_out_1=(ADSR_out_1*current_velocity)>>8;
+					if(i==1 )	CNT_list_selected[i]=CNT_list[(sound_triggers[i]+cc_77)&127];  // modified second note
+					ADSR_counter_position[i]=0+(i*256); // set to start, enables run
+
+				//	if(i==2) ADSR_out[2]=127;  //drums
 					stutter_flip=0;
 					stutter_toggle=0;
-					sound_triggers[i]=128;
+					sound_triggers[i]=128; // wtf is this
 					zero_cross[i]=0;
 		 }// end of zero cross*/
 	}
@@ -250,14 +275,9 @@ void note_process(void){ // deals with assigning notes for sounds , basic for no
 
 
 	  		if ((sound_triggers[0]>127) && (sound_triggers[1]>127)) {sound_triggers[0]=0;sound_triggers[1]=0;note_trigger=0; } // after playing both notes its off
+	  		if ((sound_triggers[2]>127) ) {sound_triggers[2]=0;note_trigger=0; } //drums , this needs a different trigger
 
-
-
-
-
-
-
-}
+	}
 
 
 

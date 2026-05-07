@@ -25,7 +25,7 @@
 #define p_change 192
 #define midi_channel 4  // current midi channel
 #define delay_buffer_size 16384 //int16
-#define wav_multi 256*cycle_length
+#define wav_multi 255*cycle_length
 #define delay_time_multiplier delay_buffer_size/32
 
 #define SPI2_CS_HIGH   	GPIOB->scr = GPIO_PINS_5;
@@ -33,8 +33,12 @@
 #define SPI4_CS_HIGH   	GPIOB->scr = GPIO_PINS_6;
 #define SPI4_CS_LOW    GPIOB->clr = GPIO_PINS_6;
 #define ram_buffer_size 40   // in bytes , 16 samples +8 bytes error correct
-#define audio_buffer_size 64
-#define one_shot_size 160364/2 // size in word 16 bit
+#define audio_buffer_size 64  // samples
+//#define one_shot_size 513200/2 // size in word 16 bit
+#define one_shot_size 321664 //
+#define total_sample_count 16 // limit for now
+#define psram_sample_start 131072  // start address for sample storage
+
 
 
 uint8_t countSetBits(uint8_t number) { // count bits in byte
@@ -47,9 +51,24 @@ uint8_t countSetBits(uint8_t number) { // count bits in byte
 
 
 
+uint32_t one_shot_var=0;  // can be changed
+uint8_t usart4_rx_buffer[256]; // uart 3 rx buffer
+int16_t usart4_int_buffer[128];
+uint8_t usart4_rx_counter=0;
+uint32_t usart4_total_counter=0;
+uint8_t psram_sample_write=0;
+uint8_t psram_busy=0;
+uint32_t uart_receive_timer[8]; // use it to track various exec times
+int8_t spi_process_counter=0;
+int16_t* spi_read_pointer=0; //tracks where to wraite incoming data
+uint8_t spi_test_mode=0;
+int16_t test_int_buf[128];
+uint32_t overload_flag=0;
+volatile uint8_t ccr_reset=0;
+volatile uint8_t dac_ready=0;
+uint32_t audio_out_buf[audio_buffer_size]; // holds temp audio out
 
-uint8_t usart3_rx_buffer[16]; // uart 3 rx buffer
-uint8_t usart3_rx_counter;
+
 uint32_t flash_memory_record[64]={};   // keep track of memory blocks start-end ,start-end, if empty then disable all flash writes ,
 //stored in external flash , start and end per banks so 2 words per bank lets say 16 banks
 
@@ -122,6 +141,7 @@ uint8_t cc_75=0;
 uint8_t cc_76=0;
 uint8_t cc_77=0;  // incoming cc
 uint8_t cc_78=0;
+uint8_t cc_7=127;  // amp level
 uint16_t release_start[note_count]={5,261,517,773}; // points to release start pos in envelopes_store
 uint8_t stutter_rate=0;
 uint8_t stutter_toggle=0;
@@ -131,7 +151,7 @@ float output_gain2=1;   // 1 is ok  0.85 with full feedback
 float side_gain=1; // sidechain
 int16_t multi=128;
 uint8_t settings_write_flag=0;
-uint8_t all_settings[256]={255,255,255,255};
+uint8_t all_settings[512]={255,255,255,255};
 uint32_t save_timer;
 uint32_t temp_ccr;
 int8_t note_fifo_write=0;
@@ -147,19 +167,19 @@ uint16_t spi_counter_2=0;
 int32_t temp_wave;
 uint8_t sound_triggers[8]; // note_trigger for invidiual sounds
 int16_t one_shot_wav[296]; // holds incoming data for one shot sample
-uint32_t one_shot_pointer=0; // points to current byte location in wav
+uint32_t one_shot_pointer=0; // points to current byte location in actual wav file
 
 uint32_t one_shot_playback_rate=0xFFFF;
-uint32_t one_shot_position;// use to calc pos , 1<<17 is one full step
+uint32_t one_shot_position;// use to calc pos,fine within the sample buffer , 1<<17 is one full step
 uint8_t temp_store[256];  // delete this
-uint8_t ram_page_read_buf[256];
+uint8_t ram_page_read_buf[512];
 uint8_t ram_test_buf[270];
-uint8_t ram_page_write_buf[256];
+uint8_t ram_page_write_buf[512];
 int8_t test_byte[256];
 volatile uint32_t spi_transmit_counter=0;
 uint32_t spi_receive_counter=0;
 uint8_t tmr_counter[32];
-int16_t flash_sample_buf[128];
+int16_t flash_sample_buf[132];
 volatile uint8_t spi_read_flag=0;  // clear on irq
 volatile uint8_t spi_write_flag=0;  // clear on irq
 uint8_t spi_message_cue; // keeps track of spi messages
@@ -169,7 +189,24 @@ uint16_t lfo1_counter=0; // simple lfo upcount 0-127(for triangle)  << 8  (slowe
 uint8_t lfo1_depth=127;  // 0-127;
 uint16_t lfo1_rate=255;  //  basic rate multiplier , might make it  a lut
 uint16_t lfo1_out=0;  // max sample count for now , not actual wave
+uint16_t lfo1_2_out=0; // second out from lfo1
 uint8_t ch; // delete
+uint8_t drum_note_hold[4];  // holds drums note data
+
+//// sample transfer stuff
+
+char c;
+
+typedef struct {
+
+    uint32_t ram_addr;      // start address
+    uint32_t size_bytes;      // size in bytes only
+    uint8_t  used;				// 1 if used
+} Samples;
+Samples samples_store[16];
+uint8_t current_sample_save=0;
+uint8_t current_playing_sample=0;
+uint32_t sample_write_end_timer=0;
 
 
 
@@ -266,6 +303,8 @@ uint16_t sine_wave[128]={
 
 };
 
+int16_t test_int[128];
+
 void midi_note_pwm_calculator(void){    // calculates counter values for pwm
 
 	float freq_list[128]; // store frequencies
@@ -284,81 +323,46 @@ void midi_note_pwm_calculator(void){    // calculates counter values for pwm
 	}
 
 }
-void envelopes_preprocess(uint8_t note){     // calcualtes adsr values for notes ,seems ok , 4 x envelopes
-	uint8_t i=note;
-	uint8_t n;
+void envelopes_preprocess(uint8_t note)
+{
+    uint16_t env_ptr = note * 256;           // start of this note's envelope table
+    uint16_t level = 0;
+    uint8_t n = 0;
+    uint8_t *adsr = &ADSR_settings[note * 4];  // attack, decay, sustain_len, release
 
-	uint16_t envelopes_pointer=0;  // for envelope file
-	uint8_t adsr_pointer=0;
-	int level=0;
+    // === ATTACK ===
+    uint8_t steps = adsr[0];
+    for (uint8_t i = 0; i < steps; i++) {
+        level += (64000 / steps);
+        if (level > 64000) level = 64000;
+        envelopes_store[env_ptr + n++] = level >> 2;
+    }
 
-	uint8_t while_pointer;
-	uint16_t max_level=64000;   // sets max adsr value
-	uint16_t level_target=max_level;
+    // === DECAY ===
+    steps = adsr[1];
+    uint16_t decay_target = 64000 - ADSR_sustain[note];
+    for (uint8_t i = 0; i < steps; i++) {
+        level -= (decay_target / steps);
+        if (level > 64000) level = 64000;   // shouldn't happen
+        if (level < 0) level = 0;
+        envelopes_store[env_ptr + n++] = level >> 2;
+    }
 
-//	uint16_t size=(note+1)*256;
-   // memset (envelopes_store,0,size);
-//	for(i=0;i<note_count;i++){
-		n=0;
+    // === SUSTAIN ===
+    steps = adsr[2];
+    uint8_t sustain_level = ADSR_sustain[note] >> 2;   // pre-shift once
+    for (uint8_t i = 0; i < steps; i++) {
+        envelopes_store[env_ptr + n++] = sustain_level;
+    }
 
-		adsr_pointer=ADSR_settings[i*4];  //attack
-		level_target=max_level;
-		while_pointer=adsr_pointer;
-		while (n<(while_pointer)){
-
-			envelopes_pointer=(i*256)+n;  // count up
-			level=(level+(level_target/(adsr_pointer)));
-			if(level>max_level) level=max_level;   // limit
-
-			envelopes_store[envelopes_pointer]=level;  // should finish around 255
-			n++; }
-
-
-		//release_start[note]=n;   //  for changing sample , can be anywhere or a set point for all sounds
-
-		adsr_pointer=ADSR_settings[(i*4)+1]; // decay
-		level_target=max_level-ADSR_sustain[i];
-		while_pointer=adsr_pointer+n;
-		while (n<(while_pointer)){
-
-			envelopes_pointer=(i*256)+n;
-			level=(level-(level_target/(adsr_pointer)));
-			if(level>max_level) level=max_level;
-			if(level<0) level=0;
-			envelopes_store[envelopes_pointer]=level;
-			n++; }
-
-
-
-		level_target=ADSR_sustain[i];
-		adsr_pointer=ADSR_settings[(i*4)+2]; // sustain length
-		while_pointer=adsr_pointer+n;
-		while (n<(while_pointer)){
-
-			envelopes_pointer=(i*256)+n;
-			level=level_target;
-
-
-			envelopes_store[envelopes_pointer]=level;
-			n++; }
-
-
-		level_target=ADSR_sustain[i];
-		adsr_pointer=ADSR_settings[(i*4)+3]; // release length
-		while_pointer=adsr_pointer+n;
-
-		while (n<(while_pointer)){
-
-			envelopes_pointer=(i*256)+n;
-			level=(level-(level_target/(adsr_pointer)));
-			if(level<0) level=0;
-			envelopes_store[envelopes_pointer]=level;
-			n++; }
-
-				//	}  // end of i counter
-
-
-} // end of envelopes process
+    // === RELEASE ===
+    steps = adsr[3];
+    for (uint8_t i = 0; i < steps; i++) {
+        level -= (ADSR_sustain[note] / steps);
+        if (level < 0) level = 0;
+        envelopes_store[env_ptr + n++] = level >> 2;   // note: using original level (not shifted)
+    }
+}
 
 
 void waves(void) {

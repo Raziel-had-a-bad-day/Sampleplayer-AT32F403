@@ -1,3 +1,7 @@
+
+
+
+
 void settings_storage(void){   // runs to store setting and read back
 
 #define variable_count 6
@@ -9,8 +13,9 @@ void settings_storage(void){   // runs to store setting and read back
 			&cc_75,
 			&cc_76,
 			&cc_77,
-			&delay_time};
-			uint8_t settings_multi[variable_count]={16,32,1,1,1,1};   // sets length,  sound_set*x ,512 atm
+			&delay_time,
+			(uint8_t*) samples_store};
+			uint8_t settings_multi[variable_count]={16,32,1,1,1,1,198};   // sets length,  sound_set*x ,512 atm
 			uint8_t settings_temp[96];
 			uint16_t settings_total=0;  //adds up position , huge miss here retard alert
 			uint8_t length=0; // max 64 atm
@@ -46,7 +51,7 @@ void flash_settings_write(void){  // sector = 2k
 	flash_sector_erase(read_adr);
 	flash_operation_wait_for(1000);
 
-	for (i=0;i<256;i++){   //
+	for (i=0;i<512;i++){   //
 		flash_byte_program(read_adr, all_settings[i]);
 
 		  read_adr += 1;

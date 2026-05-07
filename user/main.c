@@ -38,13 +38,13 @@
 #include "out.bin.h"     // only enable for initial upload, binary ->.h file for samples
 
 #include "variables.h"
-
+#include "sampler_loader.h"
 #include "ram.h"
 #include "maincode.h"
 #include "flash.h"
 #include "audio.h"
 #include "midi.h"
-#include "sampler_loader.h"
+
 
 
 uint8_t data_count=0;
@@ -76,6 +76,8 @@ int main(void)
    wk_uart4_init();
 
 	SPI2_CS_HIGH;  // disable for ram for now
+	sampler_loader_init();
+
 
 
    wk_dma1_channel2_init();// rx
@@ -105,12 +107,12 @@ int main(void)
 	waves();
 
 
-
+///////////// load settings
 	uint16_t i;
 	int16_t temp[600];
 	uint32_t read_adr= settings_data;
 
-	for (i=0;i<256;i++){   // reading ok now
+	for (i=0;i<512;i++){   // reading ok now
 		//temp[i]=*(uint8_t*)(read_adr);
 		all_settings[i]=*(uint8_t*)(read_adr);
 		  read_adr += 1;
@@ -139,21 +141,33 @@ for (i=0;i<600;i++){   // reading ok now
 	temp[i]=sine_lut[i]-32768; // convert to int
 
 }
+for (i=0;i<128;i++){   // reading ok now
 
+	test_int[i]=i; // convert to int
+
+}
 
 memcpy(in_sample_holder,temp,1200); // for testing
 memcpy(in_sample_holder_2,in_sample_holder,1200);
 
 memset(flash_sample_buf,0,128); //testing
 
-delay_ms(150);
+uint8_t psram_reset[2]={0x66,0x99};
+delay_ms(15);
+
+spi_i2s_data_transmit(SPI4,psram_reset[0] );   //  this should reset linear burst in theory
+delay_ms(15);
+SPI2_CS_LOW;
+spi_i2s_data_transmit(SPI4,psram_reset[1] );
+
+delay_ms(15);
 
 for (i=0;i<256;i++){
 		ram_page_write_buf[i]=i;
 	}
 uint8_t tmr_start=0;
 uint8_t tmr_end=0;
-
+samples_store[0].size_bytes=321048;
 //  maybe implement skip back function , record 30sec to mem and than skip back when needed
 
   while(1)
@@ -173,7 +187,9 @@ uint8_t tmr_end=0;
 
 
 
-	  if(ccr_counter==audio_buffer_size) {  // process 16*2 samples
+	 // if((ccr_counter>=audio_buffer_size)) {  // process 16*2 samples, runs always
+		  if((dac_ready)) {  // process 16*2 samples, runs always
+
 
  			// basic sound is 180us ,delay adds 50us
  		 		delay_calc();
@@ -182,119 +198,67 @@ uint8_t tmr_end=0;
 
  		 for (i=0;i<audio_buffer_size;i++){  // 64 atm moment, 250us with linear +40us with hermite resample
  			// tmr_counter[i]=tmr_counter_value_get(TMR7);
- 			 next_sample_tracker=i;
+ 			 next_sample_tracker=i;  // just counts up inside the buf
  			 ccr_counter_2=i;
  			 next_sample();
 
- 			}
+ 			} // process samples
+ 		 	 if ((!psram_busy)&&(!spi_process_counter)) spi_process_counter=1;  // starts spi processing, can block
 
  		 	 stop_time=tmr_counter_value_get(TMR6);
  		  	 	if(stop_time>start_time) elapsed_time=stop_time-start_time; else elapsed_time=0;
 
- 		 	 //	ram_page_write(delay_pointer[1],ram_in); // process send
- 	 			//spi4_polling_tx(ram_page_write_buf,132);  //send
-		 		if (spi_message_cue>=34) spi_message_cue=0 ; // on error
+		 		uint8_t oneshot=(one_shot_position>>16)<<1;  // clear last bit as well , has to be even
+ 		  	 	if ((oneshot)>128) oneshot=128; // this thing gets screwed up a lot
+ 		  	 one_shot_pointer+=oneshot;
+ 		  	 	if (one_shot_pointer >(samples_store[current_playing_sample].size_bytes+samples_store[current_playing_sample].ram_addr))
 
-		 		else
+ 		  	 	{one_shot_pointer=samples_store[current_playing_sample].ram_addr;one_shot_position=0;}
 
-		 		{
-		 			dma_channel_enable(DMA1_CHANNEL3, FALSE);
-		 			dma_channel_enable(DMA1_CHANNEL2, FALSE);
-		 			spi_write_flag=0;
-		 			spi_read_flag=0;
-		 			SPI2_CS_HIGH;
-		 			SPI4_CS_HIGH;
-		 			spi_message_cue=0 ;
-		 			memset(flash_sample_buf,0,128);} // clear sound buffer if error
+ 		  	 	//else one_shot_pointer+=126;  // wont work with other than 128 ?
 
-		 	//	spi4_polling_rx(ram_page_write_buf,132);
-		 		one_shot_pointer+=(one_shot_position>>16); //add final count up
-		 		if (one_shot_pointer >(one_shot_size-64)) one_shot_pointer=0; // reset one shot pointer
-		 		one_shot_position&=0xFFFF; // reduce to zero
+
+		 		// reset one shot pointer
+		 		one_shot_position&=0xFFFF; // needs to zero here
+		 		//one_shot_position=0; //better reset
+
+		 		memset(flash_sample_buf,0,255);  // clear
+		 		ccr_counter=0;
+		 		dac_ready=0;
+	  }
 
 
 
+ 	if ((!spi_read_flag) && (!spi_write_flag) && (spi_process_counter)&&(!psram_busy)) spi_message_process();
 
 
- 		ccr_counter=0;  	  	  }
-
- 	 if (spi_message_cue==10) { // on error
- 		 // dma 200 at /4 135us at /2 avg 350 highest
-  	 	spi_message_cue=34 ;
- 	 }
-
- 	  switch(spi_message_cue){  // cue spi messages here
- 	  case 0:spi_message_cue=1;
-
- 	  ram_page_read(one_shot_pointer,132,0);break;				////////120us with /8 and 80 /4
- 	  case 3:
- 		  //memcpy(ram_page_read_buf+1,sine_testing,128);
- 		  memcpy(flash_sample_buf,ram_page_read_buf+3,128);
- 	  spi_message_cue=4;spi_adder=0; break;// +1 needed , send to end for now as ram no go
- 	  case 4:  spi_message_cue=5;ram_page_read(delay_pointer[0] , 130, 1);break;
- 	  case 7:  spi_message_cue=8;memcpy(ram_out + (spi_adder ), ram_page_read_buf + 5, 128); break;
- 	  case 8 : spi_message_cue=9; ram_page_write(delay_pointer[1], ram_in );break;
-
- 	  default:break;
-
- 	  }
-
-/*
-
- 	  if (spi_message_cue >= 8 && spi_message_cue <= 31)
- 	 {
- 	     switch (spi_message_cue)
- 	     {
- 	         // RAM Read - Step 1 (command/address)
- 	         case 8: case 12: case 16: case 20:
- 	        	 spi_message_cue++;
- 	        	 ram_page_read(delay_pointer[0] + spi_adder, 32, 1); // seems to run both during rx and tx irq
- 	             spi_adder += 16;
-
- 	             break;
-
- 	         // RAM Read - Step 2 (copy data)
- 	         case 11: case 15: case 19: case 23:
- 	             memcpy(ram_out + (spi_adder ), ram_page_read_buf + 5, 32); // seems to be stuck in burst
- 	             spi_message_cue++;
-
- 	             break;
-
- 	         // RAM Write
- 	         case 25: case 27: case 29: case 31:
-
- 	        	 spi_message_cue++;
- 	        	 ram_page_write(delay_pointer[1] + spi_adder, ram_in + (spi_adder * 2));
- 	             spi_adder += 16;
-
- 	             break;
-
- 	         // Reset adder at end of cycle
- 	         case 24:
- 	             spi_adder = 0;
- 	             spi_message_cue = 25;
- 	             break;
- 	     }
- 	 }
-*/
 
 
+ 	if( uart_receive_timer[3] ) uart_receive_end(); // detect no transmission
+
+ 	if ((psram_sample_write==1) && (spi_process_counter==0)&& (!spi_write_flag))     { // copy serial data to psram
+ 		uart_receive_save();  }
 
 
  	  if( midi_in_clear) {  midi_fifo(usart2_rx_buffer,0); } // write to fifo ,returns 0 if done
 
  	  if (midi_buf_flag)     {midi_incoming();}  // not totally ok yet
 
- 	  if (!note_trigger) note_trigger=note_fifo(0, 1);   // enable note if incoming
- 	  if (save_timer>60000) {settings_write_flag=1;settings_storage();flash_settings_write();save_timer=0; }  // saves every ten minutes
+ 	  if (!note_trigger) note_trigger=note_fifo(0, 1);// enable note if any in fifo , note_fifo isnt really needed though, midi comes in slow , might just skip
+
+
+
+ 	  if (save_timer>60000) {settings_write_flag=1;settings_storage();flash_settings_write();save_timer=0;
+
+ 	  }  // saves every ten minutes
 
  	  if((!ADSR_timer_flag) && ((tmr_counter_value_get(TMR6)) >8200))  {  ADSR_TIM_writer();  // about 10ms
- 	  ADSR_timer_flag=1;save_timer++;lfo1_out=lfo_out();
+ 	  ADSR_timer_flag=1;save_timer++;lfo1_out=lfo_out(); if( uart_receive_timer[3] ) {sample_write_end_timer++;}
 
  	  } //process ADSR
  	  if((ADSR_timer_flag) && ((tmr_counter_value_get(TMR6))<100)) ADSR_timer_flag=0;   //reset   , can miss starts might have sync with notes or trigger more often
 
- 	  if (note_trigger)	 	  note_process();  // assign sounds for note trigger
+ 	  if (note_trigger)	 	  note_process();  // assign sounds  to polyphony for note trigger
 
 
 
@@ -318,8 +282,10 @@ void USART2_IRQHandler(void)  // midi in
 
 	  usart2_rx_buffer[usart2_rx_counter] = usart_data_receive(USART2);  // filter midi channel here first
 	  if (usart2_rx_buffer[0]==note_on+midi_channel)  usart2_rx_counter++;   // try to get note on message start , no cc atm ,stops some random  notes
-	  if (usart2_rx_buffer[0]==c_change+4)
+	  if (usart2_rx_buffer[0]==c_change+4)// midi channel 5
 		  usart2_rx_counter++;
+	  if (usart2_rx_buffer[0]==note_on+9)  usart2_rx_counter++; //drum channel
+
 	//  usart_interrupt_enable(USART2, USART_RDBF_INT, FALSE);
 	// usart2_rx_buffer[usart2_rx_counter++] = usart_data_receive(USART2);
 
@@ -336,44 +302,32 @@ void USART2_IRQHandler(void)  // midi in
 
 
 	}
-/*void USART3_IRQHandler(void)  //file transfer
-{
-  if(usart_interrupt_flag_get(USART3, USART_RDBF_FLAG) != RESET)
-  {
-	  at32_led_toggle(LED2);
-	//  usart2_rx_buffer[usart2_rx_counter++] = usart_data_receive(USART2);
-	  usart3_rx_buffer[usart3_rx_counter++] = usart_data_receive(USART3);  // filter midi channel here first
 
-
-	 uart_receive_char(usart3_rx_buffer[usart3_rx_counter++] );
-
-    if(usart3_rx_counter >15)
-    {
-       disable the usart2 receive interrupt
-      usart_interrupt_enable(USART3, USART_RDBF_INT, FALSE); // not ideal
-
-    }
-  }
-
-
-	}*/
 void UART4_IRQHandler(void)  //file transfer
 {
   if(usart_interrupt_flag_get(UART4, USART_RDBF_FLAG) != RESET)
   {
 	  at32_led_toggle(LED2);
-	//  usart2_rx_buffer[usart2_rx_counter++] = usart_data_receive(USART2);
-	  usart3_rx_buffer[usart3_rx_counter++] = usart_data_receive(UART4);  // filter midi channel here first
-	  usart3_rx_counter&=15;
+	//  usart_interrupt_enable(USART2, USART_RDBF_INT, FALSE);
+	         //   uart_receive_char(usart_data_receive(UART4));
+	  usart4_rx_buffer[usart4_rx_counter] = usart_data_receive(UART4);  // filter midi channel here first
 
-	 uart_receive_char(usart3_rx_buffer[usart3_rx_counter++] );
 
- /*   if(usart3_rx_counter >15)
-    {
-       disable the usart2 receive interrupt
-      usart_interrupt_enable(UART4, USART_RDBF_INT, FALSE); // not ideal
+		    if(usart4_rx_counter >126 ) // buffer full
+		    {
+		    	memcpy(usart4_int_buffer,usart4_rx_buffer,128);
+		    	usart4_rx_counter=0;
+		    	psram_sample_write=1;
+		    	psram_busy=1;
+		    	spi_process_counter=0;
+		    	// disable other comms
+		     // usart_interrupt_enable(UART4, USART_RDBF_INT, FALSE); //
 
-    }*/
+
+
+		    } else  usart4_rx_counter++;
+
+	           // usart_interrupt_enable(USART2, USART_RDBF_INT, FALSE);
   }
 
 
@@ -382,7 +336,7 @@ void UART4_IRQHandler(void)  //file transfer
 
 
 
-void TMR7_GLOBAL_IRQHandler(void)  // works
+void TMR7_GLOBAL_IRQHandler(void)  // not needed
 {
   if(tmr_interrupt_flag_get(TMR7, TMR_OVF_FLAG) != RESET)
   {
@@ -393,8 +347,10 @@ void TMR7_GLOBAL_IRQHandler(void)  // works
 
 		//	dac_dual_data_set(DAC_DUAL_12BIT_RIGHT, temp, temp2);
 		//	 dac_dual_software_trigger_generate();
-			 ccr_counter++;
-		 ccr_counter&=127;
+			// ccr_counter++;  // doesnt really do much
+		//if (ccr_reset) {ccr_counter=0;ccr_reset=0;}
+
+			// ccr_counter&=127;
 
     tmr_flag_clear(TMR7, TMR_OVF_FLAG);
   }
@@ -404,8 +360,11 @@ void DMA1_Channel1_IRQHandler(void) // TX DAC
 {
   if(dma_interrupt_flag_get(DMA1_FDT1_FLAG) != RESET)
   {
- ccr_counter=audio_buffer_size;
-    dma_flag_clear(DMA1_FDT1_FLAG);
+ //ccr_counter=audio_buffer_size; // ready for next set
+	  dac_ready=1;
+ //memset(ccr_buf,0,(audio_buffer_size));
+ memcpy(ccr_buf,audio_out_buf,(audio_buffer_size*4));  // copy last processed audio
+ dma_flag_clear(DMA1_FDT1_FLAG);
   }
 }
 
@@ -421,15 +380,14 @@ void DMA1_Channel2_IRQHandler(void)			// RX SPI4
   if(dma_interrupt_flag_get(DMA1_FDT2_FLAG) != RESET)
   {
 
-
-
-
     dma_flag_clear(DMA1_FDT2_FLAG);
     dma_channel_enable(DMA1_CHANNEL2, FALSE);
     SPI4_CS_HIGH;
     SPI2_CS_HIGH;
+    memcpy(spi_read_pointer,ram_page_read_buf+5,256);
     spi_read_flag=0;
-    spi_message_cue++;
+
+
     /* add user code end DMA1_FDT2_FLAG */
   }
 
@@ -460,9 +418,10 @@ void DMA1_Channel3_IRQHandler(void)   // TX SPI4
     /* handle full data transfer and clear flag */
     dma_flag_clear(DMA1_FDT3_FLAG);
     dma_channel_enable(DMA1_CHANNEL3, FALSE);
-
+    SPI4_CS_HIGH;
+    SPI2_CS_HIGH;
     spi_write_flag=0;
-    spi_message_cue++;
+
     /* add user code end DMA1_FDT3_FLAG */
   }
 
