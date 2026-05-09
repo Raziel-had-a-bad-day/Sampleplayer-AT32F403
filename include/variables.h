@@ -38,7 +38,9 @@
 #define one_shot_size 321664 //
 #define total_sample_count 16 // limit for now
 #define psram_sample_start 131072  // start address for sample storage
-
+#define NOTE 0
+#define PC   1
+#define CC   2
 
 
 uint8_t countSetBits(uint8_t number) { // count bits in byte
@@ -74,7 +76,7 @@ uint32_t flash_memory_record[64]={};   // keep track of memory blocks start-end 
 
 uint8_t memory_record_error_flag=0;  // activate if anything wrong with memory record , then proceed to restore
 
-uint32_t  sample_select[poly]={1200,1200};
+uint32_t  sample_select[poly]={1200,1200}; // waveform select
 uint32_t systick_hold;
 
 int16_t delay_buffer[delay_buffer_size]; //200ms 10khz 16 bit.  using psram now
@@ -192,6 +194,7 @@ uint16_t lfo1_out=0;  // max sample count for now , not actual wave
 uint16_t lfo1_2_out=0; // second out from lfo1
 uint8_t ch; // delete
 uint8_t drum_note_hold[4];  // holds drums note data
+int master_tune=64; // for now just 0-127
 
 //// sample transfer stuff
 
@@ -200,13 +203,22 @@ char c;
 typedef struct {
 
     uint32_t ram_addr;      // start address
-    uint32_t size_bytes;      // size in bytes only
+    uint32_t size_bytes;      // total size in bytes only
     uint8_t  used;				// 1 if used
+    uint8_t speed;   // playback speed or tune 0-127
+    uint8_t placeholder1;
+    uint8_t placeholder2;
+    uint8_t placeholder3;
 } Samples;
 Samples samples_store[16];
 uint8_t current_sample_save=0;
 uint8_t current_playing_sample=0;
 uint32_t sample_write_end_timer=0;
+uint8_t  samples_backup[ sizeof(samples_store)];
+
+uint8_t midi_hold[3][4];     // 0=Note, 1=PC, 2=CC
+uint8_t midi_msg[3][4];      // partial messages
+uint32_t sidechain_accu=0;
 
 
 

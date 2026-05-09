@@ -21,6 +21,8 @@ void next_sample(void){  // this runs always , sound in generated when ADSR_out 
 
 
 	uint32_t counter=wav_pointer[0]>>8;  // /256
+	uint32_t counter2=wav_pointer[1]>>8;
+
 	//uint32_t one_shot_counter=one_shot_position &((audio_buffer_size*65536)-1);// phase
 
 
@@ -35,7 +37,7 @@ void next_sample(void){  // this runs always , sound in generated when ADSR_out 
 	int32_t temp4=0;
 	uint16_t phaser=lfo1_out;
 	int32_t temp_sample=0;
-	one_shot_playback_rate=(0x10000)-(cc_76<<7);  // use feedback pot for now
+
 	int16_t* pointer = in_sample_holder;
 	int16_t* pointer2 = in_sample_holder_2;
 	//uint32_t pointer3=SPIM_START_ADDR+one_shot_pointer;
@@ -55,12 +57,17 @@ void next_sample(void){  // this runs always , sound in generated when ADSR_out 
 //	if(phaser>599) phaser=phaser-599;phaser&=511;
 	counter=(counter*2);
 	temp_sample=pointer[counter];   //casting the correct way
+	temp3=((temp_sample*ADSR_out[0])>>14);   // modify signal with adsr signed * unsigned
+	temp_sample=pointer[counter2*2];
+	temp=((temp_sample*ADSR_out[1])>>19);   // quieter
+
+
 	//temp_sample=(temp_sample+pointer[phaser<<1])/2;
 
 
 	//temp=temp_sample; //testing only
 
-	temp3=((temp_sample*ADSR_out[0])>>14);   // modify signal with adsr signed * unsigned
+
 
 	//////////////////    sound 1  //////////////
 
@@ -93,8 +100,13 @@ void next_sample(void){  // this runs always , sound in generated when ADSR_out 
 
 	if (temp>(1<<15)) output_gain*=0.9;  //  gains could be run once per round
 
-/*	if (temp2>(1<<12)) side_gain*=0.999;  //sidechain
-	temp*=side_gain;*/
+	//if (temp2>(1<<10)) side_gain*=0.9999;  //sidechain , this can be elsewhere
+	if (temp2>(1<<2))    sidechain_accu=((sidechain_accu*255)+temp2)>>8;  // dc accu ,slow rise
+
+	//if(side_gain<0.5) side_gain=0.5;
+	//side_gain=1-side_gain;
+
+	temp*=side_gain;
 
 	if (stutter_flip) temp=0;
 
@@ -200,7 +212,7 @@ feedback=50; // testing
 
 
 
-void ADSR_TIM_writer(void){   // single note for now  20ms ,16 bit ,could be smoother
+void ADSR_TIM_writer(void){   // single note for now  10ms ,16 bit ,could be smoother , 400 samples ish
 
 	//cc_77=0;  stutter section /////////////
 	//if (stutter_toggle>=stutter_rate) {stutter_toggle=0;stutter_flip=!stutter_flip;} else stutter_toggle++;
@@ -210,10 +222,15 @@ void ADSR_TIM_writer(void){   // single note for now  20ms ,16 bit ,could be smo
 
 	//uint32_t countup=tmr_counter_value_get(TMR6);
 	uint16_t counter=ADSR_counter_position[0];
+	uint32_t length=(samples_store[current_playing_sample].size_bytes>>9);
+	if (length<129) length=129;
 
 	ADSR_out[0]=envelopes_store[counter];   // data out for pwm
 	if (output_gain<0.7) output_gain*=1.000001;  // regain
 	if (output_gain2<1) output_gain2*=1.000001;  // regain
+	side_gain=sidechain_accu*0.0001;   // 2000-4000
+	if (side_gain>1) side_gain=1;
+	side_gain=1-side_gain;
 	if(side_gain<1) side_gain*=1.01;  // regain
 	//if(multi<128) multi++;
 
@@ -227,11 +244,13 @@ void ADSR_TIM_writer(void){   // single note for now  20ms ,16 bit ,could be smo
 	if (counter>510) counter=511; else counter++; // stop at the end
 	ADSR_counter_position[1]=counter;
 
-	////////////////          drums or samples
+	////////////////          drums or samples length should be set by current sample size
+
 	counter=ADSR_counter_position[2]; // this really should end at length of samples
+	if (counter>length) counter=length;
 	ADSR_out[2]=127;   // samples
-	if (counter>640) ADSR_out[2]= 767-counter; // fade out
-	if (counter>766) {counter=767;ADSR_out[2]=0;} else counter++; // stop at the end
+	if (counter>(length-127)) ADSR_out[2]= length-counter; // fade out
+	if (counter>length) {counter=length;ADSR_out[2]=0;} else counter++; // stop at the end
 	ADSR_counter_position[2]=counter;  //
 	////////////////
 

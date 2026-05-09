@@ -4,7 +4,7 @@
 
 void settings_storage(void){   // runs to store setting and read back
 
-#define variable_count 6
+#define variable_count 7
 
 
 	uint8_t *settings[variable_count]={
@@ -14,11 +14,14 @@ void settings_storage(void){   // runs to store setting and read back
 			&cc_76,
 			&cc_77,
 			&delay_time,
-			(uint8_t*) samples_store};
-			uint8_t settings_multi[variable_count]={16,32,1,1,1,1,198};   // sets length,  sound_set*x ,512 atm
-			uint8_t settings_temp[96];
+			(uint8_t*) samples_backup};// might expand it a little
+
+
+
+			uint16_t settings_multi[variable_count]={16,32,1,1,1,1,sizeof(samples_backup)};   // sets length,  sound_set*x ,512 atm
+			uint8_t settings_temp[512];
 			uint16_t settings_total=0;  //adds up position , huge miss here retard alert
-			uint8_t length=0; // max 64 atm
+			uint16_t length=0; // max 64 atm
 			uint16_t i=0;
 
 
@@ -48,6 +51,8 @@ void flash_settings_write(void){  // sector = 2k
 	flash_unlock();
 	uint32_t read_adr= settings_data;
 	uint16_t i=0;
+
+	 // backup samples struct
 	flash_sector_erase(read_adr);
 	flash_operation_wait_for(1000);
 

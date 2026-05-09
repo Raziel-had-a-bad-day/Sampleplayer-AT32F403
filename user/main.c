@@ -118,6 +118,11 @@ int main(void)
 		  read_adr += 1;
 	}
 	if (all_settings[0]!=255)	settings_storage();   // only reads once there is data
+
+	//52 onwards
+	memcpy(samples_store,samples_backup, sizeof(samples_backup));  // backup samples struct
+
+
 	envelopes_preprocess(0);
 	envelopes_preprocess(1);
 	envelopes_preprocess(2);
@@ -167,7 +172,7 @@ for (i=0;i<256;i++){
 	}
 uint8_t tmr_start=0;
 uint8_t tmr_end=0;
-samples_store[0].size_bytes=321048;
+//samples_store[0].size_bytes=321048;
 //  maybe implement skip back function , record 30sec to mem and than skip back when needed
 
   while(1)
@@ -184,9 +189,6 @@ samples_store[0].size_bytes=321048;
 	  }
 */
 
-
-
-
 	 // if((ccr_counter>=audio_buffer_size)) {  // process 16*2 samples, runs always
 		  if((dac_ready)) {  // process 16*2 samples, runs always
 
@@ -195,14 +197,16 @@ samples_store[0].size_bytes=321048;
  		 		delay_calc();
  		 	  start_time=tmr_counter_value_get(TMR6);
  		 	 	 // about 1200us available before it goes bad
-
+ 		 	one_shot_playback_rate=(0x10000)-(cc_76<<7);  // set playback rate before
  		 for (i=0;i<audio_buffer_size;i++){  // 64 atm moment, 250us with linear +40us with hermite resample
  			// tmr_counter[i]=tmr_counter_value_get(TMR7);
  			 next_sample_tracker=i;  // just counts up inside the buf
  			 ccr_counter_2=i;
  			 next_sample();
 
- 			} // process samples
+ 			} // process samples  300uS atm
+
+
  		 	 if ((!psram_busy)&&(!spi_process_counter)) spi_process_counter=1;  // starts spi processing, can block
 
  		 	 stop_time=tmr_counter_value_get(TMR6);
@@ -213,7 +217,7 @@ samples_store[0].size_bytes=321048;
  		  	 one_shot_pointer+=oneshot;
  		  	 	if (one_shot_pointer >(samples_store[current_playing_sample].size_bytes+samples_store[current_playing_sample].ram_addr))
 
- 		  	 	{one_shot_pointer=samples_store[current_playing_sample].ram_addr;one_shot_position=0;}
+ 		  	 	{one_shot_pointer=samples_store[current_playing_sample].ram_addr;one_shot_position=0;}  //reset sample to start
 
  		  	 	//else one_shot_pointer+=126;  // wont work with other than 128 ?
 
@@ -248,7 +252,9 @@ samples_store[0].size_bytes=321048;
 
 
 
- 	  if (save_timer>60000) {settings_write_flag=1;settings_storage();flash_settings_write();save_timer=0;
+ 	  if (save_timer>60000) {settings_write_flag=1;
+ 	 memcpy(samples_backup,samples_store, sizeof(samples_store));
+ 	  settings_storage();flash_settings_write();save_timer=0;
 
  	  }  // saves every ten minutes
 
@@ -277,17 +283,13 @@ void USART2_IRQHandler(void)  // midi in
   if(usart_interrupt_flag_get(USART2, USART_RDBF_FLAG) != RESET)
   {
     /* read one byte from the receive data register */
-	//  usart2_rx_buffer[usart2_rx_counter++] = usart_data_receive(USART2);
-
 
 	  usart2_rx_buffer[usart2_rx_counter] = usart_data_receive(USART2);  // filter midi channel here first
-	  if (usart2_rx_buffer[0]==note_on+midi_channel)  usart2_rx_counter++;   // try to get note on message start , no cc atm ,stops some random  notes
-	  if (usart2_rx_buffer[0]==c_change+4)// midi channel 5
-		  usart2_rx_counter++;
-	  if (usart2_rx_buffer[0]==note_on+9)  usart2_rx_counter++; //drum channel
 
-	//  usart_interrupt_enable(USART2, USART_RDBF_INT, FALSE);
-	// usart2_rx_buffer[usart2_rx_counter++] = usart_data_receive(USART2);
+
+	  (usart2_rx_buffer[0]==note_on+midi_channel || usart2_rx_buffer[0]==c_change+4 || usart2_rx_buffer[0]==note_on+9 ||
+			  usart2_rx_buffer[0]==c_change+9) ?  usart2_rx_counter++:usart2_rx_counter;                       // not receiving cc 185
+
 
     if(usart2_rx_counter >(usart_buffer_size-1))
     {

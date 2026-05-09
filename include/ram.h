@@ -313,9 +313,12 @@ void uart_receive_end(void){
 			usart4_total_counter+=usart4_rx_counter;
 
 			samples_store[current_sample_save].size_bytes=one_shot_var+usart4_rx_counter; // add end bit
-			samples_store[current_sample_save].ram_addr=usart4_total_counter-one_shot_var;
+			samples_store[current_sample_save].ram_addr=(usart4_total_counter-one_shot_var) & 0xFFFC00;  // not super accurate so clear one k
 			samples_store[current_sample_save].used=1;
-
+			samples_store[current_sample_save].speed=64;
+			usart4_rx_counter=0;  //clear just in case random data
+			usart4_total_counter+=1024; // add 1k
+			usart4_total_counter&=0xFFFC00;  // set to next kbyte start
 			one_shot_var=0;
 			psram_busy=0;
 			current_sample_save++;
@@ -330,21 +333,34 @@ void uart_receive_save(void){
 		if (usart4_total_counter> 16777086) return;    // quit when full
 
 		if (!uart_receive_timer[3]) { // runs after first time writing sample to ram
-/*			int empty=-1;
+			int empty=-1;
+			char text[7];
+			memcpy(text,usart4_int_buffer,7);
+
+
 
 			for (int i = 0; i < total_sample_count; i++){  // look for empty slot
 				if (samples_store[i].used>1)samples_store[i].used=0;  // in case bad data
 				if (!samples_store[i].used) {empty=i; break;}
 			}
-
-			if (empty==-1) { //quit when full
+			if (strncmp(text, "delete", 6) == 0) empty=-1; // if text sent do this
+			if (empty==-1) { //erase all when full then start from zero
 			usart_data_transmit(UART4,(char)('X'));
-			psram_sample_write=0; // will send non stop
-			return;
+
+			for (int i = 0; i < total_sample_count; i++){ samples_store[i].used=0;
+			samples_store[i].ram_addr=0;samples_store[i].size_bytes=0; }  // clear all samples
+			usart4_total_counter=0; //reset couner
+			usart4_rx_counter=0;  //clear just in case random data
+			empty=0;
+			psram_busy=0;
+			psram_sample_write=0;
+			one_shot_var=0;
+			save_timer=66000;  //delete records
+			return;  // quit on clear
 			}
 			current_sample_save=empty; // saves
 			samples_store[empty].ram_addr=usart4_total_counter;
-			samples_store[empty].used=1;*/
+			samples_store[empty].used=1;
 		} // this ok but can fail
 
 		if ((one_shot_var&4095)==0)usart_data_transmit(UART4,(usart4_total_counter>>12)); // sends back some data
@@ -352,7 +368,7 @@ void uart_receive_save(void){
 
 		ram_page_write((usart4_total_counter+psram_sample_start),usart4_int_buffer,128);
 		psram_sample_write=0;  // waits for next message
-
+		ADSR_counter_position[2]=767; // mute
 		uart_receive_timer[3]=1;
 		sample_write_end_timer=0;
 
