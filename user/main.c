@@ -38,10 +38,11 @@
 #include "out.bin.h"     // only enable for initial upload, binary ->.h file for samples
 
 #include "variables.h"
-#include "sampler_loader.h"
+//#include "sampler_loader.h"
+#include "flash.h"
 #include "ram.h"
 #include "maincode.h"
-#include "flash.h"
+
 #include "audio.h"
 #include "midi.h"
 
@@ -69,6 +70,7 @@ int main(void)
  // nvic_priority_group_config(NVIC_PRIORITY_GROUP_4);
  // systick_init();
   dac_config();
+
    usart_config();
   // spi_config();
    spi4_init();
@@ -76,7 +78,8 @@ int main(void)
    wk_uart4_init();
 
 	SPI2_CS_HIGH;  // disable for ram for now
-	sampler_loader_init();
+
+	//uart_print_init(115200);
 
 
 
@@ -100,6 +103,15 @@ int main(void)
 
   //dma_config_tx_only();
   //dma_config();
+	uint16_t i;
+/*	int _write(int fd, char *ptr, int len){  // need this for printf to work
+	  (void)fd;
+
+	  for(i=0;i<len;i++){
+		  usart_data_transmit(UART4,*ptr++);
+	  }return len;
+
+	}*/
 
  // spi_i2s_interrupt_enable(SPI2, SPI_I2S_TDBE_INT, TRUE);
 	midi_note_pwm_calculator();  // issues with float
@@ -108,7 +120,7 @@ int main(void)
 
 
 ///////////// load settings
-	uint16_t i;
+
 	int16_t temp[600];
 	uint32_t read_adr= settings_data;
 
@@ -127,7 +139,13 @@ int main(void)
 	envelopes_preprocess(1);
 	envelopes_preprocess(2);
 	envelopes_preprocess(3);
+	usart4_total_counter=flash_counter_read();
+	if (usart4_total_counter>16000000)  usart4_total_counter=0;  // reset but only if bad data
 
+
+	for ( i = 0; i < total_sample_count; i++){
+		if (samples_store[i].size_bytes)  current_sample_save++;  // count up sample save position from stored, continued saving until the end
+		}
 
 
 	sample_select[0]=600;
@@ -151,7 +169,10 @@ for (i=0;i<128;i++){   // reading ok now
 	test_int[i]=i; // convert to int
 
 }
-
+one_shot[1].playback_rate=0xFFFF;
+one_shot[2].playback_rate=0xFFFF;
+one_shot[3].playback_rate=0xFFFF;
+one_shot[4].playback_rate=0xFFFF;
 memcpy(in_sample_holder,temp,1200); // for testing
 memcpy(in_sample_holder_2,in_sample_holder,1200);
 
@@ -197,7 +218,7 @@ uint8_t tmr_end=0;
  		 		delay_calc();
  		 	  start_time=tmr_counter_value_get(TMR6);
  		 	 	 // about 1200us available before it goes bad
- 		 	one_shot_playback_rate=(0x10000)-(cc_76<<7);  // set playback rate before
+ 		 //	one_shot[0].playback_rate=(0x10000)-(cc_76<<7);  // set playback rate before
  		 for (i=0;i<audio_buffer_size;i++){  // 64 atm moment, 250us with linear +40us with hermite resample
  			// tmr_counter[i]=tmr_counter_value_get(TMR7);
  			 next_sample_tracker=i;  // just counts up inside the buf
@@ -207,26 +228,31 @@ uint8_t tmr_end=0;
  			} // process samples  300uS atm
 
 
+ 		 if(ADSR_timer>=7) {audio_gain_global(); ADSR_TIM_writer();ADSR_timer=0;} else ADSR_timer++; // 25us*64*8 = 12.8ms
+
  		 	 if ((!psram_busy)&&(!spi_process_counter)) spi_process_counter=1;  // starts spi processing, can block
 
  		 	 stop_time=tmr_counter_value_get(TMR6);
- 		  	 	if(stop_time>start_time) elapsed_time=stop_time-start_time; else elapsed_time=0;
+ 		  	 	if(stop_time>start_time) elapsed_time=stop_time-start_time; else elapsed_time=0; // return elapsed time for testing
+ 		  //	 current_playing_sample[0]=1;
+ 		  //	 current_playing_sample[1]=1;
+ 		  //	 current_playing_sample[2]=1;
 
-		 		uint8_t oneshot=(one_shot_position>>16)<<1;  // clear last bit as well , has to be even
- 		  	 	if ((oneshot)>128) oneshot=128; // this thing gets screwed up a lot
- 		  	 one_shot_pointer+=oneshot;
- 		  	 	if (one_shot_pointer >(samples_store[current_playing_sample].size_bytes+samples_store[current_playing_sample].ram_addr))
+ 		  	 for (i=0;i<4;i++){  // control progress off samples
 
- 		  	 	{one_shot_pointer=samples_store[current_playing_sample].ram_addr;one_shot_position=0;}  //reset sample to start
+ 		  		one_shot[i].playback_rate=(0x10000)-(cc_list_extra[i]<<7);  // modify pitch
+ 		  		 if(current_playing_sample[i]){
+		 		uint8_t temp=(one_shot[i].position>>16)<<1;  // clear last bit as well , has to be even
+ 		  	 	if ((temp)>128) temp=128; // this thing gets screwed up a lot
+ 		  	 one_shot[i].pointer+=temp;}  // advance only in enabled
+ 		  	 	if (one_shot[i].pointer >(samples_store[i].size_bytes+samples_store[i].ram_addr))  // need to setup a way to select samples as needed
 
- 		  	 	//else one_shot_pointer+=126;  // wont work with other than 128 ?
-
-
+ 		  	 	{one_shot[i].pointer=samples_store[i].ram_addr;one_shot[i].position=0;current_playing_sample[i]=0;}  //reset sample to start, disable
 		 		// reset one shot pointer
-		 		one_shot_position&=0xFFFF; // needs to zero here
-		 		//one_shot_position=0; //better reset
+		 		one_shot[i].position&=0xFFFF; // needs to zero here
+ 		  	 }
 
-		 		memset(flash_sample_buf,0,255);  // clear
+		 		memset(flash_sample_buf,0,2048);  // clear
 		 		ccr_counter=0;
 		 		dac_ready=0;
 	  }
@@ -235,6 +261,7 @@ uint8_t tmr_end=0;
 
  	if ((!spi_read_flag) && (!spi_write_flag) && (spi_process_counter)&&(!psram_busy)) spi_message_process();
 
+ 	if (usart4_rx_counter>9){uart4_command_process();}  // look for commands on uart4
 
 
 
@@ -258,7 +285,9 @@ uint8_t tmr_end=0;
 
  	  }  // saves every ten minutes
 
- 	  if((!ADSR_timer_flag) && ((tmr_counter_value_get(TMR6)) >8200))  {  ADSR_TIM_writer();  // about 10ms
+ 	  if((!ADSR_timer_flag) && ((tmr_counter_value_get(TMR6)) >8200))  {  // about 10ms
+ 	// printf(" %d\n",lfo1_out);//slow
+
  	  ADSR_timer_flag=1;save_timer++;lfo1_out=lfo_out(); if( uart_receive_timer[3] ) {sample_write_end_timer++;}
 
  	  } //process ADSR
@@ -305,14 +334,15 @@ void USART2_IRQHandler(void)  // midi in
 
 	}
 
-void UART4_IRQHandler(void)  //file transfer
+void UART4_IRQHandler(void)  //file transfer and commands , not quick
 {
   if(usart_interrupt_flag_get(UART4, USART_RDBF_FLAG) != RESET)
   {
 	  at32_led_toggle(LED2);
 	//  usart_interrupt_enable(USART2, USART_RDBF_INT, FALSE);
 	         //   uart_receive_char(usart_data_receive(UART4));
-	  usart4_rx_buffer[usart4_rx_counter] = usart_data_receive(UART4);  // filter midi channel here first
+	  usart4_rx_buffer[usart4_rx_counter] = usart_data_receive(UART4);  //
+	  if (usart4_rx_counter>=10) memcpy(command_buffer,usart4_rx_buffer+(usart4_rx_counter-10),10); // look for commands
 
 
 		    if(usart4_rx_counter >126 ) // buffer full
@@ -328,7 +358,7 @@ void UART4_IRQHandler(void)  //file transfer
 
 
 		    } else  usart4_rx_counter++;
-
+		    if(usart4_rx_reset) {usart4_rx_counter=0;memset(command_buffer,0,16); usart4_rx_reset=0;}// external reset counter
 	           // usart_interrupt_enable(USART2, USART_RDBF_INT, FALSE);
   }
 

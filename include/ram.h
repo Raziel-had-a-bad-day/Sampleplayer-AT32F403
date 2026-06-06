@@ -280,16 +280,16 @@ void spi_message_process (void){
 
  	 switch(spi_process_counter){  // cue spi messages here
  	  case 0: if (psram_busy) spi_process_counter=15; else spi_process_counter=1;break;
- 	  case 1:ram_page_read((one_shot_pointer+psram_sample_start),((audio_buffer_size*2)+2),1,flash_sample_buf);break;				////////read from psram
+ 	  case 1:ram_page_read((one_shot[0].pointer+psram_sample_start),((audio_buffer_size*2)+2),1,one_shot[0].buf);break;				////////read from psram
 
 
- 	  case 2:  ram_page_read((delay_pointer[0]*2) , ((audio_buffer_size*2)+2), 1,ram_out);break; // leave extra when reading
+ 	  case 2:  ram_page_read((delay_pointer[0]*2) , ((audio_buffer_size*2)+2), 1,ram_out);break; // leave extra when reading, delay read
 
- 	  case 3 : ram_page_write((delay_pointer[1]*2), ram_in,(audio_buffer_size*2));break;//dealy_write
- 	  case 4 : ram_page_write((psram_sample_start-357), test_int,256 );break;//might just run it always for now
- 	 case 5:  memset(test_int_buf,0,254);ram_page_read((psram_sample_start-357) , 254, 1,test_int_buf);break;
-
-
+ 	  case 3 : ram_page_write((delay_pointer[1]*2), ram_in,(audio_buffer_size*2));break;//delay_write
+ 	  case 4 : ram_page_write((psram_sample_start-357), test_int,256 );break;//test write ,might just run it always for now
+ 	 case 5:  memset(test_int_buf,0,254);ram_page_read((psram_sample_start-357) , 254, 1,test_int_buf);break; // test read back
+ 	 case 6 :ram_page_read((one_shot[1].pointer+psram_sample_start),((audio_buffer_size*2)+2),1,one_shot[1].buf);break;				////////read from psram
+ 	case 7 :ram_page_read((one_shot[2].pointer+psram_sample_start),((audio_buffer_size*2)+2),1,one_shot[2].buf);break;				////////read from psram
  	 default:break;
 
 
@@ -297,7 +297,7 @@ void spi_message_process (void){
  	  }
 
 
- 	 if (spi_process_counter>=5) spi_process_counter=0; else spi_process_counter++;
+ 	 if (spi_process_counter>=7) spi_process_counter=0; else spi_process_counter++;
 
 	}
 
@@ -319,45 +319,31 @@ void uart_receive_end(void){
 			usart4_rx_counter=0;  //clear just in case random data
 			usart4_total_counter+=1024; // add 1k
 			usart4_total_counter&=0xFFFC00;  // set to next kbyte start
+			flash_counter_write(usart4_total_counter);
 			one_shot_var=0;
 			psram_busy=0;
-			current_sample_save++;
+			current_sample_save++;  // this should just count up no extra info for now
 			current_sample_save&=15;
 
 		} // this triggers after some time uart4 finished receiving
 
 
 }
-void uart_receive_save(void){
+void uart_receive_save(void){ // only after 128 bytes
 		// wav ignore 44 bytes initially
-		if (usart4_total_counter> 16777086) return;    // quit when full
+		if (usart4_total_counter> 16777086) return;    // quit when full, this is saved in flash until nearly full
 
 		if (!uart_receive_timer[3]) { // runs after first time writing sample to ram
 			int empty=-1;
-			char text[7];
-			memcpy(text,usart4_int_buffer,7);
 
 
+			// this now has to write to the last address only , keep writing until nearly full then do a compact operation
 
 			for (int i = 0; i < total_sample_count; i++){  // look for empty slot
 				if (samples_store[i].used>1)samples_store[i].used=0;  // in case bad data
 				if (!samples_store[i].used) {empty=i; break;}
 			}
-			if (strncmp(text, "delete", 6) == 0) empty=-1; // if text sent do this
-			if (empty==-1) { //erase all when full then start from zero
-			usart_data_transmit(UART4,(char)('X'));
 
-			for (int i = 0; i < total_sample_count; i++){ samples_store[i].used=0;
-			samples_store[i].ram_addr=0;samples_store[i].size_bytes=0; }  // clear all samples
-			usart4_total_counter=0; //reset couner
-			usart4_rx_counter=0;  //clear just in case random data
-			empty=0;
-			psram_busy=0;
-			psram_sample_write=0;
-			one_shot_var=0;
-			save_timer=66000;  //delete records
-			return;  // quit on clear
-			}
 			current_sample_save=empty; // saves
 			samples_store[empty].ram_addr=usart4_total_counter;
 			samples_store[empty].used=1;
@@ -367,6 +353,7 @@ void uart_receive_save(void){
 		spi_write_flag=1; //needs to be set here
 
 		ram_page_write((usart4_total_counter+psram_sample_start),usart4_int_buffer,128);
+
 		psram_sample_write=0;  // waits for next message
 		ADSR_counter_position[2]=767; // mute
 		uart_receive_timer[3]=1;
@@ -375,6 +362,63 @@ void uart_receive_save(void){
 
 		one_shot_var+=128; // in bytes
 		usart4_total_counter+=128; // tracks all the samples
+
+
+}
+void uart4_command_process(void){
+
+		// needs to reset if no command
+
+	char text[10];
+	memcpy(text,command_buffer,10);
+
+
+	if (strncmp(text, "delete", 6) == 0) { //clear all
+ //erase all when full then start from zero
+		usart4_rx_reset=1;
+		usart_data_transmit(UART4,(char)('X'));
+
+	for (int i = 0; i < total_sample_count; i++){ samples_store[i].used=0;
+	samples_store[i].ram_addr=0;samples_store[i].size_bytes=0; }  // clear all samples
+	usart4_total_counter=0; //reset couner
+	flash_counter_write(usart4_total_counter);
+
+	usart4_rx_counter=0;  //clear just in case random data
+
+	psram_busy=0;
+	psram_sample_write=0;
+	one_shot_var=0;
+	save_timer=66000;  //delete records
+	return;  // quit on clear
+	}
+
+	if (strncmp(text, "save", 4) == 0) { //copy selected sample from ram to flash  ie copy 1 16
+		usart4_rx_counter=0;
+		save_timer=66000;  //delete records
+		return;
+	}
+	if (strncmp(text, "clear", 5) == 0) { //clear selected sample slots in ram 0-15 , this one now just to flag
+		int id=-1;
+		if (sscanf(text + 5, "%d", &id) == 1 && id >= 0 && id < total_sample_count) {
+			samples_store[id].used=0;
+			samples_store[id].ram_addr=0;samples_store[id].size_bytes=0;
+
+		}usart4_rx_reset=1;
+	}
+	if (strncmp(text, "load", 4) == 0) { //load to selected slot if available 0-15
+
+	}
+	if (strncmp(text, "loadall", 7) == 0) { //load any number of samples to any free slot, default function
+
+	}
+
+	if (strncmp(text, "erase", 5) == 0) { //erase selected slot , this now will just flag data to be erased
+
+	}
+	if (strncmp(text, "settings", 7) == 0) { //erase selected slot in flash 0-15
+		save_timer=66000;usart4_rx_reset=1;
+	}
+
 
 
 }

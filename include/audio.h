@@ -25,9 +25,10 @@ void next_sample(void){  // this runs always , sound in generated when ADSR_out 
 
 	//uint32_t one_shot_counter=one_shot_position &((audio_buffer_size*65536)-1);// phase
 
-
-
-	uint32_t one_shot_counter=one_shot_position; // 63
+	uint8_t phase_lfo=(next_sample_tracker+(64-((lfo1_out)>>4)))&63;
+	int32_t phase2=0;
+	int32_t phase1=0;
+	uint32_t one_shot_counter=one_shot[0].position; // 63
 	//uint32_t one_shot_counter=one_shot_position &((audio_buffer_size*65536)-1);// phase
 
 	int32_t temp=0;
@@ -35,6 +36,8 @@ void next_sample(void){  // this runs always , sound in generated when ADSR_out 
 	int32_t temp3=0;
 	int32_t temp2=0;
 	int32_t temp4=0;
+	int32_t temp5=0;
+	int32_t temp6=0;
 	uint16_t phaser=lfo1_out;
 	int32_t temp_sample=0;
 
@@ -57,7 +60,7 @@ void next_sample(void){  // this runs always , sound in generated when ADSR_out 
 //	if(phaser>599) phaser=phaser-599;phaser&=511;
 	counter=(counter*2);
 	temp_sample=pointer[counter];   //casting the correct way
-	temp3=((temp_sample*ADSR_out[0])>>14);   // modify signal with adsr signed * unsigned
+	temp3=((temp_sample*ADSR_out[0])>>15);   // modify signal with adsr signed * unsigned
 	temp_sample=pointer[counter2*2];
 	temp=((temp_sample*ADSR_out[1])>>19);   // quieter
 
@@ -82,23 +85,29 @@ void next_sample(void){  // this runs always , sound in generated when ADSR_out 
 
 	//temp2=resample_hermite_oneshot(flash_sample_buf,audio_buffer_size,&one_shot_counter,one_shot_playback_rate);
 	//temp2=resample_hermite_loop(flash_sample_buf,audio_buffer_size,&one_shot_counter,(1<<16));
-	temp2=resample_linear(flash_sample_buf,one_shot_counter);// 30us
+	if(current_playing_sample[0]) temp2=resample_linear(one_shot[0].buf,one_shot[0].position);// 30us
+	if(current_playing_sample[1]) temp4=one_shot[1].buf[(one_shot[1].position>>16)];
+	if(current_playing_sample[2]) temp5=one_shot[2].buf[(one_shot[2].position>>16)];
+	if(current_playing_sample[3]) temp5=one_shot[3].buf[(one_shot[3].position>>16)];
+	temp2=temp4+temp5+temp2+temp6;
 	//temp2=resample_hermite(flash_sample_buf,one_shot_counter);// 305/257us
 	//temp2=resample_hermite_float(flash_sample_buf,one_shot_counter);// 328/257us
 	//temp2=((flash_sample_buf[next_sample_tracker]*ADSR_out[2])>>7); //246/198  us
 	//temp2=flash_sample_buf[next_sample_tracker];
 	//temp2=flash_sample_buf[one_shot_counter>>16];
-	temp2=(temp2*ADSR_out[2])>>7;
+
+
+	//temp2=(temp2*ADSR_out[2])>>15;  // might control initial level from adsr_out to control clipping
 	////////   mixer  ////
 
 	//temp=temp2; //testing
 	temp=((temp3+temp)); // only with fx
-
+	temp=(temp*current_velocity)>>7;
 //	if (temp>(1<<22))     {multi-=4; }
 
-	temp*=output_gain;  // separate control for each , this on eis about 0.7 with 3 notes
+	//temp*=output_gain;  // separate control for each , this on eis about 0.7 with 3 notes
 
-	if (temp>(1<<15)) output_gain*=0.9;  //  gains could be run once per round
+	//if (temp>(1<<15)) output_gain*=0.9;  //  needs to be near mixer
 
 	//if (temp2>(1<<10)) side_gain*=0.9999;  //sidechain , this can be elsewhere
 	if (temp2>(1<<2))    sidechain_accu=((sidechain_accu*255)+temp2)>>8;  // dc accu ,slow rise
@@ -106,7 +115,7 @@ void next_sample(void){  // this runs always , sound in generated when ADSR_out 
 	//if(side_gain<0.5) side_gain=0.5;
 	//side_gain=1-side_gain;
 
-	temp*=side_gain;
+	//temp*=side_gain;
 
 	if (stutter_flip) temp=0;
 
@@ -125,14 +134,14 @@ feedback=50; // testing
 
 		//int32_t delayed = (int16_t) ram_read(delay);  // major slow down needs to be different
 		int32_t delayed = ram_out[next_sample_tracker]*4;  // for reading
-		//int32_t delayed_2 = ram_out[(next_sample_tracker+32)&127];
+		//int32_t delayed_2 = ram_out[(next_sample_tracker+16)&63]*4;
 		int32_t delayed_2 =delayed;
 		int32_t fb_contrib = delayed * (int32_t)feedback;
 		int32_t accumulator = (int32_t)temp* (128-(feedback/4));  // incoming
 		accumulator += fb_contrib;
 		temp3=accumulator>>SHIFT;
-		temp3*=output_gain2; //
-		if (temp3>(1<<15)) output_gain2*=0.9;
+		//temp3*=output_gain2; //
+		//if (temp3>(1<<15)) output_gain2*=0.9;
 	//	if (temp3>(1<<14)) output_gain2*=0.9; // delay input limiter
 
 		delay_filter=(delay_filter+temp3)/8;
@@ -151,19 +160,33 @@ feedback=50; // testing
 
 	}  // Delay read
 
-	temp+=temp2;// mix back
-	temp3+=temp2;
+
+	// stereo flanger
+
+
+	if (temp>(1<<15)) {audio_gain_cut[0]++;audio_gain_cut[1]++;}
+	if (temp3>(1<<15)) {audio_gain_cut[0]++;audio_gain_cut[1]++;}
+
+	phase_delay [next_sample_tracker]=temp2;
+	phase1=(phase_delay[phase_lfo]+temp2)/2;
+	phase2=(phase_delay[(32+phase_lfo)&63]+temp2)/2;
+	if (phase2>(1<<15)||phase1>(1<<15) ) audio_gain_cut[2]++;
+
+
+	temp+=phase1;// mix back
+
+	temp3+=phase2;
 
 
 	//temp_out=(temp>>5)+2048;
 
-	temp_sample=127-((lfo1_2_out*cc_7)>>10);
-	current_velocity=temp_sample;
-	current_velocity=100;
-	temp=(temp*current_velocity)>>12; // basic note velocity , not exact based on last value sent
+
+	//current_velocity=temp_sample;
+	//current_velocity=100;
+	temp=(temp)>>6; // basic note velocity , not exact based on last value sent
 	//temp=temp>>5;
 
-		temp3=(temp3*current_velocity)>>12;
+		temp3=temp3>>6;
 		//temp3=sine_testing[next_sample_tracker];temp=temp3;   // grab sample from flash
 	temp+=2047;
 	temp3+=2047;
@@ -202,9 +225,11 @@ feedback=50; // testing
 	//if ((delay_pointer[0]&127)==0)  {ram_page_read(0); memcpy (delay_buffer,ram_page_read_buf,256);} // ream from ram
 
   // if ((delay_pointer[1]&127)==0)  { memcpy (ram_page_write_buf+4,delay_buffer_2,256);ram_page_write(delay_pointer[1]);} //write to ram
-	one_shot_position+=one_shot_playback_rate;  // use this now calculate playback position
-	if(one_shot_position>(63<<16)) one_shot_position=(63<<16); // clip
 
+	for (i=0;i<4;i++){
+	one_shot[i].position+=one_shot[i].playback_rate;  // use this now calculate playback position
+	if(one_shot[i].position>(63<<16)) one_shot[i].position=(63<<16); // clip
+			}
 
 
 		}
@@ -212,7 +237,7 @@ feedback=50; // testing
 
 
 
-void ADSR_TIM_writer(void){   // single note for now  10ms ,16 bit ,could be smoother , 400 samples ish
+void ADSR_TIM_writer(void){   // single note for now  10ms ,16 bit ,could be smoother , 400 samples ish , might change to line up with sample process
 
 	//cc_77=0;  stutter section /////////////
 	//if (stutter_toggle>=stutter_rate) {stutter_toggle=0;stutter_flip=!stutter_flip;} else stutter_toggle++;
@@ -222,16 +247,18 @@ void ADSR_TIM_writer(void){   // single note for now  10ms ,16 bit ,could be smo
 
 	//uint32_t countup=tmr_counter_value_get(TMR6);
 	uint16_t counter=ADSR_counter_position[0];
-	uint32_t length=(samples_store[current_playing_sample].size_bytes>>9);
+	uint32_t length=(samples_store[current_playing_sample[0]].size_bytes>>9);
+	uint32_t temp;
 	if (length<129) length=129;
 
-	ADSR_out[0]=envelopes_store[counter];   // data out for pwm
-	if (output_gain<0.7) output_gain*=1.000001;  // regain
-	if (output_gain2<1) output_gain2*=1.000001;  // regain
-	side_gain=sidechain_accu*0.0001;   // 2000-4000
-	if (side_gain>1) side_gain=1;
-	side_gain=1-side_gain;
-	if(side_gain<1) side_gain*=1.01;  // regain
+	temp=(envelopes_store[counter]*audio_gain[1])>>8;   // data out for pwm
+	ADSR_out[0]=temp;
+//	if (output_gain<0.7) output_gain*=1.000001;  // regain
+//	if (output_gain2<1) output_gain2*=1.000001;  // regain
+//	side_gain=sidechain_accu*0.0001;   // 2000-4000
+//	if (side_gain>1) side_gain=1;
+//	side_gain=1-side_gain;
+//	if(side_gain<1) side_gain*=1.01;  // regain
 	//if(multi<128) multi++;
 
 	if ((counter) && (!ADSR_out[0]))  counter=255;  // force 0 if no signal
@@ -239,7 +266,8 @@ void ADSR_TIM_writer(void){   // single note for now  10ms ,16 bit ,could be smo
 	ADSR_counter_position[0]=counter;
 	/////////////////////  second envelope
 	counter=ADSR_counter_position[1];
-	ADSR_out[1]=envelopes_store[counter];   // data out for pwm
+	temp=(envelopes_store[counter]*audio_gain[1])>>8;   // data out around 16 bit
+	ADSR_out[1]=temp;
 	if ((counter>255) && (!ADSR_out[1]))  counter=511;  // force 0 if no signal
 	if (counter>510) counter=511; else counter++; // stop at the end
 	ADSR_counter_position[1]=counter;
@@ -248,7 +276,7 @@ void ADSR_TIM_writer(void){   // single note for now  10ms ,16 bit ,could be smo
 
 	counter=ADSR_counter_position[2]; // this really should end at length of samples
 	if (counter>length) counter=length;
-	ADSR_out[2]=127;   // samples
+	ADSR_out[2]=255*audio_gain[2];   // samples
 	if (counter>(length-127)) ADSR_out[2]= length-counter; // fade out
 	if (counter>length) {counter=length;ADSR_out[2]=0;} else counter++; // stop at the end
 	ADSR_counter_position[2]=counter;  //
@@ -258,6 +286,21 @@ void ADSR_TIM_writer(void){   // single note for now  10ms ,16 bit ,could be smo
 
 
 }
+
+void audio_gain_global(void){  // needs to be around adsr
+
+	for (uint8_t i=0;i<3;i++){
+		if ((audio_gain_cut[i]>60)&& audio_gain[i]) {audio_gain[i]--;} // go down to 1 for now , adjust number of clicks allowed
+
+		audio_gain_cut[i]=0;
+
+	}
+
+
+
+
+}
+
 	void delay_calc(void){
 
 		delay_pointer[0]+=audio_buffer_size;  //reading , counts up samples
@@ -490,10 +533,10 @@ uint16_t lfo_out(){   // creates and lfo output/  one step
 	test= lfo1_counter>>8;
 	if (test>127) test=127;
 	output=sine_wave[test]; // 0-1023
-	lfo1_2_out=output;
-	output=((output*lfo1_depth)>>8)+(lfo1_depth*2);
-
-	if (output>599) output=599;
+	//lfo1_2_out=output;
+	//output=((output*lfo1_depth)>>8)+(lfo1_depth*2);
+	output=((output*lfo1_depth)>>7);
+	if (output>1023) output=1023;
 
 	return output;
 

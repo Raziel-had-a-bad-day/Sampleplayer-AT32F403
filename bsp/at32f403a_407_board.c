@@ -108,9 +108,9 @@ int __write(int fd, char *pbuffer, int size)
 {
   for(int i = 0; i < size; i ++)
   {
-    while(usart_flag_get(PRINT_UART, USART_TDBE_FLAG) == RESET);
-    usart_data_transmit(PRINT_UART, (uint16_t)(*pbuffer++));
-    while(usart_flag_get(PRINT_UART, USART_TDC_FLAG) == RESET);
+    while(usart_flag_get(UART4, USART_TDBE_FLAG) == RESET);
+    usart_data_transmit(UART4, (uint16_t)(*pbuffer++));
+    while(usart_flag_get(UART4, USART_TDC_FLAG) == RESET);
   }
 
   return size;

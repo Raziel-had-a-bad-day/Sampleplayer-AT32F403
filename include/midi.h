@@ -72,33 +72,47 @@ uint8_t midi_fifo(uint8_t* incoming,uint8_t read_enable){     // returns last mi
 	//	0 	Bank Select (MSB)  for patch banks , 7-volume, 5-portamento time
 	// 73 -Attack ,   72 -Release ,71 -VCF REsonance , 74 -VCF cutoff freq,  91 -Reverb , 84-portamento, 94-detune, 95-phaser, 70-sound variation,
 	//92 -tremolo, 75-79 generic fx settings , may use it for delay unit
-	if (channel==4){
+	if (value<4) value=0;  // some pot issues
+		if (channel==4){
 
 		if (value<4) value=0; //compansate for bad pots
 		if (cc==72)  {ADSR_settings[1]=value&127;memset(envelopes_store,0,256);envelopes_preprocess(0);}// this will have to be fully recalculated ,will be slow
 	// pot 1
 	if(cc==5)  delay_time=value&127; // delay length
 	//pot2
-	if (cc==7) cc_7=value&127; // audio level
+
  if 	(cc==19) master_tune=value&127;  // tune
 
 	if(cc==77)  cc_77=value&127;// pot 4 , stutter or second note pitch
 	if(cc==78)  cc_78=value&127;// pot 4 , stutter or second note pitch
+	if (cc==7) current_velocity=value&127; // audio level
 
-	lfo1_rate=(cc_77<<4)+1;
-	float depth=cc_78;
-	depth=pow(1.04,depth);  // smooth log 1.04 is about the best for 128,  1.022 for 255
-	lfo1_depth=depth;
-	if(lfo1_depth>127) lfo1_depth=127;
 	//lfo1_depth=127-lfo1_depth;
 	} // end of main channel
-	if (channel!=4){ // not picking up
-		if(cc==77){
-		if (samples_store[value>>3].used)  current_playing_sample=value>>3;}
+	if ((channel!=4)&&(cc<122)){ // not picking up
 
+		if ((cc>89)) {cc_list_extra[cc-90]=value&127;  //input extra settings , pitch, length  etc
+
+
+		}
+
+		if(cc==77){
+		if (samples_store[value>>3].used)  current_playing_sample[0]=value>>3;}
+		//if(cc==78){ phase_delay_level=(value&127)>>1;}
 
 		if(cc==76)  cc_76=value&127;// feedback
-		samples_store[current_playing_sample].speed=cc_76;
+		samples_store[current_playing_sample[0]].speed=cc_76;
+		if (cc==7) cc_7=value&127; // audio level
+		if (cc==78) lfo1_rate=(value<<4)+1;
+
+		float depth=cc_7;
+		//	depth=pow(1.04,depth);  // smooth log 1.04 is about the best for 128,  1.022 for 255
+			lfo1_depth=depth;
+			if(lfo1_depth>127) lfo1_depth=127;
+
+
+
+
 	} //end of samples/drums cc
 
 	} //  end off cc process
@@ -208,7 +222,7 @@ uint8_t incoming_message[3];    //
 		        if (midi_hold[NOTE][0] == 148)   // Channel 5 (0x94)
 		        {
 		            note_fifo(midi_hold[NOTE][1], 0);
-		            current_velocity = midi_hold[NOTE][2] & 127;
+		            //current_velocity = midi_hold[NOTE][2] & 127;
 		            at32_led_toggle(LED2);
 		            memset(midi_hold[NOTE], 0, 4);
 		        }
@@ -217,8 +231,11 @@ uint8_t incoming_message[3];    //
 		    if (midi_hold[NOTE][0] == 153)    // Channel 10 (0x99) - Drums
 		    {
 		        memcpy(drum_note_hold, midi_hold[NOTE], 3); // not doing anything
-		        current_playing_sample=drum_note_hold[1]&15;  //select sample
-		        if (samples_store[current_playing_sample].used) ADSR_counter_position[2] = 0; // only trigger if there is data
+
+		        uint8_t selected_note=drum_note_hold[1]&15;
+		        if (samples_store[selected_note].used) {current_playing_sample[selected_note]=1;  //select sample but only if available
+		        one_shot[selected_note].pointer=samples_store[selected_note].ram_addr; } // reset to start
+		        			        	//ADSR_counter_position[2] = 0; // only trigger if there is data
 
 		        at32_led_toggle(LED2);
 		        memset(midi_hold[NOTE], 0, 4);

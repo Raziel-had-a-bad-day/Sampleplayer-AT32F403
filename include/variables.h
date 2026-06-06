@@ -41,7 +41,7 @@
 #define NOTE 0
 #define PC   1
 #define CC   2
-
+#define MAX_SAMPLES     100
 
 uint8_t countSetBits(uint8_t number) { // count bits in byte
 	uint8_t count = 0;
@@ -52,11 +52,11 @@ uint8_t countSetBits(uint8_t number) { // count bits in byte
     return count;}
 
 
-
 uint32_t one_shot_var=0;  // can be changed
 uint8_t usart4_rx_buffer[256]; // uart 3 rx buffer
 int16_t usart4_int_buffer[128];
-uint8_t usart4_rx_counter=0;
+uint8_t usart4_rx_counter=0;// incoming data counter
+volatile uint8_t usart4_rx_reset=0; //reset flag for rx counter
 uint32_t usart4_total_counter=0;
 uint8_t psram_sample_write=0;
 uint8_t psram_busy=0;
@@ -108,6 +108,9 @@ uint32_t CNT_list_selected[poly]={500,500,500,500,500,500,500,500}; // holds CNT
 uint16_t ADSR_out_1;
 uint16_t ADSR_out_2;
 uint16_t ADSR_out[poly];
+uint8_t ADSR_timer=0; // use it to time adsr process
+uint16_t audio_gain[poly]={256,256,256,256,4,4,4,4};  // sets gain for each sound , controll clipping
+uint16_t audio_gain_cut[poly];  // triggered on overload
 uint8_t zero_cross[poly];  // enabled when wav near zero
 uint8_t zero_cross2;
 uint8_t note_trigger;  // holds value for note out until cleared when zero cross is active
@@ -169,10 +172,10 @@ uint16_t spi_counter_2=0;
 int32_t temp_wave;
 uint8_t sound_triggers[8]; // note_trigger for invidiual sounds
 int16_t one_shot_wav[296]; // holds incoming data for one shot sample
-uint32_t one_shot_pointer=0; // points to current byte location in actual wav file
+//uint32_t one_shot_pointer[8]; // points to current byte location in actual wav file
 
-uint32_t one_shot_playback_rate=0xFFFF;
-uint32_t one_shot_position;// use to calc pos,fine within the sample buffer , 1<<17 is one full step
+//uint32_t one_shot_playback_rate[8]={0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF};
+//uint32_t one_shot_position[8];// use to calc pos,fine within the sample buffer , 1<<17 is one full step
 uint8_t temp_store[256];  // delete this
 uint8_t ram_page_read_buf[512];
 uint8_t ram_test_buf[270];
@@ -181,7 +184,7 @@ int8_t test_byte[256];
 volatile uint32_t spi_transmit_counter=0;
 uint32_t spi_receive_counter=0;
 uint8_t tmr_counter[32];
-int16_t flash_sample_buf[132];
+int16_t flash_sample_buf[8*256];// holds data from samples
 volatile uint8_t spi_read_flag=0;  // clear on irq
 volatile uint8_t spi_write_flag=0;  // clear on irq
 uint8_t spi_message_cue; // keeps track of spi messages
@@ -195,31 +198,62 @@ uint16_t lfo1_2_out=0; // second out from lfo1
 uint8_t ch; // delete
 uint8_t drum_note_hold[4];  // holds drums note data
 int master_tune=64; // for now just 0-127
+uint8_t cc_list_extra[32]={64,64,64,64,64,64,64,64}; // cover cc from 90 up , extra settings , pitch *8 ,
+//int16_t one_shot_buf[8*256];
 
 //// sample transfer stuff
 
 char c;
 
-typedef struct {
+typedef struct {  //need to store filename or some type of id
 
     uint32_t ram_addr;      // start address
     uint32_t size_bytes;      // total size in bytes only
-    uint8_t  used;				// 1 if used
+    uint8_t  used;				// 1 if used or maybe id
     uint8_t speed;   // playback speed or tune 0-127
     uint8_t placeholder1;
     uint8_t placeholder2;
     uint8_t placeholder3;
 } Samples;
+typedef struct {
+    uint32_t magic;     // 0x53414D50
+    uint32_t id;
+    uint32_t size;      // actual data bytes
+    uint8_t  status;    // 1 = valid, 2 = deleted
+    uint8_t  reserved[11];
+} SampleHeader;
+
+typedef struct {
+    uint32_t pointer;     // mem address
+    uint32_t playback_rate;// speed of playback
+    uint32_t position;      // 0-63(<<16)  position within buffer
+    int16_t  buf[256];    // read data
+
+} sample_oneshot;
+sample_oneshot one_shot[8];
+
+
+
+
+
+
+uint32_t table_count = 0;
+uint32_t current_write_pos = 0;     // on W25Q, saved in internal flash
+uint32_t next_sample_id = 1;
+
 Samples samples_store[16];
 uint8_t current_sample_save=0;
-uint8_t current_playing_sample=0;
+uint8_t current_playing_sample[8];
 uint32_t sample_write_end_timer=0;
 uint8_t  samples_backup[ sizeof(samples_store)];
 
 uint8_t midi_hold[3][4];     // 0=Note, 1=PC, 2=CC
 uint8_t midi_msg[3][4];      // partial messages
 uint32_t sidechain_accu=0;
-
+int32_t phase_delay[64];  // stores played samples
+uint8_t phase_delay_level=0;
+int data_log=0;
+static char command_buffer[16]; // stores incoming uart commands
 
 
 const uint16_t sine_lut[600]={
