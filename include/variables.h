@@ -54,7 +54,7 @@ uint8_t countSetBits(uint8_t number) { // count bits in byte
 
 uint32_t one_shot_var=0;  // can be changed
 uint8_t usart4_rx_buffer[256]; // uart 3 rx buffer
-int16_t usart4_int_buffer[128];
+int16_t usart4_int_buffer[130];
 uint8_t usart4_rx_counter=0;// incoming data counter
 volatile uint8_t usart4_rx_reset=0; //reset flag for rx counter
 uint32_t usart4_total_counter=0;
@@ -180,7 +180,7 @@ uint8_t temp_store[256];  // delete this
 uint8_t ram_page_read_buf[512];
 uint8_t ram_test_buf[270];
 uint8_t ram_page_write_buf[512];
-int8_t test_byte[256];
+ uint8_t test_byte[260];
 volatile uint32_t spi_transmit_counter=0;
 uint32_t spi_receive_counter=0;
 uint8_t tmr_counter[32];
@@ -230,7 +230,7 @@ typedef struct {
     int16_t  buf[256];    // read data
 
 } sample_oneshot;
-sample_oneshot one_shot[8];
+sample_oneshot one_shot[8]; // controls reading from memory
 
 
 
@@ -241,7 +241,7 @@ uint32_t table_count = 0;
 uint32_t current_write_pos = 0;     // on W25Q, saved in internal flash
 uint32_t next_sample_id = 1;
 
-Samples samples_store[16];
+Samples samples_store[16]; // mirror flash and ram ?
 uint8_t current_sample_save=0;
 uint8_t current_playing_sample[8];
 uint32_t sample_write_end_timer=0;

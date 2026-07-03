@@ -61,7 +61,7 @@ main-build: secondtest.elf secondary-outputs
 secondtest.elf: $(OBJS) $(USER_OBJS) makefile objects.mk $(OPTIONAL_TOOL_DEPS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GNU Arm Cross C Linker'
-	arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -lm -O0 -ffunction-sections -g -T "/home/viktor/at32ide-workspace/secondtest/ldscripts/AT32F403AxG_FLASH.ld" -Xlinker --gc-sections -Wl,-Map,"secondtest.map" --specs=nano.specs -u _printf_float --specs=nosys.specs -o "secondtest.elf" $(OBJS) $(USER_OBJS) $(LIBS)
+	arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -lm -O0 -ffunction-sections  -g -T "/home/viktor/at32ide-workspace/secondtest/ldscripts/AT32F403AxG_FLASH.ld" -Xlinker --gc-sections -Wl,-Map,"secondtest.map" --specs=nano.specs -u _printf_float --specs=nosys.specs -o "secondtest.elf" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

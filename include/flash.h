@@ -1,5 +1,7 @@
-
-
+ void flash_to_ram_mirror (void);
+ void flash_to_ram(void);
+ void ram_to_flash_mirror (void);
+ void flash_counter_write(uint32_t data);
 
 
 void settings_storage(void){   // runs to store setting and read back
@@ -269,4 +271,6 @@ void compact_flash(void)
     // Optional: Save table and positions to internal flash here
    // save_table_and_positions();
 }
+
+
 

@@ -41,6 +41,7 @@
 //#include "sampler_loader.h"
 #include "flash.h"
 #include "ram.h"
+
 #include "maincode.h"
 
 #include "audio.h"
@@ -140,6 +141,9 @@ int main(void)
 	envelopes_preprocess(2);
 	envelopes_preprocess(3);
 	usart4_total_counter=flash_counter_read();
+
+
+
 	if (usart4_total_counter>16000000)  usart4_total_counter=0;  // reset but only if bad data
 
 
@@ -180,12 +184,13 @@ memset(flash_sample_buf,0,128); //testing
 
 uint8_t psram_reset[2]={0x66,0x99};
 delay_ms(15);
-
+SPI2_CS_LOW;
 spi_i2s_data_transmit(SPI4,psram_reset[0] );   //  this should reset linear burst in theory
+SPI2_CS_HIGH;
 delay_ms(15);
 SPI2_CS_LOW;
 spi_i2s_data_transmit(SPI4,psram_reset[1] );
-
+SPI2_CS_HIGH;
 delay_ms(15);
 
 for (i=0;i<256;i++){
@@ -193,6 +198,19 @@ for (i=0;i<256;i++){
 	}
 uint8_t tmr_start=0;
 uint8_t tmr_end=0;
+uint8_t transmit[4]={0,0,0,0};
+
+
+SPI2_CS_HIGH;
+delay_ms(10);
+transmit[0]=0x06;
+SPI4_CS_LOW;
+//spi_i2s_data_transmit(SPI4,transmit[0] );   //
+SPI4_CS_HIGH;
+
+
+flash_to_ram_mirror ();
+
 //samples_store[0].size_bytes=321048;
 //  maybe implement skip back function , record 30sec to mem and than skip back when needed
 
