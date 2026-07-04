@@ -11,7 +11,8 @@ void settings_storage(void){   // runs to store setting and read back
 
 	uint8_t *settings[variable_count]={
 			(uint8_t*)ADSR_settings,
-			(uint8_t*)sample_select,
+			//(uint8_t*)sample_select,
+			(uint8_t*) cc_list_extra,
 			&cc_75,
 			&cc_76,
 			&cc_77,

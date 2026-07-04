@@ -80,8 +80,9 @@ int main(void)
 
 	SPI2_CS_HIGH;  // disable for ram for now
 
-	//uart_print_init(115200);
+	uart_print_init(115200);
 
+	//  uart_print_init(115200);
 
 
    wk_dma1_channel2_init();// rx
@@ -146,10 +147,17 @@ int main(void)
 
 	if (usart4_total_counter>16000000)  usart4_total_counter=0;  // reset but only if bad data
 
-
 	for ( i = 0; i < total_sample_count; i++){
+		one_shot[i].playback_rate=(0x10000*MAX_Rate)-((samples_store[i].speed&127)<<10);   // set initial playback rate
+		if(! one_shot[1].playback_rate) {one_shot[i].playback_rate=0xFFFF;samples_store[i].speed=64;}
+		one_shot[i].end=samples_store[i].ram_addr+((samples_store[i].size_bytes*samples_store[i].length)>>7); //calculates end part
+		if ((samples_store[i].length>127) ||(samples_store[i].length==0) )
+		{one_shot[i].end=samples_store[i].ram_addr+samples_store[i].size_bytes;samples_store[i].length=127;}// fix bad data
+
 		if (samples_store[i].size_bytes)  current_sample_save++;  // count up sample save position from stored, continued saving until the end
-		}
+
+	}
+
 
 
 	sample_select[0]=600;
@@ -173,10 +181,10 @@ for (i=0;i<128;i++){   // reading ok now
 	test_int[i]=i; // convert to int
 
 }
-one_shot[1].playback_rate=0xFFFF;
-one_shot[2].playback_rate=0xFFFF;
-one_shot[3].playback_rate=0xFFFF;
-one_shot[4].playback_rate=0xFFFF;
+//one_shot[1].playback_rate=0xFFFF;
+//one_shot[2].playback_rate=0xFFFF;
+//one_shot[3].playback_rate=0xFFFF;
+//one_shot[4].playback_rate=0xFFFF;
 memcpy(in_sample_holder,temp,1200); // for testing
 memcpy(in_sample_holder_2,in_sample_holder,1200);
 
@@ -214,7 +222,13 @@ flash_to_ram_mirror ();
 //samples_store[0].size_bytes=321048;
 //  maybe implement skip back function , record 30sec to mem and than skip back when needed
 
-  while(1)
+  ////////////////////////////  IDEAS ////////////////////////////////
+// vary length of samples with samples played after each other in a row
+
+
+
+
+while(1)
   {
 
 
@@ -258,17 +272,18 @@ flash_to_ram_mirror ();
 
  		  	 for (i=0;i<4;i++){  // control progress off samples
 
- 		  		one_shot[i].playback_rate=(0x10000)-(cc_list_extra[i]<<7);  // modify pitch
+ 		  		//one_shot[i].playback_rate=(0x10000*MAX_Rate)-(cc_list_extra[i]<<10);  // modify pitch, limited by buffer size
  		  		 if(current_playing_sample[i]){
-		 		uint8_t temp=(one_shot[i].position>>16)<<1;  // clear last bit as well , has to be even
- 		  	 	if ((temp)>128) temp=128; // this thing gets screwed up a lot
+		 		uint16_t temp=(one_shot[i].position>>16)<<1;  // clear last bit as well , has to be even
+ 		  	 	if ((temp)>(128*MAX_Rate)) temp=(128*MAX_Rate); // this thing gets screwed up a lot
  		  	 one_shot[i].pointer+=temp;}  // advance only in enabled
- 		  	 	if (one_shot[i].pointer >(samples_store[i].size_bytes+samples_store[i].ram_addr))  // need to setup a way to select samples as needed
+ 		  	 	if ((one_shot[i].pointer+(128*MAX_Rate)) >(one_shot[i].end))  // need to setup a way to select samples as needed
 
  		  	 	{one_shot[i].pointer=samples_store[i].ram_addr;one_shot[i].position=0;current_playing_sample[i]=0;}  //reset sample to start, disable
 		 		// reset one shot pointer
 		 		one_shot[i].position&=0xFFFF; // needs to zero here
  		  	 }
+ 		  //	usart_data_transmit(UART4,(char)('X'));
 
 		 		memset(flash_sample_buf,0,2048);  // clear
 		 		ccr_counter=0;

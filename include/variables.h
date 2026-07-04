@@ -42,6 +42,8 @@
 #define PC   1
 #define CC   2
 #define MAX_SAMPLES     100
+#define MAX_Rate 2  // max speed of sample playback
+#define download_buffer 254+2  // current download buffer size for samples playback
 
 uint8_t countSetBits(uint8_t number) { // count bits in byte
 	uint8_t count = 0;
@@ -211,7 +213,7 @@ typedef struct {  //need to store filename or some type of id
     uint32_t size_bytes;      // total size in bytes only
     uint8_t  used;				// 1 if used or maybe id
     uint8_t speed;   // playback speed or tune 0-127
-    uint8_t placeholder1;
+    uint8_t length;  // 0-127 fade out point
     uint8_t placeholder2;
     uint8_t placeholder3;
 } Samples;
@@ -228,6 +230,7 @@ typedef struct {
     uint32_t playback_rate;// speed of playback
     uint32_t position;      // 0-63(<<16)  position within buffer
     int16_t  buf[256];    // read data
+    uint32_t end;  // end position ,dynamic, this is calculated from (sample size*(127-sample_store.length)/128)
 
 } sample_oneshot;
 sample_oneshot one_shot[8]; // controls reading from memory

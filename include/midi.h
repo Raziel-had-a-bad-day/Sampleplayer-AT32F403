@@ -91,10 +91,18 @@ uint8_t midi_fifo(uint8_t* incoming,uint8_t read_enable){     // returns last mi
 	} // end of main channel
 	if ((channel!=4)&&(cc<122)){ // not picking up
 
-		if ((cc>89)) {cc_list_extra[cc-90]=value&127;  //input extra settings , pitch, length  etc
-
+		if ((cc>89)&& (cc<98)) {cc_list_extra[cc-90]=value&127;  //input extra settings , pitch, length  etc  0-3 (90-93) is pitch for now
+		samples_store[cc-90].speed=value&127;  //  stores last playback speed
+		one_shot[cc-90].playback_rate=(0x10000*MAX_Rate)-((value&127)<<10);  // writes new playback rate
+		}
+		if ((cc>97)&& (cc<106)) {
+			uint8_t n=cc-98;
+		samples_store[n].length=value&127;  //  stores last playback speed
+		one_shot[n].end=samples_store[n].ram_addr+((samples_store[n].size_bytes*samples_store[n].length)>>7); //calculates end part
 
 		}
+
+
 
 		if(cc==77){
 		if (samples_store[value>>3].used)  current_playing_sample[0]=value>>3;}
@@ -114,7 +122,7 @@ uint8_t midi_fifo(uint8_t* incoming,uint8_t read_enable){     // returns last mi
 
 
 	} //end of samples/drums cc
-
+	printf(" %d ",cc);
 	} //  end off cc process
 
 
@@ -233,9 +241,12 @@ uint8_t incoming_message[3];    //
 		        memcpy(drum_note_hold, midi_hold[NOTE], 3); // not doing anything
 
 		        uint8_t selected_note=drum_note_hold[1]&15;
+		        printf("sound playing %d \n",selected_note);
+		        if (selected_note>3) {memset(current_playing_sample,0,16); selected_note&=3;} //stops all samples and only plays the next one
 		        if (samples_store[selected_note].used) {current_playing_sample[selected_note]=1;  //select sample but only if available
-		        one_shot[selected_note].pointer=samples_store[selected_note].ram_addr; } // reset to start
+		        one_shot[selected_note].pointer=samples_store[selected_note].ram_addr; } // reset to start but thats all
 		        			        	//ADSR_counter_position[2] = 0; // only trigger if there is data
+
 
 		        at32_led_toggle(LED2);
 		        memset(midi_hold[NOTE], 0, 4);

@@ -40,7 +40,7 @@ void next_sample(void){  // this runs always , sound in generated when ADSR_out 
 	int32_t temp6=0;
 	uint16_t phaser=lfo1_out;
 	int32_t temp_sample=0;
-
+	uint8_t divider=0;
 	int16_t* pointer = in_sample_holder;
 	int16_t* pointer2 = in_sample_holder_2;
 	//uint32_t pointer3=SPIM_START_ADDR+one_shot_pointer;
@@ -85,11 +85,13 @@ void next_sample(void){  // this runs always , sound in generated when ADSR_out 
 
 	//temp2=resample_hermite_oneshot(flash_sample_buf,audio_buffer_size,&one_shot_counter,one_shot_playback_rate);
 	//temp2=resample_hermite_loop(flash_sample_buf,audio_buffer_size,&one_shot_counter,(1<<16));
-	if(current_playing_sample[0]) temp2=resample_linear(one_shot[0].buf,one_shot[0].position);// 30us
-	if(current_playing_sample[1]) temp4=one_shot[1].buf[(one_shot[1].position>>16)];
-	if(current_playing_sample[2]) temp5=one_shot[2].buf[(one_shot[2].position>>16)];
-	if(current_playing_sample[3]) temp5=one_shot[3].buf[(one_shot[3].position>>16)];
+	if(current_playing_sample[0]) {temp2=one_shot[0].buf[(one_shot[0].position>>16)];divider++;}    // 30us  , getting corrupted now on 0 sample(new)
+	if(current_playing_sample[1]) {temp4=one_shot[1].buf[(one_shot[1].position>>16)];divider++;}
+	if(current_playing_sample[2]) {temp5=one_shot[2].buf[(one_shot[2].position>>16)];divider++;}
+	//if(current_playing_sample[3]) {temp6=one_shot[3].buf[(one_shot[3].position>>16)];divider++;}
+	if(current_playing_sample[3]) {temp6=resample_linear(one_shot[3].buf,one_shot[3].position); divider++;} //drums
 	temp2=temp4+temp5+temp2+temp6;
+	temp2=temp2*(4-divider);
 	//temp2=resample_hermite(flash_sample_buf,one_shot_counter);// 305/257us
 	//temp2=resample_hermite_float(flash_sample_buf,one_shot_counter);// 328/257us
 	//temp2=((flash_sample_buf[next_sample_tracker]*ADSR_out[2])>>7); //246/198  us
@@ -228,7 +230,7 @@ feedback=50; // testing
 
 	for (i=0;i<4;i++){
 	one_shot[i].position+=one_shot[i].playback_rate;  // use this now calculate playback position
-	if(one_shot[i].position>(63<<16)) one_shot[i].position=(63<<16); // clip
+	if(one_shot[i].position>(((64*MAX_Rate)-1)<<16)) one_shot[i].position=(((64*MAX_Rate)-1)<<16); // limit to download buffer size
 			}
 
 

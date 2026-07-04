@@ -280,27 +280,33 @@ void wk_dma_channel_config(dma_channel_type* dmax_channely, uint32_t peripheral_
 	// Call this every time you want to start a new transfer (TX, RX, or both)
 	// TX: DMA1 Channel 3  (Memory -> SPI4)
 void spi_message_process (void){
+	uint16_t download_size=download_buffer; // sets max downloaded data per fetch mostly to get extra data if needed , minimum 128+2 for now
+	switch(spi_process_counter){  // cue spi messages here
+	case 0: if (psram_busy) spi_process_counter=15; else spi_process_counter=1;break;
+	case 1:if (current_playing_sample[0]) {ram_page_read((one_shot[0].pointer+psram_sample_start),download_size,1,one_shot[0].buf);}
+	break;				////////read from psram
 
- 	 switch(spi_process_counter){  // cue spi messages here
- 	  case 0: if (psram_busy) spi_process_counter=15; else spi_process_counter=1;break;
- 	  case 1:ram_page_read((one_shot[0].pointer+psram_sample_start),((audio_buffer_size*2)+2),1,one_shot[0].buf);break;				////////read from psram
+	case 2:  ram_page_read((delay_pointer[0]*2) , download_size, 1,ram_out);break; // leave extra when reading, delay read
 
+	case 3 : ram_page_write((delay_pointer[1]*2), ram_in,(audio_buffer_size*2),1);break;//delay_write
+	case 4 : ram_page_write((psram_sample_start-357), test_int,256,1 );break;//test write ,might just run it always for now
+	case 5:  memset(test_int_buf,0,254);ram_page_read((psram_sample_start-357) , 254, 1,test_int_buf);break; // test read back
+	case 6 :if (current_playing_sample[1]) {ram_page_read((one_shot[1].pointer+psram_sample_start),download_size,1,one_shot[1].buf);}
+	break;				////////read from psram
 
- 	  case 2:  ram_page_read((delay_pointer[0]*2) , ((audio_buffer_size*2)+2), 1,ram_out);break; // leave extra when reading, delay read
+	case 7 :if (current_playing_sample[2]){ram_page_read((one_shot[2].pointer+psram_sample_start),download_size,1,one_shot[2].buf);}
+	break;					////////read from psram
+	case 8 :if (current_playing_sample[3]){ram_page_read((one_shot[3].pointer+psram_sample_start),download_size,1,one_shot[3].buf);}
+	break;	// only read if enabled
 
- 	  case 3 : ram_page_write((delay_pointer[1]*2), ram_in,(audio_buffer_size*2),1);break;//delay_write
- 	  case 4 : ram_page_write((psram_sample_start-357), test_int,256,1 );break;//test write ,might just run it always for now
- 	 case 5:  memset(test_int_buf,0,254);ram_page_read((psram_sample_start-357) , 254, 1,test_int_buf);break; // test read back
- 	 case 6 :ram_page_read((one_shot[1].pointer+psram_sample_start),((audio_buffer_size*2)+2),1,one_shot[1].buf);break;				////////read from psram
- 	case 7 :ram_page_read((one_shot[2].pointer+psram_sample_start),((audio_buffer_size*2)+2),1,one_shot[2].buf);break;				////////read from psram
- 	 default:break;
+ 	default:break;
 
 
 
  	  }
 
 
- 	 if (spi_process_counter>=7) spi_process_counter=0; else spi_process_counter++;
+ 	 if (spi_process_counter>=8) spi_process_counter=0; else spi_process_counter++;
 
 	}
 
@@ -352,7 +358,7 @@ void uart_receive_save(void){ // only after 128 bytes
 			samples_store[empty].used=1;
 		} // this ok but can fail
 
-		if ((one_shot_var&4095)==0)usart_data_transmit(UART4,(usart4_total_counter>>12)); // sends back some data
+		if ((one_shot_var&4095)==0)printf(" %d kb  \n",(usart4_total_counter>>10)); // sends back some data , works
 		spi_write_flag=1; //needs to be set here
 
 		ram_page_write((usart4_total_counter+psram_sample_start),usart4_int_buffer,128,1);
@@ -379,7 +385,7 @@ void uart4_command_process(void){
 	if (strncmp(text, "delete", 6) == 0) { //clear all
  //erase all when full then start from zero
 		usart4_rx_reset=1;
-		usart_data_transmit(UART4,(char)('X'));
+		printf("deleting sample list \n");
 
 	for (int i = 0; i < total_sample_count; i++){ samples_store[i].used=0;
 	samples_store[i].ram_addr=0;samples_store[i].size_bytes=0; }  // clear all samples
@@ -402,7 +408,12 @@ void uart4_command_process(void){
 	}
 	if (strncmp(text, "clear", 5) == 0) { //clear selected sample slots in ram 0-15 , this one now just to flag
 		int id=-1;
+
+
 		if (sscanf(text + 5, "%d", &id) == 1 && id >= 0 && id < total_sample_count) {
+			printf("clearing selected sample %d  \n",id);
+
+
 			samples_store[id].used=0;
 			samples_store[id].ram_addr=0;samples_store[id].size_bytes=0;
 
@@ -482,8 +493,8 @@ void ram_to_flash(void){  // copies samples to flash from ram, for now all of it
 
 void flash_to_ram_mirror (void){ // just copy the entire flash to ram ,16 mbyte
 	 uint8_t test=0;
-
-	 for (uint32_t  i = psram_sample_start; i < 1000000; i+=256){
+	 printf("Copying flash to ram. Let's go. \n");
+	 for (uint32_t  i = psram_sample_start; i < 1500000; i+=256){
 
 		 ram_page_read(i,256+2,0,usart4_int_buffer);//read flash,dma
 		 //uint8_t transmit[260]={0x03,(uint8_t)(i>>16),(uint8_t)(i>>8),(uint8_t)(i),3,4,5,6,7,8,9,10 }; // read
@@ -500,12 +511,13 @@ void flash_to_ram_mirror (void){ // just copy the entire flash to ram ,16 mbyte
 }
 
 void ram_to_flash_mirror (void){ // just copy the entire flash to ram ,1 mbyte,blocking , about 1 minute, working ok
-
+		// need to break it up eventually , ok for now
+	printf("Writing to flash , this is slow , please wait \n");
 	 uint32_t address=0;
 	 uint8_t test=0;
 	 // missing data in chunks but  random
 
-	for (uint32_t  i = psram_sample_start ; i < 1000000; i+=256){ // 1 MB for now
+	for (uint32_t  i = psram_sample_start ; i < 1200000; i+=256){ // 1 MB for now
 
 		 ram_page_read(i,256+2,1,usart4_int_buffer);//read ram,dma  data is good
 
@@ -539,7 +551,7 @@ void ram_to_flash_mirror (void){ // just copy the entire flash to ram ,1 mbyte,b
 
 
 	 }
-
+	printf("Finished writing to flash, Good bye. \n");
 }
 void read_busy(void){ // needs to have write enable on to work or hangs , do not use without it
 	uint8_t temp[4]={0x05,0,0,0}; // check for busy
