@@ -239,13 +239,30 @@ uint8_t incoming_message[3];    //
 		    if (midi_hold[NOTE][0] == 153)    // Channel 10 (0x99) - Drums
 		    {
 		        memcpy(drum_note_hold, midi_hold[NOTE], 3); // not doing anything
-
+		        uint8_t i;
 		        uint8_t selected_note=drum_note_hold[1]&15;
 		        printf("sound playing %d \n",selected_note);
-		        if (selected_note>3) {memset(current_playing_sample,0,16); selected_note&=3;} //stops all samples and only plays the next one
-		        if (samples_store[selected_note].used) {current_playing_sample[selected_note]=1;  //select sample but only if available
-		        one_shot[selected_note].pointer=samples_store[selected_note].ram_addr; } // reset to start but thats all
-		        			        	//ADSR_counter_position[2] = 0; // only trigger if there is data
+		       // if (selected_note>3) {memset(current_playing_sample,0,16); selected_note&=3;} //stops all samples and only plays the next one
+		        if (samples_store[selected_note].used) { // only run if sample is there
+		        	for (i=0;i<4;i++){ // look for empy slot , skip if all playing
+		        		if (current_playing_sample[i]==0){
+				        	uint8_t set_note=selected_note&3; // limit to 4 note poly
+
+		        			current_playing_sample[set_note]=1;  //select sample but only if available
+				        	one_shot[set_note].pointer=samples_store[selected_note].ram_addr; // move to start
+				        	one_shot[set_note].playback_rate=(0x10000*MAX_Rate)-((samples_store[selected_note].speed&127)<<10);// copy rate
+				        	//one_shot[set_note].end=samples_store[selected_note].ram_addr+((samples_store[selected_note].size_bytes*samples_store[selected_note].length)>>7); //end
+				        	one_shot[set_note].end=samples_store[selected_note].ram_addr+samples_store[selected_note].size_bytes;
+				        	one_shot[set_note].start=samples_store[selected_note].ram_addr;// copy start address
+				        	i=4;
+		        		}
+
+
+		        	}// end of select available sound loop
+
+		        }
+
+		        //ADSR_counter_position[2] = 0; // only trigger if there is data
 
 
 		        at32_led_toggle(LED2);

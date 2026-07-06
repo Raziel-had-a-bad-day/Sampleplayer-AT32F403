@@ -202,7 +202,7 @@ uint8_t drum_note_hold[4];  // holds drums note data
 int master_tune=64; // for now just 0-127
 uint8_t cc_list_extra[32]={64,64,64,64,64,64,64,64}; // cover cc from 90 up , extra settings , pitch *8 ,
 //int16_t one_shot_buf[8*256];
-
+uint32_t flash_backup_start=0; // start address for ram to flash backup, set from sample address
 //// sample transfer stuff
 
 char c;
@@ -226,10 +226,11 @@ typedef struct {
 } SampleHeader;
 
 typedef struct {
-    uint32_t pointer;     // mem address
+    uint32_t pointer;     // current mem address
     uint32_t playback_rate;// speed of playback
     uint32_t position;      // 0-63(<<16)  position within buffer
     int16_t  buf[256];    // read data
+    uint32_t start; //memory start address
     uint32_t end;  // end position ,dynamic, this is calculated from (sample size*(127-sample_store.length)/128)
 
 } sample_oneshot;

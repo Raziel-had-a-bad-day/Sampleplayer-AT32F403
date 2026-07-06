@@ -1833,7 +1833,7 @@ LOAD /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-
                 0x0000000008000000                g_pfnVectors
                 0x0000000008000184                . = ALIGN (0x4)
 
-.text           0x0000000008000190     0xa8ec
+.text           0x0000000008000190     0xa9dc
                 0x0000000008000190                . = ALIGN (0x4)
  *(.text)
  .text          0x0000000008000190       0x40 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v7e-m+fp/hard/crtbegin.o
@@ -1965,855 +1965,856 @@ LOAD /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-
                 0x00000000080015fc      0x198 ./user/main.o
                 0x00000000080015fc                spi_message_process
  .text.uart_receive_end
-                0x0000000008001794      0x138 ./user/main.o
+                0x0000000008001794      0x14c ./user/main.o
                 0x0000000008001794                uart_receive_end
  .text.uart_receive_save
-                0x00000000080018cc      0x124 ./user/main.o
-                0x00000000080018cc                uart_receive_save
+                0x00000000080018e0      0x130 ./user/main.o
+                0x00000000080018e0                uart_receive_save
  .text.uart4_command_process
-                0x00000000080019f0      0x1d4 ./user/main.o
-                0x00000000080019f0                uart4_command_process
+                0x0000000008001a10      0x1d4 ./user/main.o
+                0x0000000008001a10                uart4_command_process
  .text.flash_to_ram_mirror
-                0x0000000008001bc4       0x7c ./user/main.o
-                0x0000000008001bc4                flash_to_ram_mirror
+                0x0000000008001be4       0x78 ./user/main.o
+                0x0000000008001be4                flash_to_ram_mirror
  .text.ram_to_flash_mirror
-                0x0000000008001c40      0x1d0 ./user/main.o
-                0x0000000008001c40                ram_to_flash_mirror
+                0x0000000008001c5c      0x1e8 ./user/main.o
+                0x0000000008001c5c                ram_to_flash_mirror
  .text.read_busy
-                0x0000000008001e10       0x74 ./user/main.o
-                0x0000000008001e10                read_busy
+                0x0000000008001e44       0x74 ./user/main.o
+                0x0000000008001e44                read_busy
  .text.dac_config
-                0x0000000008001e84      0x28c ./user/main.o
-                0x0000000008001e84                dac_config
+                0x0000000008001eb8      0x28c ./user/main.o
+                0x0000000008001eb8                dac_config
  .text.usart_config
-                0x0000000008002110       0x84 ./user/main.o
-                0x0000000008002110                usart_config
+                0x0000000008002144       0x84 ./user/main.o
+                0x0000000008002144                usart_config
  .text.gpio_config
-                0x0000000008002194       0x64 ./user/main.o
-                0x0000000008002194                gpio_config
+                0x00000000080021c8       0x64 ./user/main.o
+                0x00000000080021c8                gpio_config
  .text.spi4_init
-                0x00000000080021f8      0x118 ./user/main.o
-                0x00000000080021f8                spi4_init
+                0x000000000800222c      0x118 ./user/main.o
+                0x000000000800222c                spi4_init
  .text.wk_dma1_channel2_init
-                0x0000000008002310       0x78 ./user/main.o
-                0x0000000008002310                wk_dma1_channel2_init
+                0x0000000008002344       0x78 ./user/main.o
+                0x0000000008002344                wk_dma1_channel2_init
  .text.wk_dma1_channel3_init
-                0x0000000008002388       0x78 ./user/main.o
-                0x0000000008002388                wk_dma1_channel3_init
+                0x00000000080023bc       0x78 ./user/main.o
+                0x00000000080023bc                wk_dma1_channel3_init
  .text.wk_uart4_init
-                0x0000000008002400       0xd4 ./user/main.o
-                0x0000000008002400                wk_uart4_init
+                0x0000000008002434       0xd4 ./user/main.o
+                0x0000000008002434                wk_uart4_init
  .text.next_sample
-                0x00000000080024d4      0x524 ./user/main.o
-                0x00000000080024d4                next_sample
+                0x0000000008002508      0x524 ./user/main.o
+                0x0000000008002508                next_sample
  .text.ADSR_TIM_writer
-                0x00000000080029f8      0x144 ./user/main.o
-                0x00000000080029f8                ADSR_TIM_writer
+                0x0000000008002a2c      0x144 ./user/main.o
+                0x0000000008002a2c                ADSR_TIM_writer
  .text.audio_gain_global
-                0x0000000008002b3c       0x64 ./user/main.o
-                0x0000000008002b3c                audio_gain_global
+                0x0000000008002b70       0x64 ./user/main.o
+                0x0000000008002b70                audio_gain_global
  .text.delay_calc
-                0x0000000008002ba0       0x64 ./user/main.o
-                0x0000000008002ba0                delay_calc
+                0x0000000008002bd4       0x64 ./user/main.o
+                0x0000000008002bd4                delay_calc
  .text.resample_linear
-                0x0000000008002c04       0x5c ./user/main.o
- .text.lfo_out  0x0000000008002c60       0x80 ./user/main.o
-                0x0000000008002c60                lfo_out
+                0x0000000008002c38       0x5c ./user/main.o
+ .text.lfo_out  0x0000000008002c94       0x80 ./user/main.o
+                0x0000000008002c94                lfo_out
  .text.note_fifo
-                0x0000000008002ce0       0x98 ./user/main.o
-                0x0000000008002ce0                note_fifo
+                0x0000000008002d14       0x98 ./user/main.o
+                0x0000000008002d14                note_fifo
  .text.midi_fifo
-                0x0000000008002d78       0xec ./user/main.o
-                0x0000000008002d78                midi_fifo
+                0x0000000008002dac       0xec ./user/main.o
+                0x0000000008002dac                midi_fifo
  .text.program_change
-                0x0000000008002e64      0x100 ./user/main.o
-                0x0000000008002e64                program_change
+                0x0000000008002e98      0x100 ./user/main.o
+                0x0000000008002e98                program_change
  .text.control_change
-                0x0000000008002f64      0x270 ./user/main.o
-                0x0000000008002f64                control_change
+                0x0000000008002f98      0x270 ./user/main.o
+                0x0000000008002f98                control_change
  .text.midi_incoming
-                0x00000000080031d4      0x374 ./user/main.o
-                0x00000000080031d4                midi_incoming
+                0x0000000008003208      0x3fc ./user/main.o
+                0x0000000008003208                midi_incoming
  .text.note_process
-                0x0000000008003548      0x178 ./user/main.o
-                0x0000000008003548                note_process
- .text.main     0x00000000080036c0      0x7c4 ./user/main.o
-                0x00000000080036c0                main
+                0x0000000008003604      0x178 ./user/main.o
+                0x0000000008003604                note_process
+ .text.main     0x000000000800377c      0x7f4 ./user/main.o
+                0x000000000800377c                main
  .text.USART2_IRQHandler
-                0x0000000008003e84       0x98 ./user/main.o
-                0x0000000008003e84                USART2_IRQHandler
+                0x0000000008003f70       0x98 ./user/main.o
+                0x0000000008003f70                USART2_IRQHandler
  .text.UART4_IRQHandler
-                0x0000000008003f1c       0xcc ./user/main.o
-                0x0000000008003f1c                UART4_IRQHandler
+                0x0000000008004008       0xcc ./user/main.o
+                0x0000000008004008                UART4_IRQHandler
  .text.TMR7_GLOBAL_IRQHandler
-                0x0000000008003fe8       0x24 ./user/main.o
-                0x0000000008003fe8                TMR7_GLOBAL_IRQHandler
+                0x00000000080040d4       0x24 ./user/main.o
+                0x00000000080040d4                TMR7_GLOBAL_IRQHandler
  .text.DMA1_Channel1_IRQHandler
-                0x000000000800400c       0x40 ./user/main.o
-                0x000000000800400c                DMA1_Channel1_IRQHandler
+                0x00000000080040f8       0x40 ./user/main.o
+                0x00000000080040f8                DMA1_Channel1_IRQHandler
  .text.DMA1_Channel2_IRQHandler
-                0x000000000800404c       0x6c ./user/main.o
-                0x000000000800404c                DMA1_Channel2_IRQHandler
+                0x0000000008004138       0x6c ./user/main.o
+                0x0000000008004138                DMA1_Channel2_IRQHandler
  .text.DMA1_Channel3_IRQHandler
-                0x00000000080040b8       0x44 ./user/main.o
-                0x00000000080040b8                DMA1_Channel3_IRQHandler
+                0x00000000080041a4       0x44 ./user/main.o
+                0x00000000080041a4                DMA1_Channel3_IRQHandler
  .text.crm_reset
-                0x00000000080040fc       0x6c ./firmware/at32f403a_407_crm.o
-                0x00000000080040fc                crm_reset
+                0x00000000080041e8       0x6c ./firmware/at32f403a_407_crm.o
+                0x00000000080041e8                crm_reset
  .text.crm_flag_get
-                0x0000000008004168       0x50 ./firmware/at32f403a_407_crm.o
-                0x0000000008004168                crm_flag_get
+                0x0000000008004254       0x50 ./firmware/at32f403a_407_crm.o
+                0x0000000008004254                crm_flag_get
  .text.crm_hext_stable_wait
-                0x00000000080041b8       0x4a ./firmware/at32f403a_407_crm.o
-                0x00000000080041b8                crm_hext_stable_wait
+                0x00000000080042a4       0x4a ./firmware/at32f403a_407_crm.o
+                0x00000000080042a4                crm_hext_stable_wait
  .text.crm_periph_clock_enable
-                0x0000000008004202       0x7c ./firmware/at32f403a_407_crm.o
-                0x0000000008004202                crm_periph_clock_enable
- *fill*         0x000000000800427e        0x2 
+                0x00000000080042ee       0x7c ./firmware/at32f403a_407_crm.o
+                0x00000000080042ee                crm_periph_clock_enable
+ *fill*         0x000000000800436a        0x2 
  .text.crm_clock_source_enable
-                0x0000000008004280       0xa8 ./firmware/at32f403a_407_crm.o
-                0x0000000008004280                crm_clock_source_enable
+                0x000000000800436c       0xa8 ./firmware/at32f403a_407_crm.o
+                0x000000000800436c                crm_clock_source_enable
  .text.crm_ahb_div_set
-                0x0000000008004328       0x2c ./firmware/at32f403a_407_crm.o
-                0x0000000008004328                crm_ahb_div_set
+                0x0000000008004414       0x2c ./firmware/at32f403a_407_crm.o
+                0x0000000008004414                crm_ahb_div_set
  .text.crm_apb1_div_set
-                0x0000000008004354       0x2c ./firmware/at32f403a_407_crm.o
-                0x0000000008004354                crm_apb1_div_set
+                0x0000000008004440       0x2c ./firmware/at32f403a_407_crm.o
+                0x0000000008004440                crm_apb1_div_set
  .text.crm_apb2_div_set
-                0x0000000008004380       0x2c ./firmware/at32f403a_407_crm.o
-                0x0000000008004380                crm_apb2_div_set
+                0x000000000800446c       0x2c ./firmware/at32f403a_407_crm.o
+                0x000000000800446c                crm_apb2_div_set
  .text.crm_pll_config
-                0x00000000080043ac       0x9c ./firmware/at32f403a_407_crm.o
-                0x00000000080043ac                crm_pll_config
+                0x0000000008004498       0x9c ./firmware/at32f403a_407_crm.o
+                0x0000000008004498                crm_pll_config
  .text.crm_sysclk_switch
-                0x0000000008004448       0x54 ./firmware/at32f403a_407_crm.o
-                0x0000000008004448                crm_sysclk_switch
+                0x0000000008004534       0x54 ./firmware/at32f403a_407_crm.o
+                0x0000000008004534                crm_sysclk_switch
  .text.crm_sysclk_switch_status_get
-                0x000000000800449c       0x1c ./firmware/at32f403a_407_crm.o
-                0x000000000800449c                crm_sysclk_switch_status_get
+                0x0000000008004588       0x1c ./firmware/at32f403a_407_crm.o
+                0x0000000008004588                crm_sysclk_switch_status_get
  .text.crm_clocks_freq_get
-                0x00000000080044b8      0x1d4 ./firmware/at32f403a_407_crm.o
-                0x00000000080044b8                crm_clocks_freq_get
+                0x00000000080045a4      0x1d4 ./firmware/at32f403a_407_crm.o
+                0x00000000080045a4                crm_clocks_freq_get
  .text.dac_enable
-                0x000000000800468c       0x54 ./firmware/at32f403a_407_dac.o
-                0x000000000800468c                dac_enable
+                0x0000000008004778       0x54 ./firmware/at32f403a_407_dac.o
+                0x0000000008004778                dac_enable
  .text.dac_output_buffer_enable
-                0x00000000080046e0       0x64 ./firmware/at32f403a_407_dac.o
-                0x00000000080046e0                dac_output_buffer_enable
+                0x00000000080047cc       0x64 ./firmware/at32f403a_407_dac.o
+                0x00000000080047cc                dac_output_buffer_enable
  .text.dac_trigger_enable
-                0x0000000008004744       0x54 ./firmware/at32f403a_407_dac.o
-                0x0000000008004744                dac_trigger_enable
+                0x0000000008004830       0x54 ./firmware/at32f403a_407_dac.o
+                0x0000000008004830                dac_trigger_enable
  .text.dac_trigger_select
-                0x0000000008004798       0x54 ./firmware/at32f403a_407_dac.o
-                0x0000000008004798                dac_trigger_select
+                0x0000000008004884       0x54 ./firmware/at32f403a_407_dac.o
+                0x0000000008004884                dac_trigger_select
  .text.dac_wave_generate
-                0x00000000080047ec       0x54 ./firmware/at32f403a_407_dac.o
-                0x00000000080047ec                dac_wave_generate
+                0x00000000080048d8       0x54 ./firmware/at32f403a_407_dac.o
+                0x00000000080048d8                dac_wave_generate
  .text.dac_dma_enable
-                0x0000000008004840       0x54 ./firmware/at32f403a_407_dac.o
-                0x0000000008004840                dac_dma_enable
+                0x000000000800492c       0x54 ./firmware/at32f403a_407_dac.o
+                0x000000000800492c                dac_dma_enable
  .text.dma_reset
-                0x0000000008004894       0xac ./firmware/at32f403a_407_dma.o
-                0x0000000008004894                dma_reset
+                0x0000000008004980       0xac ./firmware/at32f403a_407_dma.o
+                0x0000000008004980                dma_reset
  .text.dma_interrupt_enable
-                0x0000000008004940       0x3c ./firmware/at32f403a_407_dma.o
-                0x0000000008004940                dma_interrupt_enable
+                0x0000000008004a2c       0x3c ./firmware/at32f403a_407_dma.o
+                0x0000000008004a2c                dma_interrupt_enable
  .text.dma_channel_enable
-                0x000000000800497c       0x2a ./firmware/at32f403a_407_dma.o
-                0x000000000800497c                dma_channel_enable
+                0x0000000008004a68       0x2a ./firmware/at32f403a_407_dma.o
+                0x0000000008004a68                dma_channel_enable
  .text.dma_flexible_config
-                0x00000000080049a6       0xe0 ./firmware/at32f403a_407_dma.o
-                0x00000000080049a6                dma_flexible_config
- *fill*         0x0000000008004a86        0x2 
+                0x0000000008004a92       0xe0 ./firmware/at32f403a_407_dma.o
+                0x0000000008004a92                dma_flexible_config
+ *fill*         0x0000000008004b72        0x2 
  .text.dma_interrupt_flag_get
-                0x0000000008004a88       0x50 ./firmware/at32f403a_407_dma.o
-                0x0000000008004a88                dma_interrupt_flag_get
+                0x0000000008004b74       0x50 ./firmware/at32f403a_407_dma.o
+                0x0000000008004b74                dma_interrupt_flag_get
  .text.dma_flag_clear
-                0x0000000008004ad8       0x38 ./firmware/at32f403a_407_dma.o
-                0x0000000008004ad8                dma_flag_clear
+                0x0000000008004bc4       0x38 ./firmware/at32f403a_407_dma.o
+                0x0000000008004bc4                dma_flag_clear
  .text.dma_default_para_init
-                0x0000000008004b10       0x50 ./firmware/at32f403a_407_dma.o
-                0x0000000008004b10                dma_default_para_init
+                0x0000000008004bfc       0x50 ./firmware/at32f403a_407_dma.o
+                0x0000000008004bfc                dma_default_para_init
  .text.dma_init
-                0x0000000008004b60       0xc4 ./firmware/at32f403a_407_dma.o
-                0x0000000008004b60                dma_init
+                0x0000000008004c4c       0xc4 ./firmware/at32f403a_407_dma.o
+                0x0000000008004c4c                dma_init
  .text.flash_operation_status_get
-                0x0000000008004c24       0x5c ./firmware/at32f403a_407_flash.o
-                0x0000000008004c24                flash_operation_status_get
+                0x0000000008004d10       0x5c ./firmware/at32f403a_407_flash.o
+                0x0000000008004d10                flash_operation_status_get
  .text.flash_bank1_operation_status_get
-                0x0000000008004c80       0x5c ./firmware/at32f403a_407_flash.o
-                0x0000000008004c80                flash_bank1_operation_status_get
+                0x0000000008004d6c       0x5c ./firmware/at32f403a_407_flash.o
+                0x0000000008004d6c                flash_bank1_operation_status_get
  .text.flash_bank2_operation_status_get
-                0x0000000008004cdc       0x5c ./firmware/at32f403a_407_flash.o
-                0x0000000008004cdc                flash_bank2_operation_status_get
+                0x0000000008004dc8       0x5c ./firmware/at32f403a_407_flash.o
+                0x0000000008004dc8                flash_bank2_operation_status_get
  .text.flash_spim_operation_status_get
-                0x0000000008004d38       0x64 ./firmware/at32f403a_407_flash.o
-                0x0000000008004d38                flash_spim_operation_status_get
+                0x0000000008004e24       0x64 ./firmware/at32f403a_407_flash.o
+                0x0000000008004e24                flash_spim_operation_status_get
  .text.flash_operation_wait_for
-                0x0000000008004d9c       0x44 ./firmware/at32f403a_407_flash.o
-                0x0000000008004d9c                flash_operation_wait_for
+                0x0000000008004e88       0x44 ./firmware/at32f403a_407_flash.o
+                0x0000000008004e88                flash_operation_wait_for
  .text.flash_bank1_operation_wait_for
-                0x0000000008004de0       0x44 ./firmware/at32f403a_407_flash.o
-                0x0000000008004de0                flash_bank1_operation_wait_for
+                0x0000000008004ecc       0x44 ./firmware/at32f403a_407_flash.o
+                0x0000000008004ecc                flash_bank1_operation_wait_for
  .text.flash_bank2_operation_wait_for
-                0x0000000008004e24       0x44 ./firmware/at32f403a_407_flash.o
-                0x0000000008004e24                flash_bank2_operation_wait_for
+                0x0000000008004f10       0x44 ./firmware/at32f403a_407_flash.o
+                0x0000000008004f10                flash_bank2_operation_wait_for
  .text.flash_spim_operation_wait_for
-                0x0000000008004e68       0x44 ./firmware/at32f403a_407_flash.o
-                0x0000000008004e68                flash_spim_operation_wait_for
+                0x0000000008004f54       0x44 ./firmware/at32f403a_407_flash.o
+                0x0000000008004f54                flash_spim_operation_wait_for
  .text.flash_unlock
-                0x0000000008004eac       0x34 ./firmware/at32f403a_407_flash.o
-                0x0000000008004eac                flash_unlock
+                0x0000000008004f98       0x34 ./firmware/at32f403a_407_flash.o
+                0x0000000008004f98                flash_unlock
  .text.flash_sector_erase
-                0x0000000008004ee0       0xec ./firmware/at32f403a_407_flash.o
-                0x0000000008004ee0                flash_sector_erase
+                0x0000000008004fcc       0xec ./firmware/at32f403a_407_flash.o
+                0x0000000008004fcc                flash_sector_erase
  .text.flash_byte_program
-                0x0000000008004fcc       0x90 ./firmware/at32f403a_407_flash.o
-                0x0000000008004fcc                flash_byte_program
+                0x00000000080050b8       0x90 ./firmware/at32f403a_407_flash.o
+                0x00000000080050b8                flash_byte_program
  .text.flash_spim_dummy_read
-                0x000000000800505c       0x24 ./firmware/at32f403a_407_flash.o
-                0x000000000800505c                flash_spim_dummy_read
+                0x0000000008005148       0x24 ./firmware/at32f403a_407_flash.o
+                0x0000000008005148                flash_spim_dummy_read
  .text.gpio_init
-                0x0000000008005080      0x138 ./firmware/at32f403a_407_gpio.o
-                0x0000000008005080                gpio_init
+                0x000000000800516c      0x138 ./firmware/at32f403a_407_gpio.o
+                0x000000000800516c                gpio_init
  .text.gpio_default_para_init
-                0x00000000080051b8       0x34 ./firmware/at32f403a_407_gpio.o
-                0x00000000080051b8                gpio_default_para_init
+                0x00000000080052a4       0x34 ./firmware/at32f403a_407_gpio.o
+                0x00000000080052a4                gpio_default_para_init
  .text.gpio_pin_remap_config
-                0x00000000080051ec       0x98 ./firmware/at32f403a_407_gpio.o
-                0x00000000080051ec                gpio_pin_remap_config
+                0x00000000080052d8       0x98 ./firmware/at32f403a_407_gpio.o
+                0x00000000080052d8                gpio_pin_remap_config
  .text.__NVIC_SetPriorityGrouping
-                0x0000000008005284       0x48 ./firmware/at32f403a_407_misc.o
+                0x0000000008005370       0x48 ./firmware/at32f403a_407_misc.o
  .text.__NVIC_GetPriorityGrouping
-                0x00000000080052cc       0x1c ./firmware/at32f403a_407_misc.o
+                0x00000000080053b8       0x1c ./firmware/at32f403a_407_misc.o
  .text.__NVIC_EnableIRQ
-                0x00000000080052e8       0x3c ./firmware/at32f403a_407_misc.o
+                0x00000000080053d4       0x3c ./firmware/at32f403a_407_misc.o
  .text.__NVIC_SetPriority
-                0x0000000008005324       0x54 ./firmware/at32f403a_407_misc.o
+                0x0000000008005410       0x54 ./firmware/at32f403a_407_misc.o
  .text.NVIC_EncodePriority
-                0x0000000008005378       0x66 ./firmware/at32f403a_407_misc.o
+                0x0000000008005464       0x66 ./firmware/at32f403a_407_misc.o
  .text.nvic_irq_enable
-                0x00000000080053de       0x42 ./firmware/at32f403a_407_misc.o
-                0x00000000080053de                nvic_irq_enable
+                0x00000000080054ca       0x42 ./firmware/at32f403a_407_misc.o
+                0x00000000080054ca                nvic_irq_enable
  .text.nvic_priority_group_config
-                0x0000000008005420       0x1a ./firmware/at32f403a_407_misc.o
-                0x0000000008005420                nvic_priority_group_config
- *fill*         0x000000000800543a        0x2 
+                0x000000000800550c       0x1a ./firmware/at32f403a_407_misc.o
+                0x000000000800550c                nvic_priority_group_config
+ *fill*         0x0000000008005526        0x2 
  .text.systick_clock_source_config
-                0x000000000800543c       0x3c ./firmware/at32f403a_407_misc.o
-                0x000000000800543c                systick_clock_source_config
+                0x0000000008005528       0x3c ./firmware/at32f403a_407_misc.o
+                0x0000000008005528                systick_clock_source_config
  .text.spi_default_para_init
-                0x0000000008005478       0x44 ./firmware/at32f403a_407_spi.o
-                0x0000000008005478                spi_default_para_init
+                0x0000000008005564       0x44 ./firmware/at32f403a_407_spi.o
+                0x0000000008005564                spi_default_para_init
  .text.spi_init
-                0x00000000080054bc      0x1a2 ./firmware/at32f403a_407_spi.o
-                0x00000000080054bc                spi_init
+                0x00000000080055a8      0x1a2 ./firmware/at32f403a_407_spi.o
+                0x00000000080055a8                spi_init
  .text.spi_enable
-                0x000000000800565e       0x2a ./firmware/at32f403a_407_spi.o
-                0x000000000800565e                spi_enable
+                0x000000000800574a       0x2a ./firmware/at32f403a_407_spi.o
+                0x000000000800574a                spi_enable
  .text.spi_i2s_dma_transmitter_enable
-                0x0000000008005688       0x2a ./firmware/at32f403a_407_spi.o
-                0x0000000008005688                spi_i2s_dma_transmitter_enable
+                0x0000000008005774       0x2a ./firmware/at32f403a_407_spi.o
+                0x0000000008005774                spi_i2s_dma_transmitter_enable
  .text.spi_i2s_dma_receiver_enable
-                0x00000000080056b2       0x2a ./firmware/at32f403a_407_spi.o
-                0x00000000080056b2                spi_i2s_dma_receiver_enable
+                0x000000000800579e       0x2a ./firmware/at32f403a_407_spi.o
+                0x000000000800579e                spi_i2s_dma_receiver_enable
  .text.spi_i2s_data_transmit
-                0x00000000080056dc       0x1e ./firmware/at32f403a_407_spi.o
-                0x00000000080056dc                spi_i2s_data_transmit
+                0x00000000080057c8       0x1e ./firmware/at32f403a_407_spi.o
+                0x00000000080057c8                spi_i2s_data_transmit
  .text.spi_i2s_data_receive
-                0x00000000080056fa       0x1a ./firmware/at32f403a_407_spi.o
-                0x00000000080056fa                spi_i2s_data_receive
+                0x00000000080057e6       0x1a ./firmware/at32f403a_407_spi.o
+                0x00000000080057e6                spi_i2s_data_receive
  .text.spi_i2s_flag_get
-                0x0000000008005714       0x32 ./firmware/at32f403a_407_spi.o
-                0x0000000008005714                spi_i2s_flag_get
+                0x0000000008005800       0x32 ./firmware/at32f403a_407_spi.o
+                0x0000000008005800                spi_i2s_flag_get
  .text.tmr_counter_enable
-                0x0000000008005746       0x2a ./firmware/at32f403a_407_tmr.o
-                0x0000000008005746                tmr_counter_enable
+                0x0000000008005832       0x2a ./firmware/at32f403a_407_tmr.o
+                0x0000000008005832                tmr_counter_enable
  .text.tmr_base_init
-                0x0000000008005770       0x2e ./firmware/at32f403a_407_tmr.o
-                0x0000000008005770                tmr_base_init
+                0x000000000800585c       0x2e ./firmware/at32f403a_407_tmr.o
+                0x000000000800585c                tmr_base_init
  .text.tmr_cnt_dir_set
-                0x000000000800579e       0x2a ./firmware/at32f403a_407_tmr.o
-                0x000000000800579e                tmr_cnt_dir_set
+                0x000000000800588a       0x2a ./firmware/at32f403a_407_tmr.o
+                0x000000000800588a                tmr_cnt_dir_set
  .text.tmr_counter_value_get
-                0x00000000080057c8       0x18 ./firmware/at32f403a_407_tmr.o
-                0x00000000080057c8                tmr_counter_value_get
+                0x00000000080058b4       0x18 ./firmware/at32f403a_407_tmr.o
+                0x00000000080058b4                tmr_counter_value_get
  .text.tmr_primary_mode_select
-                0x00000000080057e0       0x2a ./firmware/at32f403a_407_tmr.o
-                0x00000000080057e0                tmr_primary_mode_select
+                0x00000000080058cc       0x2a ./firmware/at32f403a_407_tmr.o
+                0x00000000080058cc                tmr_primary_mode_select
  .text.tmr_interrupt_flag_get
-                0x000000000800580a       0x3e ./firmware/at32f403a_407_tmr.o
-                0x000000000800580a                tmr_interrupt_flag_get
+                0x00000000080058f6       0x3e ./firmware/at32f403a_407_tmr.o
+                0x00000000080058f6                tmr_interrupt_flag_get
  .text.tmr_flag_clear
-                0x0000000008005848       0x1e ./firmware/at32f403a_407_tmr.o
-                0x0000000008005848                tmr_flag_clear
- *fill*         0x0000000008005866        0x2 
+                0x0000000008005934       0x1e ./firmware/at32f403a_407_tmr.o
+                0x0000000008005934                tmr_flag_clear
+ *fill*         0x0000000008005952        0x2 
  .text.usart_init
-                0x0000000008005868       0xe0 ./firmware/at32f403a_407_usart.o
-                0x0000000008005868                usart_init
+                0x0000000008005954       0xe0 ./firmware/at32f403a_407_usart.o
+                0x0000000008005954                usart_init
  .text.usart_parity_selection_config
-                0x0000000008005948       0x6a ./firmware/at32f403a_407_usart.o
-                0x0000000008005948                usart_parity_selection_config
+                0x0000000008005a34       0x6a ./firmware/at32f403a_407_usart.o
+                0x0000000008005a34                usart_parity_selection_config
  .text.usart_enable
-                0x00000000080059b2       0x2a ./firmware/at32f403a_407_usart.o
-                0x00000000080059b2                usart_enable
+                0x0000000008005a9e       0x2a ./firmware/at32f403a_407_usart.o
+                0x0000000008005a9e                usart_enable
  .text.usart_transmitter_enable
-                0x00000000080059dc       0x2a ./firmware/at32f403a_407_usart.o
-                0x00000000080059dc                usart_transmitter_enable
+                0x0000000008005ac8       0x2a ./firmware/at32f403a_407_usart.o
+                0x0000000008005ac8                usart_transmitter_enable
  .text.usart_receiver_enable
-                0x0000000008005a06       0x2a ./firmware/at32f403a_407_usart.o
-                0x0000000008005a06                usart_receiver_enable
+                0x0000000008005af2       0x2a ./firmware/at32f403a_407_usart.o
+                0x0000000008005af2                usart_receiver_enable
  .text.usart_interrupt_enable
-                0x0000000008005a30       0x68 ./firmware/at32f403a_407_usart.o
-                0x0000000008005a30                usart_interrupt_enable
+                0x0000000008005b1c       0x68 ./firmware/at32f403a_407_usart.o
+                0x0000000008005b1c                usart_interrupt_enable
  .text.usart_data_transmit
-                0x0000000008005a98       0x22 ./firmware/at32f403a_407_usart.o
-                0x0000000008005a98                usart_data_transmit
+                0x0000000008005b84       0x22 ./firmware/at32f403a_407_usart.o
+                0x0000000008005b84                usart_data_transmit
  .text.usart_data_receive
-                0x0000000008005aba       0x1a ./firmware/at32f403a_407_usart.o
-                0x0000000008005aba                usart_data_receive
+                0x0000000008005ba6       0x1a ./firmware/at32f403a_407_usart.o
+                0x0000000008005ba6                usart_data_receive
  .text.usart_hardware_flow_control_set
-                0x0000000008005ad4       0x86 ./firmware/at32f403a_407_usart.o
-                0x0000000008005ad4                usart_hardware_flow_control_set
+                0x0000000008005bc0       0x86 ./firmware/at32f403a_407_usart.o
+                0x0000000008005bc0                usart_hardware_flow_control_set
  .text.usart_flag_get
-                0x0000000008005b5a       0x28 ./firmware/at32f403a_407_usart.o
-                0x0000000008005b5a                usart_flag_get
- *fill*         0x0000000008005b82        0x2 
+                0x0000000008005c46       0x28 ./firmware/at32f403a_407_usart.o
+                0x0000000008005c46                usart_flag_get
+ *fill*         0x0000000008005c6e        0x2 
  .text.usart_interrupt_flag_get
-                0x0000000008005b84      0x1ac ./firmware/at32f403a_407_usart.o
-                0x0000000008005b84                usart_interrupt_flag_get
+                0x0000000008005c70      0x1ac ./firmware/at32f403a_407_usart.o
+                0x0000000008005c70                usart_interrupt_flag_get
  .text.Reset_Handler
-                0x0000000008005d30       0x48 ./cmsis/startup_at32f403a_407.o
-                0x0000000008005d30                Reset_Handler
+                0x0000000008005e1c       0x48 ./cmsis/startup_at32f403a_407.o
+                0x0000000008005e1c                Reset_Handler
  .text.Default_Handler
-                0x0000000008005d78        0x2 ./cmsis/startup_at32f403a_407.o
-                0x0000000008005d78                SDIO1_IRQHandler
-                0x0000000008005d78                XMC_IRQHandler
-                0x0000000008005d78                EXINT2_IRQHandler
-                0x0000000008005d78                USBFS_L_CAN1_RX0_IRQHandler
-                0x0000000008005d78                UART8_IRQHandler
-                0x0000000008005d78                SPI4_IRQHandler
-                0x0000000008005d78                I2C2_EVT_IRQHandler
-                0x0000000008005d78                TMR1_OVF_TMR10_IRQHandler
-                0x0000000008005d78                TMR8_TRG_HALL_TMR14_IRQHandler
-                0x0000000008005d78                USBFS_H_CAN1_TX_IRQHandler
-                0x0000000008005d78                I2C1_ERR_IRQHandler
-                0x0000000008005d78                EXINT9_5_IRQHandler
-                0x0000000008005d78                EMAC_IRQHandler
-                0x0000000008005d78                CAN2_RX1_IRQHandler
-                0x0000000008005d78                TMR5_GLOBAL_IRQHandler
-                0x0000000008005d78                SDIO2_IRQHandler
-                0x0000000008005d78                ADC1_2_IRQHandler
-                0x0000000008005d78                SPI1_IRQHandler
-                0x0000000008005d78                TAMPER_IRQHandler
-                0x0000000008005d78                CAN2_RX0_IRQHandler
-                0x0000000008005d78                DMA2_Channel2_IRQHandler
-                0x0000000008005d78                DMA1_Channel4_IRQHandler
-                0x0000000008005d78                TMR8_CH_IRQHandler
-                0x0000000008005d78                USART6_IRQHandler
-                0x0000000008005d78                EXINT0_IRQHandler
-                0x0000000008005d78                USART3_IRQHandler
-                0x0000000008005d78                RTC_IRQHandler
-                0x0000000008005d78                DMA1_Channel7_IRQHandler
-                0x0000000008005d78                CAN1_RX1_IRQHandler
-                0x0000000008005d78                UART5_IRQHandler
-                0x0000000008005d78                ADC3_IRQHandler
-                0x0000000008005d78                ACC_IRQHandler
-                0x0000000008005d78                EMAC_WKUP_IRQHandler
-                0x0000000008005d78                DMA2_Channel1_IRQHandler
-                0x0000000008005d78                EXINT3_IRQHandler
-                0x0000000008005d78                DMA1_Channel6_IRQHandler
-                0x0000000008005d78                Default_Handler
-                0x0000000008005d78                USBFS_MAPH_IRQHandler
-                0x0000000008005d78                TMR3_GLOBAL_IRQHandler
-                0x0000000008005d78                CAN1_SE_IRQHandler
-                0x0000000008005d78                CAN2_TX_IRQHandler
-                0x0000000008005d78                I2C3_ERR_IRQHandler
-                0x0000000008005d78                SPI3_I2S3EXT_IRQHandler
-                0x0000000008005d78                TMR1_BRK_TMR9_IRQHandler
-                0x0000000008005d78                USBFS_MAPL_IRQHandler
-                0x0000000008005d78                TMR8_BRK_TMR12_IRQHandler
-                0x0000000008005d78                TMR1_TRG_HALL_TMR11_IRQHandler
-                0x0000000008005d78                DMA1_Channel5_IRQHandler
-                0x0000000008005d78                TMR4_GLOBAL_IRQHandler
-                0x0000000008005d78                EXINT4_IRQHandler
-                0x0000000008005d78                CAN2_SE_IRQHandler
-                0x0000000008005d78                DMA2_Channel6_7_IRQHandler
-                0x0000000008005d78                PVM_IRQHandler
-                0x0000000008005d78                I2C3_EVT_IRQHandler
-                0x0000000008005d78                I2C1_EVT_IRQHandler
-                0x0000000008005d78                TMR8_OVF_TMR13_IRQHandler
-                0x0000000008005d78                TMR6_GLOBAL_IRQHandler
-                0x0000000008005d78                EXINT1_IRQHandler
-                0x0000000008005d78                RTCAlarm_IRQHandler
-                0x0000000008005d78                DMA2_Channel4_5_IRQHandler
-                0x0000000008005d78                UART7_IRQHandler
-                0x0000000008005d78                TMR2_GLOBAL_IRQHandler
-                0x0000000008005d78                FLASH_IRQHandler
-                0x0000000008005d78                SPI2_I2S2EXT_IRQHandler
-                0x0000000008005d78                I2C2_ERR_IRQHandler
-                0x0000000008005d78                USBFSWakeUp_IRQHandler
-                0x0000000008005d78                USART1_IRQHandler
-                0x0000000008005d78                TMR1_CH_IRQHandler
-                0x0000000008005d78                CRM_IRQHandler
-                0x0000000008005d78                EXINT15_10_IRQHandler
-                0x0000000008005d78                WWDT_IRQHandler
-                0x0000000008005d78                DMA2_Channel3_IRQHandler
- *fill*         0x0000000008005d7a        0x2 
+                0x0000000008005e64        0x2 ./cmsis/startup_at32f403a_407.o
+                0x0000000008005e64                SDIO1_IRQHandler
+                0x0000000008005e64                XMC_IRQHandler
+                0x0000000008005e64                EXINT2_IRQHandler
+                0x0000000008005e64                USBFS_L_CAN1_RX0_IRQHandler
+                0x0000000008005e64                UART8_IRQHandler
+                0x0000000008005e64                SPI4_IRQHandler
+                0x0000000008005e64                I2C2_EVT_IRQHandler
+                0x0000000008005e64                TMR1_OVF_TMR10_IRQHandler
+                0x0000000008005e64                TMR8_TRG_HALL_TMR14_IRQHandler
+                0x0000000008005e64                USBFS_H_CAN1_TX_IRQHandler
+                0x0000000008005e64                I2C1_ERR_IRQHandler
+                0x0000000008005e64                EXINT9_5_IRQHandler
+                0x0000000008005e64                EMAC_IRQHandler
+                0x0000000008005e64                CAN2_RX1_IRQHandler
+                0x0000000008005e64                TMR5_GLOBAL_IRQHandler
+                0x0000000008005e64                SDIO2_IRQHandler
+                0x0000000008005e64                ADC1_2_IRQHandler
+                0x0000000008005e64                SPI1_IRQHandler
+                0x0000000008005e64                TAMPER_IRQHandler
+                0x0000000008005e64                CAN2_RX0_IRQHandler
+                0x0000000008005e64                DMA2_Channel2_IRQHandler
+                0x0000000008005e64                DMA1_Channel4_IRQHandler
+                0x0000000008005e64                TMR8_CH_IRQHandler
+                0x0000000008005e64                USART6_IRQHandler
+                0x0000000008005e64                EXINT0_IRQHandler
+                0x0000000008005e64                USART3_IRQHandler
+                0x0000000008005e64                RTC_IRQHandler
+                0x0000000008005e64                DMA1_Channel7_IRQHandler
+                0x0000000008005e64                CAN1_RX1_IRQHandler
+                0x0000000008005e64                UART5_IRQHandler
+                0x0000000008005e64                ADC3_IRQHandler
+                0x0000000008005e64                ACC_IRQHandler
+                0x0000000008005e64                EMAC_WKUP_IRQHandler
+                0x0000000008005e64                DMA2_Channel1_IRQHandler
+                0x0000000008005e64                EXINT3_IRQHandler
+                0x0000000008005e64                DMA1_Channel6_IRQHandler
+                0x0000000008005e64                Default_Handler
+                0x0000000008005e64                USBFS_MAPH_IRQHandler
+                0x0000000008005e64                TMR3_GLOBAL_IRQHandler
+                0x0000000008005e64                CAN1_SE_IRQHandler
+                0x0000000008005e64                CAN2_TX_IRQHandler
+                0x0000000008005e64                I2C3_ERR_IRQHandler
+                0x0000000008005e64                SPI3_I2S3EXT_IRQHandler
+                0x0000000008005e64                TMR1_BRK_TMR9_IRQHandler
+                0x0000000008005e64                USBFS_MAPL_IRQHandler
+                0x0000000008005e64                TMR8_BRK_TMR12_IRQHandler
+                0x0000000008005e64                TMR1_TRG_HALL_TMR11_IRQHandler
+                0x0000000008005e64                DMA1_Channel5_IRQHandler
+                0x0000000008005e64                TMR4_GLOBAL_IRQHandler
+                0x0000000008005e64                EXINT4_IRQHandler
+                0x0000000008005e64                CAN2_SE_IRQHandler
+                0x0000000008005e64                DMA2_Channel6_7_IRQHandler
+                0x0000000008005e64                PVM_IRQHandler
+                0x0000000008005e64                I2C3_EVT_IRQHandler
+                0x0000000008005e64                I2C1_EVT_IRQHandler
+                0x0000000008005e64                TMR8_OVF_TMR13_IRQHandler
+                0x0000000008005e64                TMR6_GLOBAL_IRQHandler
+                0x0000000008005e64                EXINT1_IRQHandler
+                0x0000000008005e64                RTCAlarm_IRQHandler
+                0x0000000008005e64                DMA2_Channel4_5_IRQHandler
+                0x0000000008005e64                UART7_IRQHandler
+                0x0000000008005e64                TMR2_GLOBAL_IRQHandler
+                0x0000000008005e64                FLASH_IRQHandler
+                0x0000000008005e64                SPI2_I2S2EXT_IRQHandler
+                0x0000000008005e64                I2C2_ERR_IRQHandler
+                0x0000000008005e64                USBFSWakeUp_IRQHandler
+                0x0000000008005e64                USART1_IRQHandler
+                0x0000000008005e64                TMR1_CH_IRQHandler
+                0x0000000008005e64                CRM_IRQHandler
+                0x0000000008005e64                EXINT15_10_IRQHandler
+                0x0000000008005e64                WWDT_IRQHandler
+                0x0000000008005e64                DMA2_Channel3_IRQHandler
+ *fill*         0x0000000008005e66        0x2 
  .text.SystemInit
-                0x0000000008005d7c       0x88 ./cmsis/system_at32f403a_407.o
-                0x0000000008005d7c                SystemInit
+                0x0000000008005e68       0x88 ./cmsis/system_at32f403a_407.o
+                0x0000000008005e68                SystemInit
  .text.system_core_clock_update
-                0x0000000008005e04      0x150 ./cmsis/system_at32f403a_407.o
-                0x0000000008005e04                system_core_clock_update
- .text._write   0x0000000008005f54       0x60 ./bsp/at32f403a_407_board.o
-                0x0000000008005f54                _write
+                0x0000000008005ef0      0x150 ./cmsis/system_at32f403a_407.o
+                0x0000000008005ef0                system_core_clock_update
+ .text._write   0x0000000008006040       0x60 ./bsp/at32f403a_407_board.o
+                0x0000000008006040                _write
  .text.uart_print_init
-                0x0000000008005fb4       0x8c ./bsp/at32f403a_407_board.o
-                0x0000000008005fb4                uart_print_init
+                0x00000000080060a0       0x8c ./bsp/at32f403a_407_board.o
+                0x00000000080060a0                uart_print_init
  .text.at32_board_init
-                0x0000000008006040       0x16 ./bsp/at32f403a_407_board.o
-                0x0000000008006040                at32_board_init
- *fill*         0x0000000008006056        0x2 
+                0x000000000800612c       0x16 ./bsp/at32f403a_407_board.o
+                0x000000000800612c                at32_board_init
+ *fill*         0x0000000008006142        0x2 
  .text.at32_button_init
-                0x0000000008006058       0x44 ./bsp/at32f403a_407_board.o
-                0x0000000008006058                at32_button_init
+                0x0000000008006144       0x44 ./bsp/at32f403a_407_board.o
+                0x0000000008006144                at32_button_init
  .text.at32_led_init
-                0x000000000800609c       0x68 ./bsp/at32f403a_407_board.o
-                0x000000000800609c                at32_led_init
+                0x0000000008006188       0x68 ./bsp/at32f403a_407_board.o
+                0x0000000008006188                at32_led_init
  .text.at32_led_toggle
-                0x0000000008006104       0x54 ./bsp/at32f403a_407_board.o
-                0x0000000008006104                at32_led_toggle
+                0x00000000080061f0       0x54 ./bsp/at32f403a_407_board.o
+                0x00000000080061f0                at32_led_toggle
  .text.delay_init
-                0x0000000008006158       0x40 ./bsp/at32f403a_407_board.o
-                0x0000000008006158                delay_init
+                0x0000000008006244       0x40 ./bsp/at32f403a_407_board.o
+                0x0000000008006244                delay_init
  .text.delay_ms
-                0x0000000008006198       0x98 ./bsp/at32f403a_407_board.o
-                0x0000000008006198                delay_ms
- .text.round    0x0000000008006230       0xa0 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a(lib_a-s_round.o)
-                0x0000000008006230                round
- .text.pow      0x00000000080062d0       0xf0 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a(lib_a-w_pow.o)
-                0x00000000080062d0                pow
+                0x0000000008006284       0x98 ./bsp/at32f403a_407_board.o
+                0x0000000008006284                delay_ms
+ .text.round    0x000000000800631c       0xa0 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a(lib_a-s_round.o)
+                0x000000000800631c                round
+ *fill*         0x00000000080063bc        0x4 
+ .text.pow      0x00000000080063c0       0xf0 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a(lib_a-w_pow.o)
+                0x00000000080063c0                pow
  .text.__ieee754_pow
-                0x00000000080063c0      0xb74 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a(lib_a-e_pow.o)
-                0x00000000080063c0                __ieee754_pow
+                0x00000000080064b0      0xb74 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a(lib_a-e_pow.o)
+                0x00000000080064b0                __ieee754_pow
  .text.__ieee754_sqrt
-                0x0000000008006f34      0x198 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a(lib_a-e_sqrt.o)
-                0x0000000008006f34                __ieee754_sqrt
+                0x0000000008007024      0x198 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a(lib_a-e_sqrt.o)
+                0x0000000008007024                __ieee754_sqrt
  .text.with_errno
-                0x00000000080070cc       0x18 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a(lib_a-math_err.o)
- .text.xflow    0x00000000080070e4       0x2c /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a(lib_a-math_err.o)
+                0x00000000080071bc       0x18 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a(lib_a-math_err.o)
+ .text.xflow    0x00000000080071d4       0x2c /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a(lib_a-math_err.o)
  .text.__math_uflow
-                0x0000000008007110       0x14 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a(lib_a-math_err.o)
-                0x0000000008007110                __math_uflow
+                0x0000000008007200       0x14 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a(lib_a-math_err.o)
+                0x0000000008007200                __math_uflow
  .text.__math_oflow
-                0x0000000008007124       0x14 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a(lib_a-math_err.o)
-                0x0000000008007124                __math_oflow
- .text.fabs     0x0000000008007138       0x14 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a(lib_a-s_fabs.o)
-                0x0000000008007138                fabs
- .text.finite   0x000000000800714c       0x18 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a(lib_a-s_finite.o)
-                0x000000000800714c                finite
- *fill*         0x0000000008007164        0x4 
- .text.scalbn   0x0000000008007168      0x124 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a(lib_a-s_scalbn.o)
-                0x0000000008007168                scalbn
- .text.__errno  0x000000000800728c        0xc /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-errno.o)
-                0x000000000800728c                __errno
+                0x0000000008007214       0x14 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a(lib_a-math_err.o)
+                0x0000000008007214                __math_oflow
+ .text.fabs     0x0000000008007228       0x14 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a(lib_a-s_fabs.o)
+                0x0000000008007228                fabs
+ .text.finite   0x000000000800723c       0x18 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a(lib_a-s_finite.o)
+                0x000000000800723c                finite
+ *fill*         0x0000000008007254        0x4 
+ .text.scalbn   0x0000000008007258      0x124 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a(lib_a-s_scalbn.o)
+                0x0000000008007258                scalbn
+ .text.__errno  0x000000000800737c        0xc /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-errno.o)
+                0x000000000800737c                __errno
  .text.__libc_init_array
-                0x0000000008007298       0x48 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-init.o)
-                0x0000000008007298                __libc_init_array
- .text.memcpy   0x00000000080072e0       0x1c /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-memcpy-stub.o)
-                0x00000000080072e0                memcpy
- .text.memset   0x00000000080072fc       0x10 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-memset.o)
-                0x00000000080072fc                memset
- .text.__cvt    0x000000000800730c       0xc4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-vfprintf_float.o)
-                0x000000000800730c                __cvt
+                0x0000000008007388       0x48 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-init.o)
+                0x0000000008007388                __libc_init_array
+ .text.memcpy   0x00000000080073d0       0x1c /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-memcpy-stub.o)
+                0x00000000080073d0                memcpy
+ .text.memset   0x00000000080073ec       0x10 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-memset.o)
+                0x00000000080073ec                memset
+ .text.__cvt    0x00000000080073fc       0xc4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-vfprintf_float.o)
+                0x00000000080073fc                __cvt
  .text.__exponent
-                0x00000000080073d0       0x7c /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-vfprintf_float.o)
-                0x00000000080073d0                __exponent
+                0x00000000080074c0       0x7c /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-vfprintf_float.o)
+                0x00000000080074c0                __exponent
  .text._printf_float
-                0x000000000800744c      0x46c /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-vfprintf_float.o)
-                0x000000000800744c                _printf_float
+                0x000000000800753c      0x46c /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-vfprintf_float.o)
+                0x000000000800753c                _printf_float
  .text._printf_common
-                0x00000000080078b8       0xda /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-vfprintf_i.o)
-                0x00000000080078b8                _printf_common
- *fill*         0x0000000008007992        0x2 
+                0x00000000080079a8       0xda /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-vfprintf_i.o)
+                0x00000000080079a8                _printf_common
+ *fill*         0x0000000008007a82        0x2 
  .text._printf_i
-                0x0000000008007994      0x24c /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-vfprintf_i.o)
-                0x0000000008007994                _printf_i
- .text.printf   0x0000000008007be0       0x30 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-printf.o)
-                0x0000000008007be0                printf
-                0x0000000008007be0                iprintf
- .text._puts_r  0x0000000008007c10       0xdc /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-puts.o)
-                0x0000000008007c10                _puts_r
- .text.puts     0x0000000008007cec       0x10 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-puts.o)
-                0x0000000008007cec                puts
- .text.setvbuf  0x0000000008007cfc      0x18c /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-setvbuf.o)
-                0x0000000008007cfc                setvbuf
- .text.sscanf   0x0000000008007e88       0x58 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-sscanf.o)
-                0x0000000008007e88                sscanf
-                0x0000000008007e88                siscanf
- .text.__sread  0x0000000008007ee0       0x22 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-stdio.o)
-                0x0000000008007ee0                __sread
+                0x0000000008007a84      0x24c /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-vfprintf_i.o)
+                0x0000000008007a84                _printf_i
+ .text.printf   0x0000000008007cd0       0x30 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-printf.o)
+                0x0000000008007cd0                printf
+                0x0000000008007cd0                iprintf
+ .text._puts_r  0x0000000008007d00       0xdc /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-puts.o)
+                0x0000000008007d00                _puts_r
+ .text.puts     0x0000000008007ddc       0x10 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-puts.o)
+                0x0000000008007ddc                puts
+ .text.setvbuf  0x0000000008007dec      0x18c /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-setvbuf.o)
+                0x0000000008007dec                setvbuf
+ .text.sscanf   0x0000000008007f78       0x58 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-sscanf.o)
+                0x0000000008007f78                sscanf
+                0x0000000008007f78                siscanf
+ .text.__sread  0x0000000008007fd0       0x22 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-stdio.o)
+                0x0000000008007fd0                __sread
  .text.__seofread
-                0x0000000008007f02        0x4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-stdio.o)
-                0x0000000008007f02                __seofread
+                0x0000000008007ff2        0x4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-stdio.o)
+                0x0000000008007ff2                __seofread
  .text.__swrite
-                0x0000000008007f06       0x38 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-stdio.o)
-                0x0000000008007f06                __swrite
- .text.__sseek  0x0000000008007f3e       0x24 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-stdio.o)
-                0x0000000008007f3e                __sseek
+                0x0000000008007ff6       0x38 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-stdio.o)
+                0x0000000008007ff6                __swrite
+ .text.__sseek  0x000000000800802e       0x24 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-stdio.o)
+                0x000000000800802e                __sseek
  .text.__sclose
-                0x0000000008007f62        0x8 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-stdio.o)
-                0x0000000008007f62                __sclose
- .text.strncmp  0x0000000008007f6a       0x28 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-strncmp.o)
-                0x0000000008007f6a                strncmp
- *fill*         0x0000000008007f92        0x2 
+                0x0000000008008052        0x8 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-stdio.o)
+                0x0000000008008052                __sclose
+ .text.strncmp  0x000000000800805a       0x28 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-strncmp.o)
+                0x000000000800805a                strncmp
+ *fill*         0x0000000008008082        0x2 
  .text.__swbuf_r
-                0x0000000008007f94       0xa4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-wbuf.o)
-                0x0000000008007f94                __swbuf_r
+                0x0000000008008084       0xa4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-wbuf.o)
+                0x0000000008008084                __swbuf_r
  .text._write_r
-                0x0000000008008038       0x24 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-writer.o)
-                0x0000000008008038                _write_r
+                0x0000000008008128       0x24 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-writer.o)
+                0x0000000008008128                _write_r
  .text.__swsetup_r
-                0x000000000800805c       0xdc /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-wsetup.o)
-                0x000000000800805c                __swsetup_r
+                0x000000000800814c       0xdc /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-wsetup.o)
+                0x000000000800814c                __swsetup_r
  .text._close_r
-                0x0000000008008138       0x20 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-closer.o)
-                0x0000000008008138                _close_r
- .text.quorem   0x0000000008008158      0x116 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-dtoa.o)
- *fill*         0x000000000800826e        0x2 
- .text._dtoa_r  0x0000000008008270      0xbdc /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-dtoa.o)
-                0x0000000008008270                _dtoa_r
+                0x0000000008008228       0x20 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-closer.o)
+                0x0000000008008228                _close_r
+ .text.quorem   0x0000000008008248      0x116 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-dtoa.o)
+ *fill*         0x000000000800835e        0x2 
+ .text._dtoa_r  0x0000000008008360      0xbdc /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-dtoa.o)
+                0x0000000008008360                _dtoa_r
  .text.__sflush_r
-                0x0000000008008e4c      0x10c /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-fflush.o)
-                0x0000000008008e4c                __sflush_r
+                0x0000000008008f3c      0x10c /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-fflush.o)
+                0x0000000008008f3c                __sflush_r
  .text._fflush_r
-                0x0000000008008f58       0x78 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-fflush.o)
-                0x0000000008008f58                _fflush_r
- .text.std      0x0000000008008fd0       0x48 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-findfp.o)
+                0x0000000008009048       0x78 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-fflush.o)
+                0x0000000008009048                _fflush_r
+ .text.std      0x00000000080090c0       0x48 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-findfp.o)
  .text._cleanup_r
-                0x0000000008009018        0xc /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-findfp.o)
-                0x0000000008009018                _cleanup_r
+                0x0000000008009108        0xc /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-findfp.o)
+                0x0000000008009108                _cleanup_r
  .text.__sfmoreglue
-                0x0000000008009024       0x2c /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-findfp.o)
-                0x0000000008009024                __sfmoreglue
+                0x0000000008009114       0x2c /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-findfp.o)
+                0x0000000008009114                __sfmoreglue
  .text.__sfp_lock_acquire
-                0x0000000008009050        0xc /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-findfp.o)
-                0x0000000008009050                __sfp_lock_acquire
+                0x0000000008009140        0xc /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-findfp.o)
+                0x0000000008009140                __sfp_lock_acquire
  .text.__sfp_lock_release
-                0x000000000800905c        0xc /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-findfp.o)
-                0x000000000800905c                __sfp_lock_release
+                0x000000000800914c        0xc /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-findfp.o)
+                0x000000000800914c                __sfp_lock_release
  .text.__sinit_lock_acquire
-                0x0000000008009068        0xc /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-findfp.o)
-                0x0000000008009068                __sinit_lock_acquire
+                0x0000000008009158        0xc /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-findfp.o)
+                0x0000000008009158                __sinit_lock_acquire
  .text.__sinit_lock_release
-                0x0000000008009074        0xc /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-findfp.o)
-                0x0000000008009074                __sinit_lock_release
- .text.__sinit  0x0000000008009080       0x70 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-findfp.o)
-                0x0000000008009080                __sinit
- .text.__sfp    0x00000000080090f0       0x8c /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-findfp.o)
-                0x00000000080090f0                __sfp
+                0x0000000008009164        0xc /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-findfp.o)
+                0x0000000008009164                __sinit_lock_release
+ .text.__sinit  0x0000000008009170       0x70 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-findfp.o)
+                0x0000000008009170                __sinit
+ .text.__sfp    0x00000000080091e0       0x8c /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-findfp.o)
+                0x00000000080091e0                __sfp
  .text._fwalk_reent
-                0x000000000800917c       0x3e /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-fwalk.o)
-                0x000000000800917c                _fwalk_reent
- *fill*         0x00000000080091ba        0x2 
+                0x000000000800926c       0x3e /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-fwalk.o)
+                0x000000000800926c                _fwalk_reent
+ *fill*         0x00000000080092aa        0x2 
  .text._localeconv_r
-                0x00000000080091bc        0x8 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-localeconv.o)
-                0x00000000080091bc                _localeconv_r
+                0x00000000080092ac        0x8 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-localeconv.o)
+                0x00000000080092ac                _localeconv_r
  .text.__retarget_lock_init_recursive
-                0x00000000080091c4        0x2 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-lock.o)
-                0x00000000080091c4                __retarget_lock_init_recursive
+                0x00000000080092b4        0x2 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-lock.o)
+                0x00000000080092b4                __retarget_lock_init_recursive
  .text.__retarget_lock_acquire_recursive
-                0x00000000080091c6        0x2 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-lock.o)
-                0x00000000080091c6                __retarget_lock_acquire_recursive
+                0x00000000080092b6        0x2 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-lock.o)
+                0x00000000080092b6                __retarget_lock_acquire_recursive
  .text.__retarget_lock_release_recursive
-                0x00000000080091c8        0x2 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-lock.o)
-                0x00000000080091c8                __retarget_lock_release_recursive
- *fill*         0x00000000080091ca        0x2 
+                0x00000000080092b8        0x2 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-lock.o)
+                0x00000000080092b8                __retarget_lock_release_recursive
+ *fill*         0x00000000080092ba        0x2 
  .text._lseek_r
-                0x00000000080091cc       0x24 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-lseekr.o)
-                0x00000000080091cc                _lseek_r
+                0x00000000080092bc       0x24 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-lseekr.o)
+                0x00000000080092bc                _lseek_r
  .text.__swhatbuf_r
-                0x00000000080091f0       0x4a /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-makebuf.o)
-                0x00000000080091f0                __swhatbuf_r
- *fill*         0x000000000800923a        0x2 
+                0x00000000080092e0       0x4a /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-makebuf.o)
+                0x00000000080092e0                __swhatbuf_r
+ *fill*         0x000000000800932a        0x2 
  .text.__smakebuf_r
-                0x000000000800923c       0x80 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-makebuf.o)
-                0x000000000800923c                __smakebuf_r
- .text.malloc   0x00000000080092bc       0x10 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-malloc.o)
-                0x00000000080092bc                malloc
- .text._Balloc  0x00000000080092cc       0x80 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
-                0x00000000080092cc                _Balloc
- .text._Bfree   0x000000000800934c       0x44 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
-                0x000000000800934c                _Bfree
+                0x000000000800932c       0x80 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-makebuf.o)
+                0x000000000800932c                __smakebuf_r
+ .text.malloc   0x00000000080093ac       0x10 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-malloc.o)
+                0x00000000080093ac                malloc
+ .text._Balloc  0x00000000080093bc       0x80 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
+                0x00000000080093bc                _Balloc
+ .text._Bfree   0x000000000800943c       0x44 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
+                0x000000000800943c                _Bfree
  .text.__multadd
-                0x0000000008009390       0x8c /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
-                0x0000000008009390                __multadd
+                0x0000000008009480       0x8c /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
+                0x0000000008009480                __multadd
  .text.__hi0bits
-                0x000000000800941c       0x40 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
-                0x000000000800941c                __hi0bits
+                0x000000000800950c       0x40 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
+                0x000000000800950c                __hi0bits
  .text.__lo0bits
-                0x000000000800945c       0x5e /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
-                0x000000000800945c                __lo0bits
- *fill*         0x00000000080094ba        0x2 
- .text.__i2b    0x00000000080094bc       0x2c /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
-                0x00000000080094bc                __i2b
+                0x000000000800954c       0x5e /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
+                0x000000000800954c                __lo0bits
+ *fill*         0x00000000080095aa        0x2 
+ .text.__i2b    0x00000000080095ac       0x2c /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
+                0x00000000080095ac                __i2b
  .text.__multiply
-                0x00000000080094e8      0x154 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
-                0x00000000080094e8                __multiply
+                0x00000000080095d8      0x154 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
+                0x00000000080095d8                __multiply
  .text.__pow5mult
-                0x000000000800963c       0xb4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
-                0x000000000800963c                __pow5mult
+                0x000000000800972c       0xb4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
+                0x000000000800972c                __pow5mult
  .text.__lshift
-                0x00000000080096f0       0xe0 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
-                0x00000000080096f0                __lshift
- .text.__mcmp   0x00000000080097d0       0x38 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
-                0x00000000080097d0                __mcmp
- .text.__mdiff  0x0000000008009808      0x114 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
-                0x0000000008009808                __mdiff
- .text.__d2b    0x000000000800991c       0xb8 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
-                0x000000000800991c                __d2b
+                0x00000000080097e0       0xe0 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
+                0x00000000080097e0                __lshift
+ .text.__mcmp   0x00000000080098c0       0x38 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
+                0x00000000080098c0                __mcmp
+ .text.__mdiff  0x00000000080098f8      0x114 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
+                0x00000000080098f8                __mdiff
+ .text.__d2b    0x0000000008009a0c       0xb8 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
+                0x0000000008009a0c                __d2b
  .text._calloc_r
-                0x00000000080099d4       0x2c /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-callocr.o)
-                0x00000000080099d4                _calloc_r
- .text._free_r  0x0000000008009a00       0x98 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-freer.o)
-                0x0000000008009a00                _free_r
+                0x0000000008009ac4       0x2c /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-callocr.o)
+                0x0000000008009ac4                _calloc_r
+ .text._free_r  0x0000000008009af0       0x98 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-freer.o)
+                0x0000000008009af0                _free_r
  .text.sbrk_aligned
-                0x0000000008009a98       0x40 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-mallocr.o)
+                0x0000000008009b88       0x40 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-mallocr.o)
  .text._malloc_r
-                0x0000000008009ad8       0xe8 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-mallocr.o)
-                0x0000000008009ad8                _malloc_r
+                0x0000000008009bc8       0xe8 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-mallocr.o)
+                0x0000000008009bc8                _malloc_r
  .text._sungetc_r
-                0x0000000008009bc0       0x7a /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-svfscanf.o)
-                0x0000000008009bc0                _sungetc_r
+                0x0000000008009cb0       0x7a /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-svfscanf.o)
+                0x0000000008009cb0                _sungetc_r
  .text.__ssrefill_r
-                0x0000000008009c3a       0x3a /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-svfscanf.o)
-                0x0000000008009c3a                __ssrefill_r
+                0x0000000008009d2a       0x3a /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-svfscanf.o)
+                0x0000000008009d2a                __ssrefill_r
  .text.__ssvfscanf_r
-                0x0000000008009c74      0x2f0 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-svfscanf.o)
-                0x0000000008009c74                __ssvfscanf_r
-                0x0000000008009c74                __ssvfiscanf_r
+                0x0000000008009d64      0x2f0 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-svfscanf.o)
+                0x0000000008009d64                __ssvfscanf_r
+                0x0000000008009d64                __ssvfiscanf_r
  .text.__sfputc_r
-                0x0000000008009f64       0x2e /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-vfprintf.o)
+                0x000000000800a054       0x2e /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-vfprintf.o)
  .text.__sfputs_r
-                0x0000000008009f92       0x24 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-vfprintf.o)
-                0x0000000008009f92                __sfputs_r
- *fill*         0x0000000008009fb6        0x2 
+                0x000000000800a082       0x24 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-vfprintf.o)
+                0x000000000800a082                __sfputs_r
+ *fill*         0x000000000800a0a6        0x2 
  .text._vfprintf_r
-                0x0000000008009fb8      0x260 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-vfprintf.o)
-                0x0000000008009fb8                _vfiprintf_r
-                0x0000000008009fb8                _vfprintf_r
+                0x000000000800a0a8      0x260 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-vfprintf.o)
+                0x000000000800a0a8                _vfiprintf_r
+                0x000000000800a0a8                _vfprintf_r
  .text._scanf_chars
-                0x000000000800a218       0xb4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-vfscanf_i.o)
-                0x000000000800a218                _scanf_chars
+                0x000000000800a308       0xb4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-vfscanf_i.o)
+                0x000000000800a308                _scanf_chars
  .text._scanf_i
-                0x000000000800a2cc      0x1f0 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-vfscanf_i.o)
-                0x000000000800a2cc                _scanf_i
- .text._read_r  0x000000000800a4bc       0x24 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-readr.o)
-                0x000000000800a4bc                _read_r
- .text._sbrk_r  0x000000000800a4e0       0x20 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-sbrkr.o)
-                0x000000000800a4e0                _sbrk_r
- .text.__sccl   0x000000000800a500       0x70 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-sccl.o)
-                0x000000000800a500                __sccl
+                0x000000000800a3bc      0x1f0 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-vfscanf_i.o)
+                0x000000000800a3bc                _scanf_i
+ .text._read_r  0x000000000800a5ac       0x24 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-readr.o)
+                0x000000000800a5ac                _read_r
+ .text._sbrk_r  0x000000000800a5d0       0x20 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-sbrkr.o)
+                0x000000000800a5d0                _sbrk_r
+ .text.__sccl   0x000000000800a5f0       0x70 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-sccl.o)
+                0x000000000800a5f0                __sccl
  .text._strtol_l.constprop.0
-                0x000000000800a570      0x104 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-strtol.o)
+                0x000000000800a660      0x104 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-strtol.o)
  .text._strtol_r
-                0x000000000800a674        0x4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-strtol.o)
-                0x000000000800a674                _strtol_r
+                0x000000000800a764        0x4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-strtol.o)
+                0x000000000800a764                _strtol_r
  .text._strtoul_l.constprop.0
-                0x000000000800a678       0xe4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-strtoul.o)
+                0x000000000800a768       0xe4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-strtoul.o)
  .text._strtoul_r
-                0x000000000800a75c        0x4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-strtoul.o)
-                0x000000000800a75c                _strtoul_r
+                0x000000000800a84c        0x4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-strtoul.o)
+                0x000000000800a84c                _strtoul_r
  .text.__submore
-                0x000000000800a760       0x74 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-ungetc.o)
-                0x000000000800a760                __submore
+                0x000000000800a850       0x74 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-ungetc.o)
+                0x000000000800a850                __submore
  .text.__assert_func
-                0x000000000800a7d4       0x3c /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-assert.o)
-                0x000000000800a7d4                __assert_func
- .text.fprintf  0x000000000800a810       0x24 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-fprintf.o)
-                0x000000000800a810                fprintf
-                0x000000000800a810                fiprintf
+                0x000000000800a8c4       0x3c /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-assert.o)
+                0x000000000800a8c4                __assert_func
+ .text.fprintf  0x000000000800a900       0x24 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-fprintf.o)
+                0x000000000800a900                fprintf
+                0x000000000800a900                fiprintf
  .text._fstat_r
-                0x000000000800a834       0x24 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-fstatr.o)
-                0x000000000800a834                _fstat_r
+                0x000000000800a924       0x24 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-fstatr.o)
+                0x000000000800a924                _fstat_r
  .text._isatty_r
-                0x000000000800a858       0x20 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-isattyr.o)
-                0x000000000800a858                _isatty_r
+                0x000000000800a948       0x20 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-isattyr.o)
+                0x000000000800a948                _isatty_r
  .text.__ascii_mbtowc
-                0x000000000800a878       0x24 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mbtowc_r.o)
-                0x000000000800a878                __ascii_mbtowc
+                0x000000000800a968       0x24 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mbtowc_r.o)
+                0x000000000800a968                __ascii_mbtowc
  .text.__malloc_lock
-                0x000000000800a89c        0xc /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mlock.o)
-                0x000000000800a89c                __malloc_lock
+                0x000000000800a98c        0xc /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mlock.o)
+                0x000000000800a98c                __malloc_lock
  .text.__malloc_unlock
-                0x000000000800a8a8        0xc /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mlock.o)
-                0x000000000800a8a8                __malloc_unlock
+                0x000000000800a998        0xc /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mlock.o)
+                0x000000000800a998                __malloc_unlock
  .text._realloc_r
-                0x000000000800a8b4       0x5e /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-reallocr.o)
-                0x000000000800a8b4                _realloc_r
+                0x000000000800a9a4       0x5e /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-reallocr.o)
+                0x000000000800a9a4                _realloc_r
  .text.__ascii_wctomb
-                0x000000000800a912       0x1a /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-wctomb_r.o)
-                0x000000000800a912                __ascii_wctomb
- .text.abort    0x000000000800a92c        0xe /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-abort.o)
-                0x000000000800a92c                abort
+                0x000000000800aa02       0x1a /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-wctomb_r.o)
+                0x000000000800aa02                __ascii_wctomb
+ .text.abort    0x000000000800aa1c        0xe /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-abort.o)
+                0x000000000800aa1c                abort
  .text._malloc_usable_size_r
-                0x000000000800a93a       0x10 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-msizer.o)
-                0x000000000800a93a                _malloc_usable_size_r
+                0x000000000800aa2a       0x10 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-msizer.o)
+                0x000000000800aa2a                _malloc_usable_size_r
  .text._raise_r
-                0x000000000800a94a       0x50 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-signal.o)
-                0x000000000800a94a                _raise_r
- *fill*         0x000000000800a99a        0x2 
- .text.raise    0x000000000800a99c       0x10 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-signal.o)
-                0x000000000800a99c                raise
- .text._kill_r  0x000000000800a9ac       0x24 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-signalr.o)
-                0x000000000800a9ac                _kill_r
+                0x000000000800aa3a       0x50 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-signal.o)
+                0x000000000800aa3a                _raise_r
+ *fill*         0x000000000800aa8a        0x2 
+ .text.raise    0x000000000800aa8c       0x10 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-signal.o)
+                0x000000000800aa8c                raise
+ .text._kill_r  0x000000000800aa9c       0x24 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-signalr.o)
+                0x000000000800aa9c                _kill_r
  .text._getpid_r
-                0x000000000800a9d0        0x4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-signalr.o)
-                0x000000000800a9d0                _getpid_r
- .text._close   0x000000000800a9d4       0x10 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libnosys.a(close.o)
-                0x000000000800a9d4                _close
- .text._fstat   0x000000000800a9e4       0x10 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libnosys.a(fstat.o)
-                0x000000000800a9e4                _fstat
- .text._getpid  0x000000000800a9f4       0x10 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libnosys.a(getpid.o)
-                0x000000000800a9f4                _getpid
- .text._isatty  0x000000000800aa04       0x10 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libnosys.a(isatty.o)
-                0x000000000800aa04                _isatty
- .text._kill    0x000000000800aa14       0x10 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libnosys.a(kill.o)
-                0x000000000800aa14                _kill
- .text._lseek   0x000000000800aa24       0x10 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libnosys.a(lseek.o)
-                0x000000000800aa24                _lseek
- .text._read    0x000000000800aa34       0x10 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libnosys.a(read.o)
-                0x000000000800aa34                _read
- .text._sbrk    0x000000000800aa44       0x1c /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libnosys.a(sbrk.o)
-                0x000000000800aa44                _sbrk
- .text._exit    0x000000000800aa60        0x4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libnosys.a(_exit.o)
-                0x000000000800aa60                _exit
+                0x000000000800aac0        0x4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-signalr.o)
+                0x000000000800aac0                _getpid_r
+ .text._close   0x000000000800aac4       0x10 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libnosys.a(close.o)
+                0x000000000800aac4                _close
+ .text._fstat   0x000000000800aad4       0x10 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libnosys.a(fstat.o)
+                0x000000000800aad4                _fstat
+ .text._getpid  0x000000000800aae4       0x10 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libnosys.a(getpid.o)
+                0x000000000800aae4                _getpid
+ .text._isatty  0x000000000800aaf4       0x10 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libnosys.a(isatty.o)
+                0x000000000800aaf4                _isatty
+ .text._kill    0x000000000800ab04       0x10 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libnosys.a(kill.o)
+                0x000000000800ab04                _kill
+ .text._lseek   0x000000000800ab14       0x10 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libnosys.a(lseek.o)
+                0x000000000800ab14                _lseek
+ .text._read    0x000000000800ab24       0x10 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libnosys.a(read.o)
+                0x000000000800ab24                _read
+ .text._sbrk    0x000000000800ab34       0x1c /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libnosys.a(sbrk.o)
+                0x000000000800ab34                _sbrk
+ .text._exit    0x000000000800ab50        0x4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libnosys.a(_exit.o)
+                0x000000000800ab50                _exit
  *(.glue_7)
- .glue_7        0x000000000800aa64        0x0 linker stubs
+ .glue_7        0x000000000800ab54        0x0 linker stubs
  *(.glue_7t)
- .glue_7t       0x000000000800aa64        0x0 linker stubs
+ .glue_7t       0x000000000800ab54        0x0 linker stubs
  *(.eh_frame)
- .eh_frame      0x000000000800aa64        0x0 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v7e-m+fp/hard/crtbegin.o
+ .eh_frame      0x000000000800ab54        0x0 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v7e-m+fp/hard/crtbegin.o
  *(.init)
- .init          0x000000000800aa64        0x4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v7e-m+fp/hard/crti.o
-                0x000000000800aa64                _init
- .init          0x000000000800aa68        0x8 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v7e-m+fp/hard/crtn.o
+ .init          0x000000000800ab54        0x4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v7e-m+fp/hard/crti.o
+                0x000000000800ab54                _init
+ .init          0x000000000800ab58        0x8 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v7e-m+fp/hard/crtn.o
  *(.fini)
- .fini          0x000000000800aa70        0x4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v7e-m+fp/hard/crti.o
-                0x000000000800aa70                _fini
- .fini          0x000000000800aa74        0x8 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v7e-m+fp/hard/crtn.o
-                0x000000000800aa7c                . = ALIGN (0x4)
-                0x000000000800aa7c                _etext = .
+ .fini          0x000000000800ab60        0x4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v7e-m+fp/hard/crti.o
+                0x000000000800ab60                _fini
+ .fini          0x000000000800ab64        0x8 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v7e-m+fp/hard/crtn.o
+                0x000000000800ab6c                . = ALIGN (0x4)
+                0x000000000800ab6c                _etext = .
 
-.vfp11_veneer   0x000000000800aa7c        0x0
- .vfp11_veneer  0x000000000800aa7c        0x0 linker stubs
+.vfp11_veneer   0x000000000800ab6c        0x0
+ .vfp11_veneer  0x000000000800ab6c        0x0 linker stubs
 
-.v4_bx          0x000000000800aa7c        0x0
- .v4_bx         0x000000000800aa7c        0x0 linker stubs
+.v4_bx          0x000000000800ab6c        0x0
+ .v4_bx         0x000000000800ab6c        0x0 linker stubs
 
-.iplt           0x000000000800aa7c        0x0
- .iplt          0x000000000800aa7c        0x0 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v7e-m+fp/hard/crtbegin.o
+.iplt           0x000000000800ab6c        0x0
+ .iplt          0x000000000800ab6c        0x0 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v7e-m+fp/hard/crtbegin.o
 
-.rodata         0x000000000800aa80      0xaa0
-                0x000000000800aa80                . = ALIGN (0x4)
+.rodata         0x000000000800ab70      0xaa0
+                0x000000000800ab70                . = ALIGN (0x4)
  *(.rodata)
- .rodata        0x000000000800aa80      0x61b ./user/main.o
-                0x000000000800aa80                sine_lut
- *fill*         0x000000000800b09b        0x1 
- .rodata        0x000000000800b09c       0x28 ./firmware/at32f403a_407_crm.o
- .rodata        0x000000000800b0c4       0x10 ./cmsis/system_at32f403a_407.o
- .rodata        0x000000000800b0d4        0xc /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-vfscanf_i.o)
+ .rodata        0x000000000800ab70      0x61b ./user/main.o
+                0x000000000800ab70                sine_lut
+ *fill*         0x000000000800b18b        0x1 
+ .rodata        0x000000000800b18c       0x28 ./firmware/at32f403a_407_crm.o
+ .rodata        0x000000000800b1b4       0x10 ./cmsis/system_at32f403a_407.o
+ .rodata        0x000000000800b1c4        0xc /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-vfscanf_i.o)
  *(.rodata*)
  .rodata._global_impure_ptr
-                0x000000000800b0e0        0x4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-impure.o)
-                0x000000000800b0e0                _global_impure_ptr
+                0x000000000800b1d0        0x4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-impure.o)
+                0x000000000800b1d0                _global_impure_ptr
  .rodata._printf_float.str1.1
-                0x000000000800b0e4       0x10 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-vfprintf_float.o)
+                0x000000000800b1d4       0x10 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-vfprintf_float.o)
                                          0x12 (size before relaxing)
  .rodata._printf_i.str1.1
-                0x000000000800b0f4       0x22 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-vfprintf_i.o)
+                0x000000000800b1e4       0x22 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-vfprintf_i.o)
  .rodata._dtoa_r.str1.1
-                0x000000000800b116       0xb3 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-dtoa.o)
+                0x000000000800b206       0xb3 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-dtoa.o)
                                          0xb5 (size before relaxing)
- *fill*         0x000000000800b1c9        0x3 
+ *fill*         0x000000000800b2b9        0x3 
  .rodata.__sf_fake_stderr
-                0x000000000800b1cc       0x20 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-findfp.o)
-                0x000000000800b1cc                __sf_fake_stderr
+                0x000000000800b2bc       0x20 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-findfp.o)
+                0x000000000800b2bc                __sf_fake_stderr
  .rodata.__sf_fake_stdin
-                0x000000000800b1ec       0x20 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-findfp.o)
-                0x000000000800b1ec                __sf_fake_stdin
+                0x000000000800b2dc       0x20 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-findfp.o)
+                0x000000000800b2dc                __sf_fake_stdin
  .rodata.__sf_fake_stdout
-                0x000000000800b20c       0x20 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-findfp.o)
-                0x000000000800b20c                __sf_fake_stdout
+                0x000000000800b2fc       0x20 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-findfp.o)
+                0x000000000800b2fc                __sf_fake_stdout
  .rodata._Balloc.str1.1
-                0x000000000800b22c       0x7f /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
+                0x000000000800b31c       0x7f /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
                                          0x96 (size before relaxing)
  .rodata.__multadd.str1.1
-                0x000000000800b2ab       0x11 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
- *fill*         0x000000000800b2ab        0x5 
+                0x000000000800b39b       0x11 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
+ *fill*         0x000000000800b39b        0x5 
  .rodata.__mprec_bigtens
-                0x000000000800b2b0       0x28 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
-                0x000000000800b2b0                __mprec_bigtens
+                0x000000000800b3a0       0x28 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
+                0x000000000800b3a0                __mprec_bigtens
  .rodata.__mprec_tens
-                0x000000000800b2d8       0xc8 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
-                0x000000000800b2d8                __mprec_tens
- .rodata.p05.0  0x000000000800b3a0        0xc /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
+                0x000000000800b3c8       0xc8 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
+                0x000000000800b3c8                __mprec_tens
+ .rodata.p05.0  0x000000000800b490        0xc /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-mprec.o)
  .rodata.__ssvfscanf_r.str1.1
-                0x000000000800b3ac        0x4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-svfscanf.o)
+                0x000000000800b49c        0x4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-svfscanf.o)
  .rodata._vfprintf_r.str1.1
-                0x000000000800b3b0        0xd /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-vfprintf.o)
+                0x000000000800b4a0        0xd /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-vfprintf.o)
                                          0x11 (size before relaxing)
  .rodata.str1.1
-                0x000000000800b3bd        0x9 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-vfscanf_i.o)
+                0x000000000800b4ad        0x9 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-vfscanf_i.o)
  .rodata._scanf_i.str1.1
-                0x000000000800b3c6       0x12 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-vfscanf_i.o)
+                0x000000000800b4b6       0x12 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-vfscanf_i.o)
  .rodata.__assert_func.str1.1
-                0x000000000800b3d8       0x3c /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-assert.o)
+                0x000000000800b4c8       0x3c /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-assert.o)
                                          0x3d (size before relaxing)
  .rodata._ctype_
-                0x000000000800b414      0x101 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-ctype_.o)
-                0x000000000800b414                _ctype_
+                0x000000000800b504      0x101 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-ctype_.o)
+                0x000000000800b504                _ctype_
  .rodata._setlocale_r.str1.1
-                0x000000000800b515        0x8 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-locale.o)
+                0x000000000800b605        0x8 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-locale.o)
                                           0x9 (size before relaxing)
  .rodata.str1.1
-                0x000000000800b51d        0x2 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-locale.o)
-                0x000000000800b520                . = ALIGN (0x4)
- *fill*         0x000000000800b51f        0x1 
+                0x000000000800b60d        0x2 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-locale.o)
+                0x000000000800b610                . = ALIGN (0x4)
+ *fill*         0x000000000800b60f        0x1 
 
-.rel.dyn        0x000000000800b520        0x0
- .rel.iplt      0x000000000800b520        0x0 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v7e-m+fp/hard/crtbegin.o
+.rel.dyn        0x000000000800b610        0x0
+ .rel.iplt      0x000000000800b610        0x0 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v7e-m+fp/hard/crtbegin.o
 
 .ARM.extab
  *(.ARM.extab* .gnu.linkonce.armextab.*)
 
-.ARM            0x000000000800b520        0x0
-                0x000000000800b520                __exidx_start = .
+.ARM            0x000000000800b610        0x0
+                0x000000000800b610                __exidx_start = .
  *(.ARM.exidx*)
-                0x000000000800b520                __exidx_end = .
+                0x000000000800b610                __exidx_end = .
 
-.preinit_array  0x000000000800b520        0x0
-                0x000000000800b520                PROVIDE (__preinit_array_start = .)
+.preinit_array  0x000000000800b610        0x0
+                0x000000000800b610                PROVIDE (__preinit_array_start = .)
  *(.preinit_array*)
-                0x000000000800b520                PROVIDE (__preinit_array_end = .)
+                0x000000000800b610                PROVIDE (__preinit_array_end = .)
 
-.init_array     0x000000000800b520        0x4
-                0x000000000800b520                PROVIDE (__init_array_start = .)
+.init_array     0x000000000800b610        0x4
+                0x000000000800b610                PROVIDE (__init_array_start = .)
  *(SORT_BY_NAME(.init_array.*))
  *(.init_array*)
- .init_array    0x000000000800b520        0x4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v7e-m+fp/hard/crtbegin.o
-                0x000000000800b524                PROVIDE (__init_array_end = .)
+ .init_array    0x000000000800b610        0x4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v7e-m+fp/hard/crtbegin.o
+                0x000000000800b614                PROVIDE (__init_array_end = .)
 
-.fini_array     0x000000000800b524        0x4
+.fini_array     0x000000000800b614        0x4
                 [!provide]                        PROVIDE (__fini_array_start = .)
  *(SORT_BY_NAME(.fini_array.*))
  *(.fini_array*)
- .fini_array    0x000000000800b524        0x4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v7e-m+fp/hard/crtbegin.o
+ .fini_array    0x000000000800b614        0x4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v7e-m+fp/hard/crtbegin.o
                 [!provide]                        PROVIDE (__fini_array_end = .)
-                0x000000000800b528                _sidata = LOADADDR (.data)
+                0x000000000800b618                _sidata = LOADADDR (.data)
 
-.data           0x0000000020000000      0x6b0 load address 0x000000000800b528
+.data           0x0000000020000000      0x6b0 load address 0x000000000800b618
                 0x0000000020000000                . = ALIGN (0x4)
                 0x0000000020000000                _sdata = .
  *(.data)
@@ -2860,7 +2861,7 @@ LOAD /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-
                 0x0000000008400000                _spim_init_base = LOADADDR (.spim)
                 0x0000000000000000                _spim_init_length = SIZEOF (.spim)
 
-.igot.plt       0x00000000200006b0        0x0 load address 0x000000000800bbd8
+.igot.plt       0x00000000200006b0        0x0 load address 0x000000000800bcc8
  .igot.plt      0x00000000200006b0        0x0 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v7e-m+fp/hard/crtbegin.o
 
 .spim           0x0000000008400000        0x0
@@ -2877,12 +2878,12 @@ LOAD /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-
                 0x00000000080e0000                . = ALIGN (0x4)
                 0x00000000080e0000                . = ALIGN (0x4)
 
-.bss            0x00000000200006b0     0xe494
+.bss            0x00000000200006b0     0xe4b8
                 0x00000000200006b0                _sbss = .
                 0x00000000200006b0                __bss_start__ = _sbss
  *(.bss)
  .bss           0x00000000200006b0       0x1c /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v7e-m+fp/hard/crtbegin.o
- .bss           0x00000000200006cc     0xe454 ./user/main.o
+ .bss           0x00000000200006cc     0xe478 ./user/main.o
                 0x00000000200006cc                one_shot_var
                 0x00000000200006d0                usart4_rx_buffer
                 0x00000000200007d0                usart4_int_buffer
@@ -2992,73 +2993,73 @@ LOAD /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-
                 0x000000002000ce3e                lfo1_2_out
                 0x000000002000ce40                ch
                 0x000000002000ce44                drum_note_hold
-                0x000000002000ce48                c
-                0x000000002000ce4c                one_shot
-                0x000000002000decc                table_count
-                0x000000002000ded0                current_write_pos
-                0x000000002000ded4                samples_store
-                0x000000002000dfd4                current_sample_save
-                0x000000002000dfd8                current_playing_sample
-                0x000000002000dfe0                sample_write_end_timer
-                0x000000002000dfe4                samples_backup
-                0x000000002000e0e4                midi_hold
-                0x000000002000e0f0                midi_msg
-                0x000000002000e0fc                sidechain_accu
-                0x000000002000e100                phase_delay
-                0x000000002000e200                phase_delay_level
-                0x000000002000e204                data_log
-                0x000000002000e218                test_int
-                0x000000002000e318                sample_table
-                0x000000002000eae8                gpio_init_struct
-                0x000000002000eaf0                crm_clocks_freq_struct
-                0x000000002000eb04                tmr_output_struct
-                0x000000002000eb0c                usart2_rx_buffer
-                0x000000002000eb0f                usart2_rx_counter
-                0x000000002000eb10                data_count
-                0x000000002000eb14                start_time
-                0x000000002000eb18                stop_time
-                0x000000002000eb1c                elapsed_time
- .bss           0x000000002000eb20        0x8 ./user/systick.o
-                0x000000002000eb20                systick_ms
-                0x000000002000eb24                systick_reload
- .bss           0x000000002000eb28        0x8 ./bsp/at32f403a_407_board.o
+                0x000000002000ce48                flash_backup_start
+                0x000000002000ce4c                c
+                0x000000002000ce50                one_shot
+                0x000000002000def0                table_count
+                0x000000002000def4                current_write_pos
+                0x000000002000def8                samples_store
+                0x000000002000dff8                current_sample_save
+                0x000000002000dffc                current_playing_sample
+                0x000000002000e004                sample_write_end_timer
+                0x000000002000e008                samples_backup
+                0x000000002000e108                midi_hold
+                0x000000002000e114                midi_msg
+                0x000000002000e120                sidechain_accu
+                0x000000002000e124                phase_delay
+                0x000000002000e224                phase_delay_level
+                0x000000002000e228                data_log
+                0x000000002000e23c                test_int
+                0x000000002000e33c                sample_table
+                0x000000002000eb0c                gpio_init_struct
+                0x000000002000eb14                crm_clocks_freq_struct
+                0x000000002000eb28                tmr_output_struct
+                0x000000002000eb30                usart2_rx_buffer
+                0x000000002000eb33                usart2_rx_counter
+                0x000000002000eb34                data_count
+                0x000000002000eb38                start_time
+                0x000000002000eb3c                stop_time
+                0x000000002000eb40                elapsed_time
+ .bss           0x000000002000eb44        0x8 ./user/systick.o
+                0x000000002000eb44                systick_ms
+                0x000000002000eb48                systick_reload
+ .bss           0x000000002000eb4c        0x8 ./bsp/at32f403a_407_board.o
  *(.bss*)
  .bss.__lock___malloc_recursive_mutex
-                0x000000002000eb30        0x1 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-lock.o)
-                0x000000002000eb30                __lock___malloc_recursive_mutex
+                0x000000002000eb54        0x1 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-lock.o)
+                0x000000002000eb54                __lock___malloc_recursive_mutex
  .bss.__lock___sfp_recursive_mutex
-                0x000000002000eb31        0x1 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-lock.o)
-                0x000000002000eb31                __lock___sfp_recursive_mutex
+                0x000000002000eb55        0x1 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-lock.o)
+                0x000000002000eb55                __lock___sfp_recursive_mutex
  .bss.__lock___sinit_recursive_mutex
-                0x000000002000eb32        0x1 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-lock.o)
-                0x000000002000eb32                __lock___sinit_recursive_mutex
- *fill*         0x000000002000eb33        0x1 
+                0x000000002000eb56        0x1 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-lock.o)
+                0x000000002000eb56                __lock___sinit_recursive_mutex
+ *fill*         0x000000002000eb57        0x1 
  .bss.__malloc_free_list
-                0x000000002000eb34        0x4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-mallocr.o)
-                0x000000002000eb34                __malloc_free_list
+                0x000000002000eb58        0x4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-mallocr.o)
+                0x000000002000eb58                __malloc_free_list
  .bss.__malloc_sbrk_start
-                0x000000002000eb38        0x4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-mallocr.o)
-                0x000000002000eb38                __malloc_sbrk_start
- .bss.errno     0x000000002000eb3c        0x4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-reent.o)
-                0x000000002000eb3c                errno
+                0x000000002000eb5c        0x4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-nano-mallocr.o)
+                0x000000002000eb5c                __malloc_sbrk_start
+ .bss.errno     0x000000002000eb60        0x4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libg_nano.a(lib_a-reent.o)
+                0x000000002000eb60                errno
  .bss.heap_end.0
-                0x000000002000eb40        0x4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libnosys.a(sbrk.o)
+                0x000000002000eb64        0x4 /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libnosys.a(sbrk.o)
  *(COMMON)
-                0x000000002000eb44                . = ALIGN (0x4)
-                0x000000002000eb44                _ebss = .
-                0x000000002000eb44                __bss_end__ = _ebss
+                0x000000002000eb68                . = ALIGN (0x4)
+                0x000000002000eb68                _ebss = .
+                0x000000002000eb68                __bss_end__ = _ebss
 
 ._user_heap_stack
-                0x000000002000eb44      0x604
-                0x000000002000eb48                . = ALIGN (0x8)
- *fill*         0x000000002000eb44        0x4 
-                0x000000002000eb48                PROVIDE (end = .)
+                0x000000002000eb68      0x600
+                0x000000002000eb68                . = ALIGN (0x8)
+                0x000000002000eb68                PROVIDE (end = .)
                 [!provide]                        PROVIDE (_end = .)
-                0x000000002000ed48                . = (. + _Min_Heap_Size)
- *fill*         0x000000002000eb48      0x200 
-                0x000000002000f148                . = (. + _Min_Stack_Size)
- *fill*         0x000000002000ed48      0x400 
-                0x000000002000f148                . = ALIGN (0x8)
+                0x000000002000ed68                . = (. + _Min_Heap_Size)
+ *fill*         0x000000002000eb68      0x200 
+                0x000000002000f168                . = (. + _Min_Stack_Size)
+ *fill*         0x000000002000ed68      0x400 
+                0x000000002000f168                . = ALIGN (0x8)
 
 /DISCARD/
  libc.a(*)
@@ -3272,41 +3273,41 @@ LOAD /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-
 LOAD /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a
 LOAD /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-X86_64/platform/tools/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v7e-m+fp/hard/libgcc.a
 
-.debug_info     0x0000000000000000    0x16ed5
+.debug_info     0x0000000000000000    0x16f2c
  .debug_info    0x0000000000000000      0x3d8 ./user/at32f403a_407_clock.o
  .debug_info    0x00000000000003d8      0x137 ./user/at32f403a_407_int.o
- .debug_info    0x000000000000050f     0x66f2 ./user/main.o
- .debug_info    0x0000000000006c01      0x123 ./user/systick.o
- .debug_info    0x0000000000006d24     0x2375 ./firmware/at32f403a_407_crm.o
- .debug_info    0x0000000000009099      0xc7e ./firmware/at32f403a_407_dac.o
- .debug_info    0x0000000000009d17      0xe80 ./firmware/at32f403a_407_dma.o
- .debug_info    0x000000000000ab97     0x1871 ./firmware/at32f403a_407_flash.o
- .debug_info    0x000000000000c408     0x1f58 ./firmware/at32f403a_407_gpio.o
- .debug_info    0x000000000000e360      0x9de ./firmware/at32f403a_407_misc.o
- .debug_info    0x000000000000ed3e     0x1228 ./firmware/at32f403a_407_spi.o
- .debug_info    0x000000000000ff66     0x26ca ./firmware/at32f403a_407_tmr.o
- .debug_info    0x0000000000012630     0x10a6 ./firmware/at32f403a_407_usart.o
- .debug_info    0x00000000000136d6       0x22 ./cmsis/startup_at32f403a_407.o
- .debug_info    0x00000000000136f8     0x1596 ./cmsis/system_at32f403a_407.o
- .debug_info    0x0000000000014c8e     0x2247 ./bsp/at32f403a_407_board.o
+ .debug_info    0x000000000000050f     0x6749 ./user/main.o
+ .debug_info    0x0000000000006c58      0x123 ./user/systick.o
+ .debug_info    0x0000000000006d7b     0x2375 ./firmware/at32f403a_407_crm.o
+ .debug_info    0x00000000000090f0      0xc7e ./firmware/at32f403a_407_dac.o
+ .debug_info    0x0000000000009d6e      0xe80 ./firmware/at32f403a_407_dma.o
+ .debug_info    0x000000000000abee     0x1871 ./firmware/at32f403a_407_flash.o
+ .debug_info    0x000000000000c45f     0x1f58 ./firmware/at32f403a_407_gpio.o
+ .debug_info    0x000000000000e3b7      0x9de ./firmware/at32f403a_407_misc.o
+ .debug_info    0x000000000000ed95     0x1228 ./firmware/at32f403a_407_spi.o
+ .debug_info    0x000000000000ffbd     0x26ca ./firmware/at32f403a_407_tmr.o
+ .debug_info    0x0000000000012687     0x10a6 ./firmware/at32f403a_407_usart.o
+ .debug_info    0x000000000001372d       0x22 ./cmsis/startup_at32f403a_407.o
+ .debug_info    0x000000000001374f     0x1596 ./cmsis/system_at32f403a_407.o
+ .debug_info    0x0000000000014ce5     0x2247 ./bsp/at32f403a_407_board.o
 
-.debug_abbrev   0x0000000000000000     0x1f52
+.debug_abbrev   0x0000000000000000     0x1f63
  .debug_abbrev  0x0000000000000000       0xb9 ./user/at32f403a_407_clock.o
  .debug_abbrev  0x00000000000000b9       0x6d ./user/at32f403a_407_int.o
- .debug_abbrev  0x0000000000000126      0x4c7 ./user/main.o
- .debug_abbrev  0x00000000000005ed       0x6b ./user/systick.o
- .debug_abbrev  0x0000000000000658      0x229 ./firmware/at32f403a_407_crm.o
- .debug_abbrev  0x0000000000000881      0x1d5 ./firmware/at32f403a_407_dac.o
- .debug_abbrev  0x0000000000000a56      0x201 ./firmware/at32f403a_407_dma.o
- .debug_abbrev  0x0000000000000c57      0x2d8 ./firmware/at32f403a_407_flash.o
- .debug_abbrev  0x0000000000000f2f      0x215 ./firmware/at32f403a_407_gpio.o
- .debug_abbrev  0x0000000000001144      0x245 ./firmware/at32f403a_407_misc.o
- .debug_abbrev  0x0000000000001389      0x212 ./firmware/at32f403a_407_spi.o
- .debug_abbrev  0x000000000000159b      0x1e5 ./firmware/at32f403a_407_tmr.o
- .debug_abbrev  0x0000000000001780      0x248 ./firmware/at32f403a_407_usart.o
- .debug_abbrev  0x00000000000019c8       0x12 ./cmsis/startup_at32f403a_407.o
- .debug_abbrev  0x00000000000019da      0x187 ./cmsis/system_at32f403a_407.o
- .debug_abbrev  0x0000000000001b61      0x3f1 ./bsp/at32f403a_407_board.o
+ .debug_abbrev  0x0000000000000126      0x4d8 ./user/main.o
+ .debug_abbrev  0x00000000000005fe       0x6b ./user/systick.o
+ .debug_abbrev  0x0000000000000669      0x229 ./firmware/at32f403a_407_crm.o
+ .debug_abbrev  0x0000000000000892      0x1d5 ./firmware/at32f403a_407_dac.o
+ .debug_abbrev  0x0000000000000a67      0x201 ./firmware/at32f403a_407_dma.o
+ .debug_abbrev  0x0000000000000c68      0x2d8 ./firmware/at32f403a_407_flash.o
+ .debug_abbrev  0x0000000000000f40      0x215 ./firmware/at32f403a_407_gpio.o
+ .debug_abbrev  0x0000000000001155      0x245 ./firmware/at32f403a_407_misc.o
+ .debug_abbrev  0x000000000000139a      0x212 ./firmware/at32f403a_407_spi.o
+ .debug_abbrev  0x00000000000015ac      0x1e5 ./firmware/at32f403a_407_tmr.o
+ .debug_abbrev  0x0000000000001791      0x248 ./firmware/at32f403a_407_usart.o
+ .debug_abbrev  0x00000000000019d9       0x12 ./cmsis/startup_at32f403a_407.o
+ .debug_abbrev  0x00000000000019eb      0x187 ./cmsis/system_at32f403a_407.o
+ .debug_abbrev  0x0000000000001b72      0x3f1 ./bsp/at32f403a_407_board.o
 
 .debug_aranges  0x0000000000000000      0xc78
  .debug_aranges
@@ -3359,56 +3360,56 @@ LOAD /home/viktor/Downloads/AT32_IDE_V1.0.13_Linux-x86_64/AT32IDE_V1.0.13_Linux-
  .debug_ranges  0x0000000000000af8       0x18 ./cmsis/system_at32f403a_407.o
  .debug_ranges  0x0000000000000b10       0x80 ./bsp/at32f403a_407_board.o
 
-.debug_line     0x0000000000000000     0x80e2
+.debug_line     0x0000000000000000     0x8125
  .debug_line    0x0000000000000000      0x29c ./user/at32f403a_407_clock.o
  .debug_line    0x000000000000029c      0x272 ./user/at32f403a_407_int.o
- .debug_line    0x000000000000050e     0x289e ./user/main.o
- .debug_line    0x0000000000002dac      0x1c3 ./user/systick.o
- .debug_line    0x0000000000002f6f      0x9b1 ./firmware/at32f403a_407_crm.o
- .debug_line    0x0000000000003920      0x4af ./firmware/at32f403a_407_dac.o
- .debug_line    0x0000000000003dcf      0x478 ./firmware/at32f403a_407_dma.o
- .debug_line    0x0000000000004247      0xd8c ./firmware/at32f403a_407_flash.o
- .debug_line    0x0000000000004fd3      0x627 ./firmware/at32f403a_407_gpio.o
- .debug_line    0x00000000000055fa      0x4cf ./firmware/at32f403a_407_misc.o
- .debug_line    0x0000000000005ac9      0x796 ./firmware/at32f403a_407_spi.o
- .debug_line    0x000000000000625f      0xc8b ./firmware/at32f403a_407_tmr.o
- .debug_line    0x0000000000006eea      0x6ae ./firmware/at32f403a_407_usart.o
- .debug_line    0x0000000000007598       0x7c ./cmsis/startup_at32f403a_407.o
- .debug_line    0x0000000000007614      0x3c7 ./cmsis/system_at32f403a_407.o
- .debug_line    0x00000000000079db      0x707 ./bsp/at32f403a_407_board.o
+ .debug_line    0x000000000000050e     0x28e1 ./user/main.o
+ .debug_line    0x0000000000002def      0x1c3 ./user/systick.o
+ .debug_line    0x0000000000002fb2      0x9b1 ./firmware/at32f403a_407_crm.o
+ .debug_line    0x0000000000003963      0x4af ./firmware/at32f403a_407_dac.o
+ .debug_line    0x0000000000003e12      0x478 ./firmware/at32f403a_407_dma.o
+ .debug_line    0x000000000000428a      0xd8c ./firmware/at32f403a_407_flash.o
+ .debug_line    0x0000000000005016      0x627 ./firmware/at32f403a_407_gpio.o
+ .debug_line    0x000000000000563d      0x4cf ./firmware/at32f403a_407_misc.o
+ .debug_line    0x0000000000005b0c      0x796 ./firmware/at32f403a_407_spi.o
+ .debug_line    0x00000000000062a2      0xc8b ./firmware/at32f403a_407_tmr.o
+ .debug_line    0x0000000000006f2d      0x6ae ./firmware/at32f403a_407_usart.o
+ .debug_line    0x00000000000075db       0x7c ./cmsis/startup_at32f403a_407.o
+ .debug_line    0x0000000000007657      0x3c7 ./cmsis/system_at32f403a_407.o
+ .debug_line    0x0000000000007a1e      0x707 ./bsp/at32f403a_407_board.o
 
-.debug_str      0x0000000000000000     0x96f5
+.debug_str      0x0000000000000000     0x9711
  .debug_str     0x0000000000000000      0x784 ./user/at32f403a_407_clock.o
                                         0x7d3 (size before relaxing)
  .debug_str     0x0000000000000784       0xb7 ./user/at32f403a_407_int.o
                                         0x213 (size before relaxing)
- .debug_str     0x000000000000083b     0x3aeb ./user/main.o
-                                       0x3e06 (size before relaxing)
- .debug_str     0x0000000000004326       0x21 ./user/systick.o
+ .debug_str     0x000000000000083b     0x3b07 ./user/main.o
+                                       0x3e2a (size before relaxing)
+ .debug_str     0x0000000000004342       0x21 ./user/systick.o
                                         0x310 (size before relaxing)
- .debug_str     0x0000000000004347     0x1444 ./firmware/at32f403a_407_crm.o
+ .debug_str     0x0000000000004363     0x1444 ./firmware/at32f403a_407_crm.o
                                        0x2150 (size before relaxing)
- .debug_str     0x000000000000578b      0x5d0 ./firmware/at32f403a_407_dac.o
+ .debug_str     0x00000000000057a7      0x5d0 ./firmware/at32f403a_407_dac.o
                                         0xcef (size before relaxing)
- .debug_str     0x0000000000005d5b      0x13d ./firmware/at32f403a_407_dma.o
+ .debug_str     0x0000000000005d77      0x13d ./firmware/at32f403a_407_dma.o
                                         0xee7 (size before relaxing)
- .debug_str     0x0000000000005e98      0x904 ./firmware/at32f403a_407_flash.o
+ .debug_str     0x0000000000005eb4      0x904 ./firmware/at32f403a_407_flash.o
                                         0xbb2 (size before relaxing)
- .debug_str     0x000000000000679c      0x8a5 ./firmware/at32f403a_407_gpio.o
+ .debug_str     0x00000000000067b8      0x8a5 ./firmware/at32f403a_407_gpio.o
                                        0x13b1 (size before relaxing)
- .debug_str     0x0000000000007041      0x24d ./firmware/at32f403a_407_misc.o
+ .debug_str     0x000000000000705d      0x24d ./firmware/at32f403a_407_misc.o
                                         0xadb (size before relaxing)
- .debug_str     0x000000000000728e      0x6de ./firmware/at32f403a_407_spi.o
+ .debug_str     0x00000000000072aa      0x6de ./firmware/at32f403a_407_spi.o
                                        0x11e3 (size before relaxing)
- .debug_str     0x000000000000796c     0x12b6 ./firmware/at32f403a_407_tmr.o
+ .debug_str     0x0000000000007988     0x12b6 ./firmware/at32f403a_407_tmr.o
                                        0x2012 (size before relaxing)
- .debug_str     0x0000000000008c22      0x557 ./firmware/at32f403a_407_usart.o
+ .debug_str     0x0000000000008c3e      0x557 ./firmware/at32f403a_407_usart.o
                                         0xdf0 (size before relaxing)
- .debug_str     0x0000000000009179       0x2f ./cmsis/startup_at32f403a_407.o
+ .debug_str     0x0000000000009195       0x2f ./cmsis/startup_at32f403a_407.o
                                          0x5f (size before relaxing)
- .debug_str     0x00000000000091a8       0x68 ./cmsis/system_at32f403a_407.o
+ .debug_str     0x00000000000091c4       0x68 ./cmsis/system_at32f403a_407.o
                                         0xaf8 (size before relaxing)
- .debug_str     0x0000000000009210      0x4e5 ./bsp/at32f403a_407_board.o
+ .debug_str     0x000000000000922c      0x4e5 ./bsp/at32f403a_407_board.o
                                        0x142c (size before relaxing)
 
 .comment        0x0000000000000000       0x49

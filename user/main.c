@@ -147,8 +147,9 @@ int main(void)
 
 	if (usart4_total_counter>16000000)  usart4_total_counter=0;  // reset but only if bad data
 
-	for ( i = 0; i < total_sample_count; i++){
+	for ( i = 0; i < total_sample_count; i++){ // copies sample store data to oneshot but will be replaced once running
 		one_shot[i].playback_rate=(0x10000*MAX_Rate)-((samples_store[i].speed&127)<<10);   // set initial playback rate
+		one_shot[i].start=samples_store[i].ram_addr;
 		if(! one_shot[1].playback_rate) {one_shot[i].playback_rate=0xFFFF;samples_store[i].speed=64;}
 		one_shot[i].end=samples_store[i].ram_addr+((samples_store[i].size_bytes*samples_store[i].length)>>7); //calculates end part
 		if ((samples_store[i].length>127) ||(samples_store[i].length==0) )
@@ -279,7 +280,7 @@ while(1)
  		  	 one_shot[i].pointer+=temp;}  // advance only in enabled
  		  	 	if ((one_shot[i].pointer+(128*MAX_Rate)) >(one_shot[i].end))  // need to setup a way to select samples as needed
 
- 		  	 	{one_shot[i].pointer=samples_store[i].ram_addr;one_shot[i].position=0;current_playing_sample[i]=0;}  //reset sample to start, disable
+ 		  	 	{one_shot[i].pointer=one_shot[i].start;one_shot[i].position=0;current_playing_sample[i]=0;}  //reset sample to start, disable
 		 		// reset one shot pointer
 		 		one_shot[i].position&=0xFFFF; // needs to zero here
  		  	 }

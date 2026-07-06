@@ -326,14 +326,18 @@ void uart_receive_end(void){
 			samples_store[current_sample_save].used=1;
 			samples_store[current_sample_save].speed=64;
 			usart4_rx_counter=0;  //clear just in case random data
-			usart4_total_counter+=1024; // add 1k
-			usart4_total_counter&=0xFFFC00;  // set to next kbyte start
+			usart4_total_counter+=4096; // add 4k
+			usart4_total_counter&=0xFFFFF000;  // set to next 4k block start
 			flash_counter_write(usart4_total_counter);// this migh tbe obsolet
+
 			one_shot_var=0;
 			psram_busy=0;
 			current_sample_save++;  // this should just count up no extra info for now
 			current_sample_save&=15;
-			ram_to_flash_mirror (); // save all ram
+			ram_to_flash_mirror (); // save all ram , but it needs to start from the beginning
+
+
+			save_timer=66000; // settings backup
 		} // this triggers after some time uart4 finished receiving
 
 
@@ -356,6 +360,7 @@ void uart_receive_save(void){ // only after 128 bytes
 			current_sample_save=empty; // saves
 			samples_store[empty].ram_addr=usart4_total_counter;
 			samples_store[empty].used=1;
+			flash_backup_start=usart4_total_counter; //sets starting address for flash backup
 		} // this ok but can fail
 
 		if ((one_shot_var&4095)==0)printf(" %d kb  \n",(usart4_total_counter>>10)); // sends back some data , works
@@ -494,30 +499,24 @@ void ram_to_flash(void){  // copies samples to flash from ram, for now all of it
 void flash_to_ram_mirror (void){ // just copy the entire flash to ram ,16 mbyte
 	 uint8_t test=0;
 	 printf("Copying flash to ram. Let's go. \n");
-	 for (uint32_t  i = psram_sample_start; i < 1500000; i+=256){
-
+	 for (uint32_t  i = psram_sample_start; i < 8388608; i+=256){
 		 ram_page_read(i,256+2,0,usart4_int_buffer);//read flash,dma
-		 //uint8_t transmit[260]={0x03,(uint8_t)(i>>16),(uint8_t)(i>>8),(uint8_t)(i),3,4,5,6,7,8,9,10 }; // read
-		 	 while (spi_read_flag);
-
-				 //spi4_polling_rx(transmit,260);// read data
-				 //memcpy(usart4_int_buffer,test_byte+4,256);
-
-
-				 ram_page_write(i,usart4_int_buffer,256,1);// write to psram , 127 is bad
+		 while (spi_read_flag);
+		 ram_page_write(i,usart4_int_buffer,256,1);// write to psram , 127 is bad
 		 while (spi_write_flag);
 	 }
 
 }
 
-void ram_to_flash_mirror (void){ // just copy the entire flash to ram ,1 mbyte,blocking , about 1 minute, working ok
+void ram_to_flash_mirror (void){ // just copy the entire flash to ram ,500kb ,blocking , about 15s for 500kb
 		// need to break it up eventually , ok for now
 	printf("Writing to flash , this is slow , please wait \n");
 	 uint32_t address=0;
 	 uint8_t test=0;
 	 // missing data in chunks but  random
+	 	 uint32_t aligned=(flash_backup_start+psram_sample_start)&0xFFFF0000; // start copying on a 64kb block , not a problem
 
-	for (uint32_t  i = psram_sample_start ; i < 1200000; i+=256){ // 1 MB for now
+	for (uint32_t  i = aligned ; i < (655360+aligned); i+=256){ // 600kB for now, should be enough
 
 		 ram_page_read(i,256+2,1,usart4_int_buffer);//read ram,dma  data is good
 
@@ -526,7 +525,8 @@ void ram_to_flash_mirror (void){ // just copy the entire flash to ram ,1 mbyte,b
 		  address=i;
 		 uint8_t transmit[260]={0x03,(uint8_t)(address>>16),(uint8_t)(address>>8),(uint8_t)(address),3,4,5,6,7,8,9,10 };
 		 memcpy(transmit+4,usart4_int_buffer,256);
-		 if ((i&65535)==0){ // 64k block erase,  working ok
+
+		 if ((i&65535)==0){ // 64k block erase,  working ok , total about 2-3s
 			 read_busy();
 			 transmit[0]=0x06;
 			 spi4_polling_tx(transmit,1);// write enable
