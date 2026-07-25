@@ -576,4 +576,20 @@ void read_busy(void){ // needs to have write enable on to work or hangs , do not
 
 }
 
+void i2c_polling_rx(uint8_t *data, uint16_t length)		//rx
+{
+    if (length == 0) return;
+    uint8_t temp[length];
+
+
+    for (uint16_t i = 0; i < length; i++)
+    {
+        while (i2c_flag_get(I2C2,I2C_RDBF_FLAG) == RESET);
+    	temp[i] = i2c_data_receive(I2C2);
+
+    }
+    memcpy(data,temp,length);
+
+}
+
 

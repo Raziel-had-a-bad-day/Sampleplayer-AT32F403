@@ -2,7 +2,7 @@
  void flash_to_ram(void);
  void ram_to_flash_mirror (void);
  void flash_counter_write(uint32_t data);
-
+ void controller_process(void);
 
 void settings_storage(void){   // runs to store setting and read back
 
@@ -272,6 +272,50 @@ void compact_flash(void)
     // Optional: Save table and positions to internal flash here
    // save_table_and_positions();
 }
+void controller_process(void){ // process incoming controller info ,16 bit address(low then high) , 8 bit data, 8 bit checksum
+	uint8_t n;
+	for (n = 0; n < 4; ++n) { // look for checksum,works, 3 digits , sample(1-4) , part(0-7),parameter (0-3)
 
+		uint8_t checksum = usart3_rx_temp[n] ^ usart3_rx_temp[(n+1)]^ usart3_rx_temp[(n+2)]; //
+
+		if (usart3_rx_temp[(n+3)&3]==checksum){ // getting mixed even when checksum ok
+			controller_address=(usart3_rx_temp[n]) | (usart3_rx_temp[(n+1)&3]<<8);
+			controller_value=(usart3_rx_temp[(n+2)&3])&127;
+			at32_led_toggle(LED2);
+
+			if ((controller_address>484)||(controller_address<110)) {usart3_rx_counter=(usart3_rx_counter+1)&3;usart3_rx_temp[4]=0; return; } // if value is swapped
+
+
+			if (controller_value>127){ controller_address=0;} // if bad data, clear
+
+			printf(" %d   ",controller_address);printf(" %d  \n",controller_value);
+			uint8_t midi_generated[3]={153,1,127};  //trigger sampple playback
+			uint8_t sample_select=((controller_address/100)-1)&3;
+			uint8_t part_select=(((controller_address%100)/10)-1)&7; // part edited
+			uint8_t feat_select=((controller_address%100)%10)&3; // select between start, end, pitch,gap
+
+
+
+			switch (feat_select) { // modify values for sample
+				case 0:one_shot[sample_select].start[part_select]=sample_address_calculate(sample_select,controller_value); break; // start change enter
+				case 1:one_shot[sample_select].length[part_select]=controller_value;
+				one_shot[sample_select].end[part_select]=sample_address_calculate(sample_select,controller_value);break; // end  enter
+				case 2:
+				one_shot[sample_select].speed[part_select]=(0x10000*MAX_Rate)-((controller_value&127)<<10);break;// copy ratebreak;//pitch or playback speed
+				case 3:one_shot[sample_select].gap[part_select]=controller_value;break; // following gap length
+				default:break;
+			}
+			if (!one_shot[sample_select].start[part_select]) one_shot[sample_select].start[part_select]=samples_store[sample_select].ram_addr; // in case start is 0
+			if (!midi_in_clear){  // trigger midi note
+				usart2_rx_buffer[0]=153;
+				usart2_rx_buffer[1]=sample_select;
+				usart2_rx_buffer[2]=127;
+				midi_in_clear=1; }  // this is temp
+
+			break;
+		}
+	}
+	usart3_rx_temp[4]=0;  //clear receive flag
+	}
 
 

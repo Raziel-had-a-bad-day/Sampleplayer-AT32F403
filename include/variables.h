@@ -44,7 +44,7 @@
 #define MAX_SAMPLES     100
 #define MAX_Rate 2  // max speed of sample playback
 #define download_buffer 254+2  // current download buffer size for samples playback
-
+extern i2c_handle_type hi2c3;
 uint8_t countSetBits(uint8_t number) { // count bits in byte
 	uint8_t count = 0;
     while (number) {
@@ -58,6 +58,15 @@ uint32_t one_shot_var=0;  // can be changed
 uint8_t usart4_rx_buffer[256]; // uart 3 rx buffer
 int16_t usart4_int_buffer[130];
 uint8_t usart4_rx_counter=0;// incoming data counter
+uint8_t usart3_rx_buffer[4]; // uart 3 rx buffer
+
+volatile uint8_t usart3_rx_counter=0;// incoming data counter
+volatile uint8_t usart3_rx_temp[5];// holds temp info from usart3
+uint16_t controller_address=0; // 16 bit (low,high) ,  3 digits , sample(1-4) , part(0-7),parameter (0-3)
+uint8_t controller_value=0;// received data from controller
+uint8_t usart3_rx_restart=0; // restart recieve if data bad
+uint8_t usart2_rx_buffer[usart_buffer_size];
+
 volatile uint8_t usart4_rx_reset=0; //reset flag for rx counter
 uint32_t usart4_total_counter=0;
 uint8_t psram_sample_write=0;
@@ -70,6 +79,11 @@ int16_t test_int_buf[128];
 uint32_t overload_flag=0;
 volatile uint8_t ccr_reset=0;
 volatile uint8_t dac_ready=0;
+
+volatile uint8_t  i2c_rx_buffer[64];
+volatile uint16_t i2c_rx_index = 0;
+volatile bool     i2c_rx_done = false;
+
 uint32_t audio_out_buf[audio_buffer_size]; // holds temp audio out
 
 
@@ -204,7 +218,9 @@ uint8_t cc_list_extra[32]={64,64,64,64,64,64,64,64}; // cover cc from 90 up , ex
 //int16_t one_shot_buf[8*256];
 uint32_t flash_backup_start=0; // start address for ram to flash backup, set from sample address
 //// sample transfer stuff
-
+uint8_t i2c_rec_buffer[10];
+uint8_t i2c_rec_counter=0;
+uint8_t i2c_rec_flag=0;
 char c;
 
 typedef struct {  //need to store filename or some type of id
@@ -226,17 +242,34 @@ typedef struct {
 } SampleHeader;
 
 typedef struct {
+
+    uint32_t start[8]; //memory start address, 8 parts for now for sequencing, calculated with offset
+    uint32_t end[8];  // end position ,dynamic, this is calculated from (sample size*(127-sample_store.length)/128)
+    uint32_t speed[8]; // pitch or playback speed 0-127 for seq
+    uint8_t gap[8]; // end gap for sequencer, maybe in 100ms increments
+    uint8_t length[8]; // length 0-127 , store from incoming
+} sample_oneshot;
+sample_oneshot one_shot[8]; // controls reading from memory, might have to fill up during init
+
+typedef struct {
     uint32_t pointer;     // current mem address
-    uint32_t playback_rate;// speed of playback
+    uint32_t playback_rate;// speed of playback , this is calculated
     uint32_t position;      // 0-63(<<16)  position within buffer
     int16_t  buf[256];    // read data
-    uint32_t start; //memory start address
-    uint32_t end;  // end position ,dynamic, this is calculated from (sample size*(127-sample_store.length)/128)
 
-} sample_oneshot;
-sample_oneshot one_shot[8]; // controls reading from memory
+} sample_oneplay;
+sample_oneplay one_play[8]; // holds temp data for playback
 
 
+typedef struct  {
+  uint8_t start[4][8];
+  uint8_t end[4][8];
+  uint8_t pitch[4][8];
+  uint8_t gap[4][8];
+  uint8_t phaserLevel[4];
+  uint8_t delayLevel[4];
+} settings;
+settings sample_edit;  // holds values for sample editor, controlled externally through I2C
 
 
 
@@ -247,7 +280,8 @@ uint32_t next_sample_id = 1;
 
 Samples samples_store[16]; // mirror flash and ram ?
 uint8_t current_sample_save=0;
-uint8_t current_playing_sample[8];
+uint8_t current_playing_sample[8];// select currently playing sample
+uint8_t current_playing_part[8]; // select part that is playing of sample
 uint32_t sample_write_end_timer=0;
 uint8_t  samples_backup[ sizeof(samples_store)];
 
@@ -259,6 +293,13 @@ uint8_t phase_delay_level=0;
 int data_log=0;
 static char command_buffer[16]; // stores incoming uart commands
 
+uint32_t sample_address_calculate(uint8_t sample,uint8_t length){   //Calculate an address
+	length&=127;
+	sample=sample&15;
+	uint32_t temp;
+	temp=samples_store[sample].ram_addr+((samples_store[sample].size_bytes*length)>>7);
+	return temp;
+}
 
 const uint16_t sine_lut[600]={
 

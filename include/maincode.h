@@ -18,7 +18,7 @@ gpio_init_type  gpio_init_struct = {0};
 crm_clocks_freq_type crm_clocks_freq_struct = {0};
 
 tmr_output_config_type tmr_output_struct;
-uint8_t usart2_rx_buffer[usart_buffer_size];
+
 volatile uint8_t usart2_rx_counter =0;
 #define DMA_Buffer_size 260  // 256 + 4 command
 
@@ -503,3 +503,84 @@ void wk_nvic_config(void)
 
 	  /* add user code end uart4_init 3 */
 	}
+
+	void wk_i2c3_init(void)
+	{
+	  /* add user code begin i2c3_init 0 */
+		  crm_periph_clock_enable(CRM_I2C3_PERIPH_CLOCK, TRUE);
+		  crm_periph_clock_enable(CRM_GPIOB_PERIPH_CLOCK, TRUE);
+		  crm_periph_clock_enable(CRM_IOMUX_PERIPH_CLOCK, TRUE);
+		  crm_periph_clock_enable(CRM_GPIOA_PERIPH_CLOCK, TRUE);
+	  /* add user code end i2c3_init 0 */
+
+	  gpio_init_type gpio_init_struct;
+
+	  gpio_default_para_init(&gpio_init_struct);
+
+	  /* add user code begin i2c3_init 1 */
+
+	  /* add user code end i2c3_init 1 */
+
+	  /* configure the SCL pin */
+	  gpio_init_struct.gpio_out_type = GPIO_OUTPUT_OPEN_DRAIN;
+	  gpio_init_struct.gpio_pull = GPIO_PULL_NONE; // wont do pullup here
+	  gpio_init_struct.gpio_mode = GPIO_MODE_MUX;
+	  gpio_init_struct.gpio_drive_strength = GPIO_DRIVE_STRENGTH_MODERATE;
+	  gpio_init_struct.gpio_pins = GPIO_PINS_8;
+	  gpio_init(GPIOA, &gpio_init_struct);
+
+	  /* configure the SDA pin */
+	  gpio_init_struct.gpio_out_type = GPIO_OUTPUT_OPEN_DRAIN;
+	  gpio_init_struct.gpio_pull = GPIO_PULL_NONE;
+	  gpio_init_struct.gpio_mode = GPIO_MODE_MUX;
+	  gpio_init_struct.gpio_drive_strength = GPIO_DRIVE_STRENGTH_STRONGER;
+	  gpio_init_struct.gpio_pins = GPIO_PINS_4;
+	  gpio_init(GPIOB, &gpio_init_struct);
+
+	  gpio_pin_remap_config(I2C3_GMUX_0001, TRUE);
+
+	  i2c_init(I2C3, I2C_FSMODE_DUTY_2_1, 100000);
+	  i2c_own_address1_set(I2C3, I2C_ADDRESS_MODE_7BIT, 0x38);
+	  i2c_ack_enable(I2C3, TRUE);
+	  i2c_clock_stretch_enable(I2C3, TRUE);
+	  i2c_general_call_enable(I2C3, FALSE);
+
+
+	  // i2c_interrupt_enable(I2C3, I2C_DATA_INT, TRUE);
+	//	  nvic_priority_group_config(NVIC_PRIORITY_GROUP_4);
+	//	  nvic_irq_enable(I2C3_EVT_IRQn, 0, 0);
+	//	 nvic_irq_enable(I2C3_ERR_IRQn, 0, 0);
+
+
+	  /* enable i2c data transmission interrupt */
+//	  i2c_interrupt_enable(I2C3, I2C_DATA_INT, TRUE);
+
+	  /* enable i2c event interrupt */
+//	  i2c_interrupt_enable(I2C3, I2C_EVT_INT, TRUE);
+
+	  /* add user code begin i2c3_init 2 */
+
+	  /* add user code end i2c3_init 2 */
+
+	  i2c_enable(I2C3, TRUE);
+
+	  /* add user code begin i2c3_init 3 */
+
+	  /* add user code end i2c3_init 3 */
+	}
+	void I2C3_ERR_IRQHandler(void)
+	{
+	    if (i2c_flag_get(I2C3, I2C_ACKFAIL_FLAG) != RESET)
+	    {
+	        i2c_flag_clear(I2C3, I2C_ACKFAIL_FLAG);
+	    }
+	    if (i2c_flag_get(I2C3, I2C_OUF_FLAG) != RESET)
+	    {
+	        i2c_flag_clear(I2C3, I2C_OUF_FLAG);
+	    }
+	    // Add others if needed (BUSERR, etc.)
+	}
+	/* add user code begin 1 */
+
+	/* add user code end 1 */
+

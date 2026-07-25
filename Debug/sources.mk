@@ -22,5 +22,6 @@ SUBDIRS := \
 bsp \
 cmsis \
 firmware \
+include \
 user \
 

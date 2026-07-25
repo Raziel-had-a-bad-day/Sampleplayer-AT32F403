@@ -24,6 +24,7 @@
 
 #include "at32f403a_407_board.h"
 #include "at32f403a_407_clock.h"
+#include "i2c_application.h"
 
 
 
@@ -75,9 +76,9 @@ int main(void)
    usart_config();
   // spi_config();
    spi4_init();
-   //wk_usart3_init();
-   wk_uart4_init();
 
+   wk_uart4_init();
+   wk_usart3_init();
 	SPI2_CS_HIGH;  // disable for ram for now
 
 	uart_print_init(115200);
@@ -94,6 +95,7 @@ int main(void)
 
    /* init dma1 channel3 */
    wk_dma1_channel3_init(); // TX
+
 
   /* wk_dma_channel_config(DMA1_CHANNEL3,
                          (uint32_t)&SPI4->dt,
@@ -149,11 +151,14 @@ int main(void)
 
 	for ( i = 0; i < total_sample_count; i++){ // copies sample store data to oneshot but will be replaced once running
 		one_shot[i].playback_rate=(0x10000*MAX_Rate)-((samples_store[i].speed&127)<<10);   // set initial playback rate
-		one_shot[i].start=samples_store[i].ram_addr;
+		one_shot[i].start[0]=samples_store[i].ram_addr;
+		one_shot[i].speed[0]=samples_store[i].speed;
+		one_shot[i].length[0]=samples_store[i].length;
+		one_shot[i].length[0]=0;
 		if(! one_shot[1].playback_rate) {one_shot[i].playback_rate=0xFFFF;samples_store[i].speed=64;}
-		one_shot[i].end=samples_store[i].ram_addr+((samples_store[i].size_bytes*samples_store[i].length)>>7); //calculates end part
+		one_shot[i].end[0]=samples_store[i].ram_addr+((samples_store[i].size_bytes*samples_store[i].length)>>7); //calculates end part
 		if ((samples_store[i].length>127) ||(samples_store[i].length==0) )
-		{one_shot[i].end=samples_store[i].ram_addr+samples_store[i].size_bytes;samples_store[i].length=127;}// fix bad data
+		{one_shot[i].end[0]=samples_store[i].ram_addr+samples_store[i].size_bytes;samples_store[i].length=127;}// fix bad data
 
 		if (samples_store[i].size_bytes)  current_sample_save++;  // count up sample save position from stored, continued saving until the end
 
@@ -217,7 +222,6 @@ SPI4_CS_LOW;
 //spi_i2s_data_transmit(SPI4,transmit[0] );   //
 SPI4_CS_HIGH;
 
-
 flash_to_ram_mirror ();
 
 //samples_store[0].size_bytes=321048;
@@ -251,7 +255,7 @@ while(1)
  		 		delay_calc();
  		 	  start_time=tmr_counter_value_get(TMR6);
  		 	 	 // about 1200us available before it goes bad
- 		 //	one_shot[0].playback_rate=(0x10000)-(cc_76<<7);  // set playback rate before
+
  		 for (i=0;i<audio_buffer_size;i++){  // 64 atm moment, 250us with linear +40us with hermite resample
  			// tmr_counter[i]=tmr_counter_value_get(TMR7);
  			 next_sample_tracker=i;  // just counts up inside the buf
@@ -260,31 +264,16 @@ while(1)
 
  			} // process samples  300uS atm
 
-
+ 		 if ( usart3_rx_temp[4]) controller_process();
  		 if(ADSR_timer>=7) {audio_gain_global(); ADSR_TIM_writer();ADSR_timer=0;} else ADSR_timer++; // 25us*64*8 = 12.8ms
 
  		 	 if ((!psram_busy)&&(!spi_process_counter)) spi_process_counter=1;  // starts spi processing, can block
 
- 		 	 stop_time=tmr_counter_value_get(TMR6);
+ 		 	 	 stop_time=tmr_counter_value_get(TMR6);
  		  	 	if(stop_time>start_time) elapsed_time=stop_time-start_time; else elapsed_time=0; // return elapsed time for testing
- 		  //	 current_playing_sample[0]=1;
- 		  //	 current_playing_sample[1]=1;
- 		  //	 current_playing_sample[2]=1;
 
- 		  	 for (i=0;i<4;i++){  // control progress off samples
+ 		  	 	oneshot_sequencer(); // process oneshot data
 
- 		  		//one_shot[i].playback_rate=(0x10000*MAX_Rate)-(cc_list_extra[i]<<10);  // modify pitch, limited by buffer size
- 		  		 if(current_playing_sample[i]){
-		 		uint16_t temp=(one_shot[i].position>>16)<<1;  // clear last bit as well , has to be even
- 		  	 	if ((temp)>(128*MAX_Rate)) temp=(128*MAX_Rate); // this thing gets screwed up a lot
- 		  	 one_shot[i].pointer+=temp;}  // advance only in enabled
- 		  	 	if ((one_shot[i].pointer+(128*MAX_Rate)) >(one_shot[i].end))  // need to setup a way to select samples as needed
-
- 		  	 	{one_shot[i].pointer=one_shot[i].start;one_shot[i].position=0;current_playing_sample[i]=0;}  //reset sample to start, disable
-		 		// reset one shot pointer
-		 		one_shot[i].position&=0xFFFF; // needs to zero here
- 		  	 }
- 		  //	usart_data_transmit(UART4,(char)('X'));
 
 		 		memset(flash_sample_buf,0,2048);  // clear
 		 		ccr_counter=0;
@@ -293,41 +282,41 @@ while(1)
 
 
 
- 	if ((!spi_read_flag) && (!spi_write_flag) && (spi_process_counter)&&(!psram_busy)) spi_message_process();
+		  if ((!spi_read_flag) && (!spi_write_flag) && (spi_process_counter)&&(!psram_busy)) spi_message_process();
 
- 	if (usart4_rx_counter>9){uart4_command_process();}  // look for commands on uart4
-
-
-
- 	if( uart_receive_timer[3] ) uart_receive_end(); // detect no transmission
-
- 	if ((psram_sample_write==1) && (spi_process_counter==0)&& (!spi_write_flag))     { // copy serial data to psram
- 		uart_receive_save();  }
-
-
- 	  if( midi_in_clear) {  midi_fifo(usart2_rx_buffer,0); } // write to fifo ,returns 0 if done
-
- 	  if (midi_buf_flag)     {midi_incoming();}  // not totally ok yet
-
- 	  if (!note_trigger) note_trigger=note_fifo(0, 1);// enable note if any in fifo , note_fifo isnt really needed though, midi comes in slow , might just skip
+		  if (usart4_rx_counter>9){uart4_command_process();}  // look for commands on uart4
 
 
 
- 	  if (save_timer>60000) {settings_write_flag=1;
- 	 memcpy(samples_backup,samples_store, sizeof(samples_store));
- 	  settings_storage();flash_settings_write();save_timer=0;
+		  if( uart_receive_timer[3] ) uart_receive_end(); // detect no transmission
 
- 	  }  // saves every ten minutes
+		  if ((psram_sample_write==1) && (spi_process_counter==0)&& (!spi_write_flag))     { // copy serial data to psram
+			  uart_receive_save();  }
 
- 	  if((!ADSR_timer_flag) && ((tmr_counter_value_get(TMR6)) >8200))  {  // about 10ms
- 	// printf(" %d\n",lfo1_out);//slow
 
- 	  ADSR_timer_flag=1;save_timer++;lfo1_out=lfo_out(); if( uart_receive_timer[3] ) {sample_write_end_timer++;}
+		  if( midi_in_clear) {  midi_fifo(usart2_rx_buffer,0); } // write to fifo ,returns 0 if done
 
- 	  } //process ADSR
- 	  if((ADSR_timer_flag) && ((tmr_counter_value_get(TMR6))<100)) ADSR_timer_flag=0;   //reset   , can miss starts might have sync with notes or trigger more often
+		  if (midi_buf_flag)     {midi_incoming();}  // not totally ok yet
 
- 	  if (note_trigger)	 	  note_process();  // assign sounds  to polyphony for note trigger
+		  if (!note_trigger) note_trigger=note_fifo(0, 1);// enable note if any in fifo , note_fifo isnt really needed though, midi comes in slow , might just skip
+
+
+
+		  if (save_timer>60000) {settings_write_flag=1;
+		  memcpy(samples_backup,samples_store, sizeof(samples_store));
+		  settings_storage();flash_settings_write();save_timer=0;
+
+		  }  // saves every ten minutes
+
+		  if((!ADSR_timer_flag) && ((tmr_counter_value_get(TMR6)) >8200))  {  // about 10ms
+			  // printf(" %d\n",lfo1_out);//slow
+
+			  ADSR_timer_flag=1;save_timer++;lfo1_out=lfo_out(); if( uart_receive_timer[3] ) {sample_write_end_timer++;}
+
+		  } //process ADSR
+		  if((ADSR_timer_flag) && ((tmr_counter_value_get(TMR6))<100)) ADSR_timer_flag=0;   //reset   , can miss starts might have sync with notes or trigger more often
+
+		  if (note_trigger)	 	  note_process();  // assign sounds  to polyphony for note trigger
 
 
 
@@ -378,7 +367,6 @@ void UART4_IRQHandler(void)  //file transfer and commands , not quick
 	  usart4_rx_buffer[usart4_rx_counter] = usart_data_receive(UART4);  //
 	  if (usart4_rx_counter>=10) memcpy(command_buffer,usart4_rx_buffer+(usart4_rx_counter-10),10); // look for commands
 
-
 		    if(usart4_rx_counter >126 ) // buffer full
 		    {
 		    	memcpy(usart4_int_buffer,usart4_rx_buffer,128);
@@ -388,9 +376,6 @@ void UART4_IRQHandler(void)  //file transfer and commands , not quick
 		    	spi_process_counter=0;
 		    	// disable other comms
 		     // usart_interrupt_enable(UART4, USART_RDBF_INT, FALSE); //
-
-
-
 		    } else  usart4_rx_counter++;
 		    if(usart4_rx_reset) {usart4_rx_counter=0;memset(command_buffer,0,16); usart4_rx_reset=0;}// external reset counter
 	           // usart_interrupt_enable(USART2, USART_RDBF_INT, FALSE);
@@ -495,8 +480,18 @@ void DMA1_Channel3_IRQHandler(void)   // TX SPI4
 
   /* add user code end DMA1_Channel3_IRQ 1 */
 }
+void USART3_IRQHandler(void)  //receive from controller buttons bluepill, works
+{
+	if(usart_interrupt_flag_get(USART3, USART_RDBF_FLAG) != RESET)
+	{
 
+		usart3_rx_buffer[usart3_rx_counter] = usart_data_receive(USART3);  //
+		usart3_rx_temp[usart3_rx_counter]=usart3_rx_buffer[usart3_rx_counter];
+		usart3_rx_temp[4]=1; // receive flag
+		 usart3_rx_counter=(usart3_rx_counter+1)&3;
+	}
 
+}
 
 /**
   * @}
