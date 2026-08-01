@@ -283,7 +283,7 @@ void spi_message_process (void){
 	uint16_t download_size=download_buffer; // sets max downloaded data per fetch mostly to get extra data if needed , minimum 128+2 for now
 	switch(spi_process_counter){  // cue spi messages here
 	case 0: if (psram_busy) spi_process_counter=15; else spi_process_counter=1;break;
-	case 1:if (current_playing_sample[0]) {ram_page_read((one_shot[0].pointer+psram_sample_start),download_size,1,one_shot[0].buf);}
+	case 1:if (current_playing_sample[0]) {ram_page_read((one_play[0].pointer+psram_sample_start),download_size,1,one_play[0].buf);}
 	break;				////////read from psram
 
 	case 2:  ram_page_read((delay_pointer[0]*2) , download_size, 1,ram_out);break; // leave extra when reading, delay read
@@ -291,15 +291,16 @@ void spi_message_process (void){
 	case 3 : ram_page_write((delay_pointer[1]*2), ram_in,(audio_buffer_size*2),1);break;//delay_write
 	case 4 : ram_page_write((psram_sample_start-357), test_int,256,1 );break;//test write ,might just run it always for now
 	case 5:  memset(test_int_buf,0,254);ram_page_read((psram_sample_start-357) , 254, 1,test_int_buf);break; // test read back
-	case 6 :if (current_playing_sample[1]) {ram_page_read((one_shot[1].pointer+psram_sample_start),download_size,1,one_shot[1].buf);}
+	case 6 :if (current_playing_sample[1]) {ram_page_read((one_play[1].pointer+psram_sample_start),download_size,1,one_play[1].buf);}
 	break;				////////read from psram
 
-	case 7 :if (current_playing_sample[2]){ram_page_read((one_shot[2].pointer+psram_sample_start),download_size,1,one_shot[2].buf);}
+	case 7 :if (current_playing_sample[2]){ram_page_read((one_play[2].pointer+psram_sample_start),download_size,1,one_play[2].buf);}
 	break;					////////read from psram
-	case 8 :if (current_playing_sample[3]){ram_page_read((one_shot[3].pointer+psram_sample_start),download_size,1,one_shot[3].buf);}
+	case 8 :if (current_playing_sample[3]){ram_page_read((one_play[3].pointer+psram_sample_start),download_size,1,one_play[3].buf);}
 	break;	// only read if enabled
 
  	default:break;
+
 
 
 

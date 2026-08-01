@@ -94,7 +94,7 @@ void program_change(uint8_t pc_value){  // this is ok , getting garbage from seq
 
 		if ((cc>89)&& (cc<98)) {cc_list_extra[cc-90]=value&127;  //input extra settings , pitch, length  etc  0-3 (90-93) is pitch for now
 		samples_store[cc-90].speed=value&127;  //  stores last playback speed
-		one_shot[cc-90].playback_rate=(0x10000*MAX_Rate)-((value&127)<<10);  // writes new playback rate
+		one_play[cc-90].playback_rate=(0x10000*MAX_Rate)-((value&127)<<10);  // writes new playback rate
 		}
 		if ((cc>97)&& (cc<106)) {
 			uint8_t n=cc-98;
@@ -359,28 +359,29 @@ void oneshot_sequencer(void){ // control oneshot progress for main loop, 0 lengt
   		 finish=0;
 
   		 if (one_shot[i].length[part_playing+1]) next_part=1; // enable progress
-
+  		 if (one_shot[i].speed[part_playing+1]>128000) next_part=0; // bad data
+  		if (!one_shot[i].length[part_playing+1]) next_part=0; // bad data
   		 //one_shot[i].playback_rate=(0x10000*MAX_Rate)-(cc_list_extra[i]<<10);  // modify pitch, limited by buffer size
 
   		 if(current_playing_sample[i]){ // advance position
-  			 uint16_t temp=(one_shot[i].position>>16)<<1;  // clear last bit as well , has to be even
+  			 uint16_t temp=(one_play[i].position>>16)<<1;  // clear last bit as well , has to be even
   			 if ((temp)>(128*MAX_Rate)) temp=(128*MAX_Rate); // this thing gets screwed up a lot
-  			 one_shot[i].pointer+=temp;
-  			one_shot[i].playback_rate=one_shot[i].speed[part_playing];// copy rate
-  			if (one_shot[i].playback_rate<1024) one_shot[i].playback_rate=64000;
+  			 one_play[i].pointer+=temp;
+  			one_play[i].playback_rate=one_shot[i].speed[part_playing];// copy rate
+  			if (one_play[i].playback_rate<1024) one_play[i].playback_rate=64000;
   		 }  // advance only in enabled
 
 
-  		 if ((one_shot[i].pointer+(128*MAX_Rate)) >(one_shot[i].end[part_playing])) finish=1; // enable finish or jump to next start
+  		 if ((one_play[i].pointer+(128*MAX_Rate)) >(one_shot[i].end[part_playing])) finish=1; // enable finish or jump to next start
 
-  		 if (finish && (!next_part)){one_shot[i].pointer=one_shot[i].start[part_playing];one_shot[i].position=0;current_playing_sample[i]=0;
+  		 if (finish && (!next_part)){one_play[i].pointer=one_shot[i].start[part_playing];one_play[i].position=0;current_playing_sample[i]=0;
   		 	 	 current_playing_part[i]=0;finish=0;}  //reset sample to start, disable
 
   		 if (finish && next_part){  // select next step if available
   			current_playing_part[i]++; // move one shot to next part set
   			part_playing++;
-  			one_shot[i].pointer=one_shot[part_playing].start[part_playing]; // move to start of the next
-  			one_shot[i].playback_rate=one_shot[i].speed[part_playing];// copy rate
+  			one_play[i].pointer=one_shot[i].start[part_playing]; // move to start of the next
+  			one_play[i].playback_rate=one_shot[i].speed[part_playing];// copy rate
 
 
   		 }
@@ -389,7 +390,7 @@ void oneshot_sequencer(void){ // control oneshot progress for main loop, 0 lengt
 
   		 // reset one shot pointer to start
 
-  		 one_shot[i].position&=0xFFFF; // needs to zero here
+  		 one_play[i].position&=0xFFFF; // needs to zero here
 
   	 }// end of for-loop
 

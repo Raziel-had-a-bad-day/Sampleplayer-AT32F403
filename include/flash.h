@@ -6,7 +6,7 @@
 
 void settings_storage(void){   // runs to store setting and read back
 
-#define variable_count 8
+#define variable_count 9
 
 
 	uint8_t *settings[variable_count]={
@@ -18,12 +18,12 @@ void settings_storage(void){   // runs to store setting and read back
 			&cc_77,
 			&delay_time,
 			(uint8_t*)current_write_pos,
-			(uint8_t*) samples_backup};// might expand it a little
+			(uint8_t*) samples_backup,// might expand it a little
+			(uint8_t*) one_shot_backup};// might expand it a little
 
 
-
-			uint16_t settings_multi[variable_count]={16,32,1,1,1,1,4,sizeof(samples_backup)};   // sets length,  sound_set*x ,512 atm
-			uint8_t settings_temp[512];
+			uint16_t settings_multi[variable_count]={16,32,1,1,1,1,4,sizeof(samples_backup),sizeof(one_shot_backup)};   // sets length,  sound_set*x ,512 atm
+			uint8_t settings_temp[2048];
 			uint16_t settings_total=0;  //adds up position , huge miss here retard alert
 			uint16_t length=0; // max 64 atm
 			uint16_t i=0;
@@ -60,7 +60,7 @@ void flash_settings_write(void){  // sector = 2k
 	flash_sector_erase(read_adr);
 	flash_operation_wait_for(1000);
 
-	for (i=0;i<512;i++){   //
+	for (i=0;i<2048;i++){   //
 		flash_byte_program(read_adr, all_settings[i]);
 
 		  read_adr += 1;
@@ -300,8 +300,11 @@ void controller_process(void){ // process incoming controller info ,16 bit addre
 				case 0:one_shot[sample_select].start[part_select]=sample_address_calculate(sample_select,controller_value); break; // start change enter
 				case 1:one_shot[sample_select].length[part_select]=controller_value;
 				one_shot[sample_select].end[part_select]=sample_address_calculate(sample_select,controller_value);break; // end  enter
+				//case 2:
+				//one_shot[sample_select].speed[part_select]=(0x10000*MAX_Rate)-((controller_value&127)<<10);break;// copy ratebreak;//pitch or playback speed
 				case 2:
-				one_shot[sample_select].speed[part_select]=(0x10000*MAX_Rate)-((controller_value&127)<<10);break;// copy ratebreak;//pitch or playback speed
+				one_shot[sample_select].speed[part_select]=(CNT_list[controller_value]<<1);break;// copy ratebreak;//pitch or playback speed
+
 				case 3:one_shot[sample_select].gap[part_select]=controller_value;break; // following gap length
 				default:break;
 			}

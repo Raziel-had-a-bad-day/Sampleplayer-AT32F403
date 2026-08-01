@@ -25,10 +25,10 @@ void next_sample(void){  // this runs always , sound in generated when ADSR_out 
 
 	//uint32_t one_shot_counter=one_shot_position &((audio_buffer_size*65536)-1);// phase
 
-	uint8_t phase_lfo=(next_sample_tracker+(64-((lfo1_out)>>4)))&63;
+	uint8_t phase_lfo=(next_sample_tracker+(63-((lfo1_out)>>4)))&63;
 	int32_t phase2=0;
 	int32_t phase1=0;
-	uint32_t one_shot_counter=one_shot[0].position; // 63
+	uint32_t one_shot_counter=one_play[0].position; // 63
 	//uint32_t one_shot_counter=one_shot_position &((audio_buffer_size*65536)-1);// phase
 
 	int32_t temp=0;
@@ -83,13 +83,13 @@ void next_sample(void){  // this runs always , sound in generated when ADSR_out 
 	temp=((temp_sample*ADSR_out[1])>>17);*/
 	//////////////////   one shot wave playback   //////////
 
-	//temp2=resample_hermite_oneshot(flash_sample_buf,audio_buffer_size,&one_shot_counter,one_shot_playback_rate);
-	//temp2=resample_hermite_loop(flash_sample_buf,audio_buffer_size,&one_shot_counter,(1<<16));
-	if(current_playing_sample[0]) {temp2=one_shot[0].buf[(one_shot[0].position>>16)];divider++;}    // 30us  , getting corrupted now on 0 sample(new)
-	if(current_playing_sample[1]) {temp4=one_shot[1].buf[(one_shot[1].position>>16)];divider++;}
-	if(current_playing_sample[2]) {temp5=one_shot[2].buf[(one_shot[2].position>>16)];divider++;}
-	//if(current_playing_sample[3]) {temp6=one_shot[3].buf[(one_shot[3].position>>16)];divider++;}
-	if(current_playing_sample[3]) {temp6=resample_linear(one_shot[3].buf,one_shot[3].position); divider++;} //drums
+	//temp2=resample_hermite_oneshot(flash_sample_buf,audio_buffer_size,&one_play_counter,one_play_playback_rate);
+	//temp2=resample_hermite_loop(flash_sample_buf,audio_buffer_size,&one_play_counter,(1<<16));
+	if(current_playing_sample[0]) {temp2=one_play[0].buf[(one_play[0].position>>16)];divider++;}    // 30us  , getting corrupted now on 0 sample(new)
+	if(current_playing_sample[1]) {temp4=one_play[1].buf[(one_play[1].position>>16)];divider++;}
+	if(current_playing_sample[2]) {temp5=one_play[2].buf[(one_play[2].position>>16)];divider++;}
+	//if(current_playing_sample[3]) {temp6=one_play[3].buf[(one_play[3].position>>16)];divider++;}
+	if(current_playing_sample[3]) {temp6=resample_linear(one_play[3].buf,one_play[3].position); divider++;} //drums
 	temp2=temp4+temp5+temp2+temp6;
 	temp2=temp2*(4-divider);
 	//temp2=resample_hermite(flash_sample_buf,one_shot_counter);// 305/257us
@@ -229,8 +229,8 @@ feedback=50; // testing
   // if ((delay_pointer[1]&127)==0)  { memcpy (ram_page_write_buf+4,delay_buffer_2,256);ram_page_write(delay_pointer[1]);} //write to ram
 
 	for (i=0;i<4;i++){
-	one_shot[i].position+=one_shot[i].playback_rate;  // use this now calculate playback position
-	if(one_shot[i].position>(((64*MAX_Rate)-1)<<16)) one_shot[i].position=(((64*MAX_Rate)-1)<<16); // limit to download buffer size
+	one_play[i].position+=one_play[i].playback_rate;  // use this now calculate playback position
+	if(one_play[i].position>(((64*MAX_Rate)-1)<<16)) one_play[i].position=(((64*MAX_Rate)-1)<<16); // limit to download buffer size
 			}
 
 

@@ -172,7 +172,7 @@ float output_gain2=1;   // 1 is ok  0.85 with full feedback
 float side_gain=1; // sidechain
 int16_t multi=128;
 uint8_t settings_write_flag=0;
-uint8_t all_settings[512]={255,255,255,255};
+uint8_t all_settings[2048]={255,255,255,255};
 uint32_t save_timer;
 uint32_t temp_ccr;
 int8_t note_fifo_write=0;
@@ -207,8 +207,8 @@ uint8_t spi_message_cue; // keeps track of spi messages
 int16_t sine_testing[156];
 uint8_t spi_adder=0;
 uint16_t lfo1_counter=0; // simple lfo upcount 0-127(for triangle)  << 8  (slower rates)
-uint8_t lfo1_depth=127;  // 0-127;
-uint16_t lfo1_rate=255;  //  basic rate multiplier , might make it  a lut
+uint8_t lfo1_depth=96;  // 0-127;
+uint16_t lfo1_rate=64;  //  basic rate multiplier , might make it  a lut
 uint16_t lfo1_out=0;  // max sample count for now , not actual wave
 uint16_t lfo1_2_out=0; // second out from lfo1
 uint8_t ch; // delete
@@ -249,7 +249,7 @@ typedef struct {
     uint8_t gap[8]; // end gap for sequencer, maybe in 100ms increments
     uint8_t length[8]; // length 0-127 , store from incoming
 } sample_oneshot;
-sample_oneshot one_shot[8]; // controls reading from memory, might have to fill up during init
+sample_oneshot one_shot[8]; // controls reading from memory, might have to fill up during init , about 1k needed
 
 typedef struct {
     uint32_t pointer;     // current mem address
@@ -284,7 +284,7 @@ uint8_t current_playing_sample[8];// select currently playing sample
 uint8_t current_playing_part[8]; // select part that is playing of sample
 uint32_t sample_write_end_timer=0;
 uint8_t  samples_backup[ sizeof(samples_store)];
-
+uint8_t  one_shot_backup[ sizeof(one_shot)];
 uint8_t midi_hold[3][4];     // 0=Note, 1=PC, 2=CC
 uint8_t midi_msg[3][4];      // partial messages
 uint32_t sidechain_accu=0;

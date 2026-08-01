@@ -125,10 +125,10 @@ int main(void)
 
 ///////////// load settings
 
-	int16_t temp[600];
+	int16_t temp[2048];
 	uint32_t read_adr= settings_data;
 
-	for (i=0;i<512;i++){   // reading ok now
+	for (i=0;i<2048;i++){   // reading ok now
 		//temp[i]=*(uint8_t*)(read_adr);
 		all_settings[i]=*(uint8_t*)(read_adr);
 		  read_adr += 1;
@@ -137,6 +137,25 @@ int main(void)
 
 	//52 onwards
 	memcpy(samples_store,samples_backup, sizeof(samples_backup));  // backup samples struct
+	memcpy(one_shot,one_shot_backup, sizeof(one_shot_backup));  // backup samples struct
+
+	for (int sample=0;sample<8;sample++){  // check for  missing or bad data
+	for (int part=0;part<8;part++){
+		if (one_shot[sample].start[part]<samples_store[sample].ram_addr)
+			one_shot[sample].start[part]=samples_store[sample].ram_addr;
+		if (one_shot[sample].start[part]>16000000)
+			one_shot[sample].start[part]=samples_store[sample].ram_addr;
+		if (one_shot[sample].end[part]<one_shot[sample].start[part])
+			one_shot[sample].end[part]=samples_store[sample].ram_addr;
+		if (one_shot[sample].end[part]>(one_shot[sample].start[part]+samples_store[sample].size_bytes))
+			one_shot[sample].end[part]=samples_store[sample].ram_addr;
+
+		if (one_shot[sample].length[part]>127) one_shot[sample].length[part]=0;
+		if (one_shot[sample].speed[part]>131072)
+				one_shot[sample].speed[part]=65535;
+
+	}
+	}
 
 
 	envelopes_preprocess(0);
@@ -150,15 +169,12 @@ int main(void)
 	if (usart4_total_counter>16000000)  usart4_total_counter=0;  // reset but only if bad data
 
 	for ( i = 0; i < total_sample_count; i++){ // copies sample store data to oneshot but will be replaced once running
-		one_shot[i].playback_rate=(0x10000*MAX_Rate)-((samples_store[i].speed&127)<<10);   // set initial playback rate
-		one_shot[i].start[0]=samples_store[i].ram_addr;
-		one_shot[i].speed[0]=samples_store[i].speed;
-		one_shot[i].length[0]=samples_store[i].length;
-		one_shot[i].length[0]=0;
-		if(! one_shot[1].playback_rate) {one_shot[i].playback_rate=0xFFFF;samples_store[i].speed=64;}
-		one_shot[i].end[0]=samples_store[i].ram_addr+((samples_store[i].size_bytes*samples_store[i].length)>>7); //calculates end part
+		one_play[i].playback_rate=one_shot[i].speed[0];;   // set initial playback rate
+		one_play[i].pointer=one_shot[i].start[0];
+
+		//one_shot[i].end[0]=samples_store[i].ram_addr+((samples_store[i].size_bytes*samples_store[i].length)>>7); //calculates end part
 		if ((samples_store[i].length>127) ||(samples_store[i].length==0) )
-		{one_shot[i].end[0]=samples_store[i].ram_addr+samples_store[i].size_bytes;samples_store[i].length=127;}// fix bad data
+		{samples_store[i].length=127;}// fix bad data
 
 		if (samples_store[i].size_bytes)  current_sample_save++;  // count up sample save position from stored, continued saving until the end
 
@@ -304,6 +320,7 @@ while(1)
 
 		  if (save_timer>60000) {settings_write_flag=1;
 		  memcpy(samples_backup,samples_store, sizeof(samples_store));
+			memcpy(one_shot_backup,one_shot, sizeof(one_shot));
 		  settings_storage();flash_settings_write();save_timer=0;
 
 		  }  // saves every ten minutes
