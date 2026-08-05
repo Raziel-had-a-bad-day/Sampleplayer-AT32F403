@@ -282,6 +282,7 @@ Samples samples_store[16]; // mirror flash and ram ?
 uint8_t current_sample_save=0;
 uint8_t current_playing_sample[8];// select currently playing sample
 uint8_t current_playing_part[8]; // select part that is playing of sample
+uint16_t current_playing_gap[8]; // tracks gap playing , downcount , various resets needed
 uint32_t sample_write_end_timer=0;
 uint8_t  samples_backup[ sizeof(samples_store)];
 uint8_t  one_shot_backup[ sizeof(one_shot)];
@@ -479,4 +480,10 @@ void waves(void) {
 
 
 }
+int32_t sample_grab(uint8_t sample) {
 
+
+ {return one_play[sample].buf[(one_play[sample].position>>16)];}
+
+
+}

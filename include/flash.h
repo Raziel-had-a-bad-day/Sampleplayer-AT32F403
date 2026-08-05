@@ -84,7 +84,8 @@ void flash_counter_write(uint32_t data){  // write flash counter
 uint32_t flash_counter_read(){  // return current flash counter
 
 
-	uint32_t read_adr= settings_data+1024;
+	uint32_t read_adr= settings_data+8196;
+	if (read_adr>16000000)  read_adr=0;  // reset but only if bad data
 	return *(uint32_t*)(read_adr);
 
 }
@@ -276,27 +277,37 @@ void controller_process(void){ // process incoming controller info ,16 bit addre
 	uint8_t n;
 	for (n = 0; n < 4; ++n) { // look for checksum,works, 3 digits , sample(1-4) , part(0-7),parameter (0-3)
 
-		uint8_t checksum = usart3_rx_temp[n] ^ usart3_rx_temp[(n+1)]^ usart3_rx_temp[(n+2)]; //
-
+		uint8_t checksum = usart3_rx_temp[n] ^ usart3_rx_temp[(n+1)&3]^ usart3_rx_temp[(n+2)&3]; //
+		uint8_t play_set=1;
 		if (usart3_rx_temp[(n+3)&3]==checksum){ // getting mixed even when checksum ok
 			controller_address=(usart3_rx_temp[n]) | (usart3_rx_temp[(n+1)&3]<<8);
 			controller_value=(usart3_rx_temp[(n+2)&3])&127;
 			at32_led_toggle(LED2);
 
-			if ((controller_address>484)||(controller_address<110)) {usart3_rx_counter=(usart3_rx_counter+1)&3;usart3_rx_temp[4]=0; return; } // if value is swapped
+
+			// FX starts at 5000 ie 5110  , phaser=5010 delay=511
+
+			if (controller_address>5000) controller_address-=4896;
+			if ((controller_address>484)||(controller_address<110)) {  // if checksum is ok but data is bad
+			usart3_rx_temp[4]=0;
+			usart3_rx_temp[0]=0;usart3_rx_temp[1]=0;
+			usart3_rx_counter=(usart3_rx_counter+1)&3;
+			usart3_rx_counter=0;
+
+			return; } //
 
 
 			if (controller_value>127){ controller_address=0;} // if bad data, clear
 
 			printf(" %d   ",controller_address);printf(" %d  \n",controller_value);
 			uint8_t midi_generated[3]={153,1,127};  //trigger sampple playback
-			uint8_t sample_select=((controller_address/100)-1)&3;
+			uint8_t sample_select=((controller_address/100)-1)&15; // 0-3 for now
 			uint8_t part_select=(((controller_address%100)/10)-1)&7; // part edited
-			uint8_t feat_select=((controller_address%100)%10)&3; // select between start, end, pitch,gap
+			uint8_t feat_select=((controller_address%100)%10); // select between start, end, pitch,gap
 
+			current_playing_part[sample_select]=part_select;
 
-
-			switch (feat_select) { // modify values for sample
+			switch (feat_select) { // modify values for sample , this works ok
 				case 0:one_shot[sample_select].start[part_select]=sample_address_calculate(sample_select,controller_value); break; // start change enter
 				case 1:one_shot[sample_select].length[part_select]=controller_value;
 				one_shot[sample_select].end[part_select]=sample_address_calculate(sample_select,controller_value);break; // end  enter
@@ -306,18 +317,31 @@ void controller_process(void){ // process incoming controller info ,16 bit addre
 				one_shot[sample_select].speed[part_select]=(CNT_list[controller_value]<<1);break;// copy ratebreak;//pitch or playback speed
 
 				case 3:one_shot[sample_select].gap[part_select]=controller_value;break; // following gap length
+				case 4:lfo1_rate=controller_value;play_set=0;break;
+				case 5:delay_time=controller_value;play_set=0;break;
+
 				default:break;
-			}
+			} // end of feat select
+
+    		//one_play[sample_select].pointer=one_shot[sample_select].start[part_select];
+    		//one_play[sample_select].position=0;
+    		//one_play[sample_select].playback_rate=one_shot[sample_select].speed[part_select];
+
+
+
+			if (play_set){
 			if (!one_shot[sample_select].start[part_select]) one_shot[sample_select].start[part_select]=samples_store[sample_select].ram_addr; // in case start is 0
+
+			if (part_select==1) sample_select+=5;
 			if (!midi_in_clear){  // trigger midi note
 				usart2_rx_buffer[0]=153;
 				usart2_rx_buffer[1]=sample_select;
 				usart2_rx_buffer[2]=127;
 				midi_in_clear=1; }  // this is temp
-
+			}
 			break;
-		}
-	}
+		}// end of checksum
+	}// end of loop
 	usart3_rx_temp[4]=0;  //clear receive flag
 	}
 

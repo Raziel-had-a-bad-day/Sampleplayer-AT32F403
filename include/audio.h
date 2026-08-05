@@ -85,12 +85,21 @@ void next_sample(void){  // this runs always , sound in generated when ADSR_out 
 
 	//temp2=resample_hermite_oneshot(flash_sample_buf,audio_buffer_size,&one_play_counter,one_play_playback_rate);
 	//temp2=resample_hermite_loop(flash_sample_buf,audio_buffer_size,&one_play_counter,(1<<16));
-	if(current_playing_sample[0]) {temp2=one_play[0].buf[(one_play[0].position>>16)];divider++;}    // 30us  , getting corrupted now on 0 sample(new)
-	if(current_playing_sample[1]) {temp4=one_play[1].buf[(one_play[1].position>>16)];divider++;}
-	if(current_playing_sample[2]) {temp5=one_play[2].buf[(one_play[2].position>>16)];divider++;}
+
+
+	for (int var = 0; var < 4; ++var) {
+	if ((current_playing_sample[var]==1) ) {temp2+=sample_grab(var);divider++;} // might have to expand
+	}
+
+	//if(current_playing_sample[0]) {temp2=one_play[0].buf[(one_play[0].position>>16)];divider++;}    // 30us  , getting corrupted now on 0 sample(new)
+	//if(current_playing_sample[1]) {temp4=one_play[1].buf[(one_play[1].position>>16)];divider++;}
+	//if(current_playing_sample[2]) {temp5=one_play[2].buf[(one_play[2].position>>16)];divider++;}
 	//if(current_playing_sample[3]) {temp6=one_play[3].buf[(one_play[3].position>>16)];divider++;}
-	if(current_playing_sample[3]) {temp6=resample_linear(one_play[3].buf,one_play[3].position); divider++;} //drums
-	temp2=temp4+temp5+temp2+temp6;
+	//if(current_playing_sample[3]) {temp6=resample_linear(one_play[3].buf,one_play[3].position); divider++;} //drums
+	//temp2=temp4+temp5+temp2+temp6;
+
+
+
 	temp2=temp2*(4-divider);
 	//temp2=resample_hermite(flash_sample_buf,one_shot_counter);// 305/257us
 	//temp2=resample_hermite_float(flash_sample_buf,one_shot_counter);// 328/257us
@@ -105,6 +114,7 @@ void next_sample(void){  // this runs always , sound in generated when ADSR_out 
 	//temp=temp2; //testing
 	temp=((temp3+temp)); // only with fx
 	temp=(temp*current_velocity)>>7;
+	temp=temp+(temp2/2);
 //	if (temp>(1<<22))     {multi-=4; }
 
 	//temp*=output_gain;  // separate control for each , this on eis about 0.7 with 3 notes
@@ -112,7 +122,7 @@ void next_sample(void){  // this runs always , sound in generated when ADSR_out 
 	//if (temp>(1<<15)) output_gain*=0.9;  //  needs to be near mixer
 
 	//if (temp2>(1<<10)) side_gain*=0.9999;  //sidechain , this can be elsewhere
-	if (temp2>(1<<2))    sidechain_accu=((sidechain_accu*255)+temp2)>>8;  // dc accu ,slow rise
+	//if (temp2>(1<<2))    sidechain_accu=((sidechain_accu*255)+temp2)>>8;  // dc accu ,slow rise
 
 	//if(side_gain<0.5) side_gain=0.5;
 	//side_gain=1-side_gain;
@@ -543,3 +553,4 @@ uint16_t lfo_out(){   // creates and lfo output/  one step
 	return output;
 
 }
+

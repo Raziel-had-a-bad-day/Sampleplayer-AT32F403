@@ -162,11 +162,11 @@ int main(void)
 	envelopes_preprocess(1);
 	envelopes_preprocess(2);
 	envelopes_preprocess(3);
-	usart4_total_counter=flash_counter_read();
+	usart4_total_counter=flash_counter_read(); // this needs to change
 
 
 
-	if (usart4_total_counter>16000000)  usart4_total_counter=0;  // reset but only if bad data
+
 
 	for ( i = 0; i < total_sample_count; i++){ // copies sample store data to oneshot but will be replaced once running
 		one_play[i].playback_rate=one_shot[i].speed[0];;   // set initial playback rate
@@ -271,6 +271,7 @@ while(1)
  		 		delay_calc();
  		 	  start_time=tmr_counter_value_get(TMR6);
  		 	 	 // about 1200us available before it goes bad
+ 		 	oneshot_looper(); // process oneshot data
 
  		 for (i=0;i<audio_buffer_size;i++){  // 64 atm moment, 250us with linear +40us with hermite resample
  			// tmr_counter[i]=tmr_counter_value_get(TMR7);
@@ -281,15 +282,12 @@ while(1)
  			} // process samples  300uS atm
 
  		 if ( usart3_rx_temp[4]) controller_process();
- 		 if(ADSR_timer>=7) {audio_gain_global(); ADSR_TIM_writer();ADSR_timer=0;} else ADSR_timer++; // 25us*64*8 = 12.8ms
+ 		 if(ADSR_timer>=7) {audio_gain_global(); ADSR_TIM_writer();gap_control();ADSR_timer=0;} else ADSR_timer++; // 25us*64*8 = 12.8ms
 
  		 	 if ((!psram_busy)&&(!spi_process_counter)) spi_process_counter=1;  // starts spi processing, can block
 
  		 	 	 stop_time=tmr_counter_value_get(TMR6);
  		  	 	if(stop_time>start_time) elapsed_time=stop_time-start_time; else elapsed_time=0; // return elapsed time for testing
-
- 		  	 	oneshot_sequencer(); // process oneshot data
-
 
 		 		memset(flash_sample_buf,0,2048);  // clear
 		 		ccr_counter=0;
