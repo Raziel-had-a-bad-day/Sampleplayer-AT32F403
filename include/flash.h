@@ -72,7 +72,7 @@ void flash_settings_write(void){  // sector = 2k
 }
 void flash_counter_write(uint32_t data){  // write flash counter
 	flash_unlock();
-	uint32_t read_adr= settings_data+1024;  // just a preset location
+	uint32_t read_adr= settings_data+8196;  // just a preset location
 	uint16_t i=0;
 	for (i=0;i<4;i++){
 		data=data>>i;
@@ -288,7 +288,7 @@ void controller_process(void){ // process incoming controller info ,16 bit addre
 			// FX starts at 5000 ie 5110  , phaser=5010 delay=511
 
 			if (controller_address>5000) controller_address-=4896;
-			if ((controller_address>484)||(controller_address<110)) {  // if checksum is ok but data is bad
+			if ((controller_address>884)||(controller_address<110)) {  // if checksum is ok but data is bad
 			usart3_rx_temp[4]=0;
 			usart3_rx_temp[0]=0;usart3_rx_temp[1]=0;
 			usart3_rx_counter=(usart3_rx_counter+1)&3;
@@ -301,20 +301,23 @@ void controller_process(void){ // process incoming controller info ,16 bit addre
 
 			printf(" %d   ",controller_address);printf(" %d  \n",controller_value);
 			uint8_t midi_generated[3]={153,1,127};  //trigger sampple playback
-			uint8_t sample_select=((controller_address/100)-1)&15; // 0-3 for now
+			uint8_t sample_select=((controller_address/100)-1)&7; // 0-3 for now
 			uint8_t part_select=(((controller_address%100)/10)-1)&7; // part edited
 			uint8_t feat_select=((controller_address%100)%10); // select between start, end, pitch,gap
-
+			uint8_t playing_now=1;
+			uint8_t replace_sample=sample_select;
+			uint32_t speed=0;
 			current_playing_part[sample_select]=part_select;
-
+			if (!samples_store[sample_select].used) replace_sample=poly_limit; //replace with another sample if missing
 			switch (feat_select) { // modify values for sample , this works ok
-				case 0:one_shot[sample_select].start[part_select]=sample_address_calculate(sample_select,controller_value); break; // start change enter
+				case 0:one_shot[sample_select].start[part_select]=sample_address_calculate(replace_sample,controller_value); break; // start change enter
 				case 1:one_shot[sample_select].length[part_select]=controller_value;
-				one_shot[sample_select].end[part_select]=sample_address_calculate(sample_select,controller_value);break; // end  enter
+				one_shot[sample_select].end[part_select]=sample_address_calculate(replace_sample,controller_value);break; // end  enter
 				//case 2:
 				//one_shot[sample_select].speed[part_select]=(0x10000*MAX_Rate)-((controller_value&127)<<10);break;// copy ratebreak;//pitch or playback speed
 				case 2:
-				one_shot[sample_select].speed[part_select]=(CNT_list[controller_value]<<1);break;// copy ratebreak;//pitch or playback speed
+					if (controller_value>103) speed=(CNT_list[controller_value]<<1); else speed= (controller_value+1)<<10; // 103-127 (2 octaves) 0-103 fine tuned speed 65 default
+					one_shot[sample_select].speed[part_select]=speed;break;// copy ratebreak;//pitch or playback speed
 
 				case 3:one_shot[sample_select].gap[part_select]=controller_value;break; // following gap length
 				case 4:lfo1_rate=controller_value;play_set=0;break;
@@ -331,9 +334,13 @@ void controller_process(void){ // process incoming controller info ,16 bit addre
 
 			if (play_set){
 			if (!one_shot[sample_select].start[part_select]) one_shot[sample_select].start[part_select]=samples_store[sample_select].ram_addr; // in case start is 0
-
+			for (int var = 0; var < 8; ++var) {
+				if (current_playing_sample[var]) playing_now=0;
+			}
 			if (part_select==1) sample_select+=5;
-			if (!midi_in_clear){  // trigger midi note
+
+
+			if ((!midi_in_clear) && playing_now){  // trigger midi note ,but only when nothing is playing
 				usart2_rx_buffer[0]=153;
 				usart2_rx_buffer[1]=sample_select;
 				usart2_rx_buffer[2]=127;

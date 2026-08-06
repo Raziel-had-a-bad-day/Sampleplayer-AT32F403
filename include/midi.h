@@ -244,12 +244,12 @@ uint8_t incoming_message[3];    //
 
 		        uint8_t selected_note=drum_note_hold[1]%12;   //
 		        printf("sound playing %d \n",selected_note);
-	        	if (selected_note>4) {selected_note-=5;current_playing_part[selected_note]=1;  }
+	        	if (selected_note>5) {selected_note-=6;current_playing_part[selected_note]=1;  }
 
 	        	else current_playing_part[selected_note]=0;
 
 		       // if (selected_note>3) {memset(current_playing_sample,0,16); selected_note&=3;} //stops all samples and only plays the next one
-		        if (samples_store[selected_note].used) { // ignore if no sample
+		        if (one_shot[selected_note].length[0]) { // ignore if no sample
 		        	uint8_t set_note=selected_note;
 
 
@@ -413,14 +413,14 @@ void oneshot_sequencer(void){ // control oneshot progress for main loop, 0 lengt
 
 void oneshot_looper(void){ // loop sample until triggered again , maybe have lights that show sampleplaying
 	// also change start position just by pressing diff keys or play diff parts
-	// need to enable gap processing though
+	// up to here any number of samples then change it when loading from ram
   	 uint8_t i;
   	 uint8_t part_playing=0;
   	 uint8_t next_part=0;
   	 uint8_t finish=0;
   	 uint8_t advance=0;
 
-  	 for (i=0;i<4;i++){  // control progress off samples
+  	 for (i=0;i<8;i++){  // control progress off samples
   		 part_playing=current_playing_part[i];   // current part progress of the sample
   		 next_part=0;
   		 finish=0;

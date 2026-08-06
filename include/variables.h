@@ -6,7 +6,7 @@
 #define user_data_start 0x080E0000
 #define settings_data   0x080EF000  // the last 256 byte
 #define SPIM_address  0x08400000   // default 16MB
-#define cpu_clock    120000000
+#define cpu_clock    192000000  // this is correct atm
 #define uart_receive 3     // uart buffer size ,needs at least 3 to work properly
 #define cpu_clock_prescaler 1  // for pwm
 #define TIM_counter_CNT 2048  //  41khz sampple rate ,320hz  at +1
@@ -20,7 +20,8 @@
 #define flash_last_byte 0xFFFFFF // 16 777 215
 #define flash_record_backup 0xFFEF00// page address should always start on 00  !!!!
 
-#define poly 8   // polyphony- spell check doesn't know this word ,retarded
+#define poly 8   // polyphony-
+#define poly_limit 6 //total playable audio channels atm from psram , one_play limit
 #define note_on 144
 #define p_change 192
 #define midi_channel 4  // current midi channel
@@ -189,7 +190,7 @@ int32_t temp_wave;
 uint8_t sound_triggers[8]; // note_trigger for invidiual sounds
 int16_t one_shot_wav[296]; // holds incoming data for one shot sample
 //uint32_t one_shot_pointer[8]; // points to current byte location in actual wav file
-
+uint8_t phaser_enable=0;
 //uint32_t one_shot_playback_rate[8]={0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF};
 //uint32_t one_shot_position[8];// use to calc pos,fine within the sample buffer , 1<<17 is one full step
 uint8_t temp_store[256];  // delete this
@@ -253,8 +254,8 @@ sample_oneshot one_shot[8]; // controls reading from memory, might have to fill 
 
 typedef struct {
     uint32_t pointer;     // current mem address
-    uint32_t playback_rate;// speed of playback , this is calculated
-    uint32_t position;      // 0-63(<<16)  position within buffer
+    uint32_t playback_rate;// (0.5-2) <<16  speed of playback , this is calculated
+    uint32_t position;      // (0-63)<<16  position within buffer
     int16_t  buf[256];    // read data
 
 } sample_oneplay;
@@ -283,6 +284,8 @@ uint8_t current_sample_save=0;
 uint8_t current_playing_sample[8];// select currently playing sample
 uint8_t current_playing_part[8]; // select part that is playing of sample
 uint16_t current_playing_gap[8]; // tracks gap playing , downcount , various resets needed
+uint8_t current_ducking_level[8]; // sets the divider for ducking, this is dynamicly controlled by current_playing_sample , might use it for level setting
+uint8_t current_ducking_mask[8]={0,0,0,1,3,0,0,0}; // enable for sounds to be compressed
 uint32_t sample_write_end_timer=0;
 uint8_t  samples_backup[ sizeof(samples_store)];
 uint8_t  one_shot_backup[ sizeof(one_shot)];

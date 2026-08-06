@@ -70,6 +70,7 @@ void testing(void){
 void ram_page_read(uint32_t address,uint16_t size,uint8_t interface,int16_t* buf){   // receive 16bit word  ,add always +2 bytes to avoid losing data
    // needs extra byte at the end to read correctly or it fails
 	//address has to even , always or lose data
+	//size in bytes
 
 		spi_read_pointer=buf;
 		address=(address>>1)<<1;   // only way to avoid corrupt last bit
@@ -279,7 +280,7 @@ void wk_dma_channel_config(dma_channel_type* dmax_channely, uint32_t peripheral_
 	// Reliable re-arm for SPI4 DMA (Normal mode, variable size)
 	// Call this every time you want to start a new transfer (TX, RX, or both)
 	// TX: DMA1 Channel 3  (Memory -> SPI4)
-void spi_message_process (void){
+void spi_message_process (void){  // send and receive list from psram
 	uint16_t download_size=download_buffer; // sets max downloaded data per fetch mostly to get extra data if needed , minimum 128+2 for now
 	switch(spi_process_counter){  // cue spi messages here
 	case 0: if (psram_busy) spi_process_counter=15; else spi_process_counter=1;break;
@@ -289,8 +290,13 @@ void spi_message_process (void){
 	case 2:  ram_page_read((delay_pointer[0]*2) , download_size, 1,ram_out);break; // leave extra when reading, delay read
 
 	case 3 : ram_page_write((delay_pointer[1]*2), ram_in,(audio_buffer_size*2),1);break;//delay_write
+
 	case 4 : ram_page_write((psram_sample_start-357), test_int,256,1 );break;//test write ,might just run it always for now
-	case 5:  memset(test_int_buf,0,254);ram_page_read((psram_sample_start-357) , 254, 1,test_int_buf);break; // test read back
+	//case 5:  memset(test_int_buf,0,254);ram_page_read((psram_sample_start-357) , 254, 1,test_int_buf);break; // test read back
+	case 5 :if (current_playing_sample[5]) {ram_page_read((one_play[5].pointer+psram_sample_start),download_size,1,one_play[5].buf);}
+	break;
+
+
 	case 6 :if (current_playing_sample[1]) {ram_page_read((one_play[1].pointer+psram_sample_start),download_size,1,one_play[1].buf);}
 	break;				////////read from psram
 
@@ -298,7 +304,8 @@ void spi_message_process (void){
 	break;					////////read from psram
 	case 8 :if (current_playing_sample[3]){ram_page_read((one_play[3].pointer+psram_sample_start),download_size,1,one_play[3].buf);}
 	break;	// only read if enabled
-
+	case 9 :if (current_playing_sample[4]){ram_page_read((one_play[4].pointer+psram_sample_start),download_size,1,one_play[4].buf);}
+	break;	// only read if enabled
  	default:break;
 
 
@@ -307,7 +314,7 @@ void spi_message_process (void){
  	  }
 
 
- 	 if (spi_process_counter>=8) spi_process_counter=0; else spi_process_counter++;
+ 	 if (spi_process_counter>=9) spi_process_counter=0; else spi_process_counter++;
 
 	}
 
@@ -355,7 +362,7 @@ void uart_receive_save(void){ // only after 128 bytes
 
 			for (int i = 0; i < total_sample_count; i++){  // look for empty slot
 				if (samples_store[i].used>1)samples_store[i].used=0;  // in case bad data
-				if (!samples_store[i].used) {empty=i; break;}
+				if ((!samples_store[i].used) && (!samples_store[i].size_bytes)) {empty=i; break;}  // only if size is 0 too
 			}
 			//empty=0; // force only first slot for now , delete later
 			current_sample_save=empty; // saves

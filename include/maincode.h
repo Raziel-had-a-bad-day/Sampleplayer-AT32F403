@@ -70,7 +70,9 @@ void dac_config(void){
 	     crm_clocks_freq_get(&crm_clocks_freq_struct);
 
 	     /* ==================== TMR7 - DAC Sample Rate Trigger (~40kHz) ==================== */
-	     tmr_base_init(TMR7, 24, (crm_clocks_freq_struct.sclk_freq / 1000000 - 1));   // 25-1 → ~40kHz
+	    // tmr_base_init(TMR7, 24, (crm_clocks_freq_struct.sclk_freq / 1000000 - 1));   // 25-1 → ~40kHz  , 192khz
+	     tmr_base_init(TMR7, 4352, (crm_clocks_freq_struct.sclk_freq /192000000-1));   // 44100  , 192khz   , prescaler ,divider , tested correct
+
 	     tmr_cnt_dir_set(TMR7, TMR_COUNT_UP);
 	     tmr_primary_mode_select(TMR7, TMR_PRIMARY_SEL_OVERFLOW);   // TRGO on update event
 
@@ -269,7 +271,7 @@ void spi4_init(void)
   spi_init_struct.master_slave_mode = SPI_MODE_MASTER;
   spi_init_struct.frame_bit_num = SPI_FRAME_8BIT;
   spi_init_struct.first_bit_transmission = SPI_FIRST_BIT_MSB;
-  spi_init_struct.mclk_freq_division = SPI_MCLK_DIV_2;  // 2 is default, max flash read is 50mhz though
+  spi_init_struct.mclk_freq_division = SPI_MCLK_DIV_2;  // 2 is default (48mhz) , max flash read is 50mhz though
   spi_init_struct.clock_polarity = SPI_CLOCK_POLARITY_LOW;
   spi_init_struct.clock_phase = SPI_CLOCK_PHASE_1EDGE;
   spi_init_struct.cs_mode_selection = SPI_CS_SOFTWARE_MODE;

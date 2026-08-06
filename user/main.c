@@ -157,18 +157,26 @@ int main(void)
 	}
 	}
 
-
+//	for (int sample=0;sample<poly_limit;sample++){ // if one is turned off  ,load up next after the poly limit , this is temp
+//
+//		if (!samples_store[sample].used) {
+//
+//			 one_shot[sample].start[0]=samples_store[poly_limit].ram_addr;
+//			 one_shot[sample].end[0]=one_shot[poly_limit].start[0]+samples_store[poly_limit].size_bytes;
+//					}
+//
+//	}
 	envelopes_preprocess(0);
 	envelopes_preprocess(1);
 	envelopes_preprocess(2);
 	envelopes_preprocess(3);
 	usart4_total_counter=flash_counter_read(); // this needs to change
+	if (usart4_total_counter>16000000) usart4_total_counter=0;
 
 
 
 
-
-	for ( i = 0; i < total_sample_count; i++){ // copies sample store data to oneshot but will be replaced once running
+	for ( i = 0; i < 8; i++){ // copies sample store data to oneshot but will be replaced once running
 		one_play[i].playback_rate=one_shot[i].speed[0];;   // set initial playback rate
 		one_play[i].pointer=one_shot[i].start[0];
 
@@ -272,23 +280,24 @@ while(1)
  		 	  start_time=tmr_counter_value_get(TMR6);
  		 	 	 // about 1200us available before it goes bad
  		 	oneshot_looper(); // process oneshot data
-
+ 		 	ducking_control();
  		 for (i=0;i<audio_buffer_size;i++){  // 64 atm moment, 250us with linear +40us with hermite resample
  			// tmr_counter[i]=tmr_counter_value_get(TMR7);
  			 next_sample_tracker=i;  // just counts up inside the buf
  			 ccr_counter_2=i;
- 			 next_sample();
+ 			 next_sample();  // 8 *256 (inc delay r/w) 11mbits
 
  			} // process samples  300uS atm
 
  		 if ( usart3_rx_temp[4]) controller_process();
- 		 if(ADSR_timer>=7) {audio_gain_global(); ADSR_TIM_writer();gap_control();ADSR_timer=0;} else ADSR_timer++; // 25us*64*8 = 12.8ms
+ 		 if(ADSR_timer>7) {audio_gain_global(); ADSR_TIM_writer();gap_control();ADSR_timer=0;} else ADSR_timer++; // 22.6us*64*8 = 11.6 ms
+ 		 	 //unsure how accurate this is
 
  		 	 if ((!psram_busy)&&(!spi_process_counter)) spi_process_counter=1;  // starts spi processing, can block
 
  		 	 	 stop_time=tmr_counter_value_get(TMR6);
  		  	 	if(stop_time>start_time) elapsed_time=stop_time-start_time; else elapsed_time=0; // return elapsed time for testing
-
+ 		  	 	// sitting at 510us , 580us with FX
 		 		memset(flash_sample_buf,0,2048);  // clear
 		 		ccr_counter=0;
 		 		dac_ready=0;
@@ -502,7 +511,7 @@ void USART3_IRQHandler(void)  //receive from controller buttons bluepill, works
 
 		usart3_rx_buffer[usart3_rx_counter] = usart_data_receive(USART3);  //
 		usart3_rx_temp[usart3_rx_counter]=usart3_rx_buffer[usart3_rx_counter];
-		usart3_rx_temp[4]=1; // receive flag
+		if (usart3_rx_counter==3) usart3_rx_temp[4]=1; // receive flag
 		 usart3_rx_counter=(usart3_rx_counter+1)&3;
 	}
 

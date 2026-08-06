@@ -43,6 +43,8 @@ void next_sample(void){  // this runs always , sound in generated when ADSR_out 
 	uint8_t divider=0;
 	int16_t* pointer = in_sample_holder;
 	int16_t* pointer2 = in_sample_holder_2;
+
+
 	//uint32_t pointer3=SPIM_START_ADDR+one_shot_pointer;
 	//int32_t pointer3=user_data_start+one_shot_pointer;
 
@@ -87,8 +89,8 @@ void next_sample(void){  // this runs always , sound in generated when ADSR_out 
 	//temp2=resample_hermite_loop(flash_sample_buf,audio_buffer_size,&one_play_counter,(1<<16));
 
 
-	for (int var = 0; var < 4; ++var) {
-	if ((current_playing_sample[var]==1) ) {temp2+=sample_grab(var);divider++;} // might have to expand
+	for (int var = 0; var < poly_limit; ++var) {
+	if ((current_playing_sample[var]==1) ) {temp2+=(sample_grab(var)>>current_ducking_level[var]);			;divider++;} // might have to expand
 	}
 
 	//if(current_playing_sample[0]) {temp2=one_play[0].buf[(one_play[0].position>>16)];divider++;}    // 30us  , getting corrupted now on 0 sample(new)
@@ -100,7 +102,8 @@ void next_sample(void){  // this runs always , sound in generated when ADSR_out 
 
 
 
-	temp2=temp2*(4-divider);
+	//temp2=temp2*(4-divider);
+	//temp2=temp2*2;
 	//temp2=resample_hermite(flash_sample_buf,one_shot_counter);// 305/257us
 	//temp2=resample_hermite_float(flash_sample_buf,one_shot_counter);// 328/257us
 	//temp2=((flash_sample_buf[next_sample_tracker]*ADSR_out[2])>>7); //246/198  us
@@ -160,7 +163,7 @@ feedback=50; // testing
 
 		ram_in[next_sample_tracker]=delay_filter; // write back stops here, maybe lower signal and then gain
 		//ram_write(delay_2,(int16_t) delay_filter); // write back stops here
-		int32_t dry  = (int32_t)temp   * 50;
+		int32_t dry  = (int32_t)temp   * 50;   // these can be elminated
 		int32_t wet  =delayed      * 50;
 		int32_t mix  = dry + wet;
 		int32_t wet_2  =delayed_2      * 50;
@@ -179,6 +182,8 @@ feedback=50; // testing
 	if (temp>(1<<15)) {audio_gain_cut[0]++;audio_gain_cut[1]++;}
 	if (temp3>(1<<15)) {audio_gain_cut[0]++;audio_gain_cut[1]++;}
 
+
+	if (phaser_enable){  // turn off on 0
 	phase_delay [next_sample_tracker]=temp2;
 	phase1=(phase_delay[phase_lfo]+temp2)/2;
 	phase2=(phase_delay[(32+phase_lfo)&63]+temp2)/2;
@@ -188,17 +193,17 @@ feedback=50; // testing
 	temp+=phase1;// mix back
 
 	temp3+=phase2;
-
+	}
 
 	//temp_out=(temp>>5)+2048;
 
 
 	//current_velocity=temp_sample;
 	//current_velocity=100;
-	temp=(temp)>>6; // basic note velocity , not exact based on last value sent
+	temp=(temp)>>(4+phaser_enable); // basic note velocity , not exact based on last value sent
 	//temp=temp>>5;
 
-		temp3=temp3>>6;
+		temp3=temp3>>(4+phaser_enable);
 		//temp3=sine_testing[next_sample_tracker];temp=temp3;   // grab sample from flash
 	temp+=2047;
 	temp3+=2047;
@@ -238,7 +243,7 @@ feedback=50; // testing
 
   // if ((delay_pointer[1]&127)==0)  { memcpy (ram_page_write_buf+4,delay_buffer_2,256);ram_page_write(delay_pointer[1]);} //write to ram
 
-	for (i=0;i<4;i++){
+	for (i=0;i<poly;i++){
 	one_play[i].position+=one_play[i].playback_rate;  // use this now calculate playback position
 	if(one_play[i].position>(((64*MAX_Rate)-1)<<16)) one_play[i].position=(((64*MAX_Rate)-1)<<16); // limit to download buffer size
 			}
@@ -544,6 +549,7 @@ uint16_t lfo_out(){   // creates and lfo output/  one step
 	lfo1_counter=(lfo1_counter+lfo1_rate)&32767;   // 15 bit
 	test= lfo1_counter>>8;
 	if (test>127) test=127;
+	if (lfo1_rate>2) phaser_enable=2; else phaser_enable=0;
 	output=sine_wave[test]; // 0-1023
 	//lfo1_2_out=output;
 	//output=((output*lfo1_depth)>>8)+(lfo1_depth*2);
@@ -553,4 +559,33 @@ uint16_t lfo_out(){   // creates and lfo output/  one step
 	return output;
 
 }
+void ducking_control(void){  // creates current_ducking_level for audio
+	uint8_t duck=0;
+	for (int var = 0; var < 8; ++var) {
 
+		if (current_ducking_mask[var]) {  // only test ducking slaves
+			duck=0;
+			for (int i = 0; i< 8; ++i) {
+				if ((var!=i) && (current_playing_sample[i]==1) && (!current_ducking_mask[i])) duck=1;  // do not activate by other active ducking
+			}
+			if (duck) current_ducking_level[var]=current_ducking_mask[var]&3; else current_ducking_level[var]=0;
+		}
+
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
