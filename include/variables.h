@@ -60,6 +60,9 @@ uint8_t usart4_rx_buffer[256]; // uart 3 rx buffer
 int16_t usart4_int_buffer[130];
 uint8_t usart4_rx_counter=0;// incoming data counter
 uint8_t usart3_rx_buffer[4]; // uart 3 rx buffer
+volatile uint16_t mtc_clock=0;
+uint16_t mtc_clock_buf; // stores for update
+uint16_t mtc_clock_timer=0; // measures for syncro
 
 volatile uint8_t usart3_rx_counter=0;// incoming data counter
 volatile uint8_t usart3_rx_temp[5];// holds temp info from usart3
@@ -249,6 +252,7 @@ typedef struct {
     uint32_t speed[8]; // pitch or playback speed 0-127 for seq
     uint8_t gap[8]; // end gap for sequencer, maybe in 100ms increments
     uint8_t length[8]; // length 0-127 , store from incoming
+    uint8_t roll[8]; // roll/repeat 0-15 roll speed[0:3] repeat 0-7 [4:7]
 } sample_oneshot;
 sample_oneshot one_shot[8]; // controls reading from memory, might have to fill up during init , about 1k needed
 
@@ -281,11 +285,14 @@ uint32_t next_sample_id = 1;
 
 Samples samples_store[16]; // mirror flash and ram ?
 uint8_t current_sample_save=0;
-uint8_t current_playing_sample[8];// select currently playing sample
+uint8_t current_playing_sample[8];// select currently playing sample 0=off 1=sound 2=gap
 uint8_t current_playing_part[8]; // select part that is playing of sample
 uint16_t current_playing_gap[8]; // tracks gap playing , downcount , various resets needed
 uint8_t current_ducking_level[8]; // sets the divider for ducking, this is dynamicly controlled by current_playing_sample , might use it for level setting
-uint8_t current_ducking_mask[8]={0,0,0,1,3,0,0,0}; // enable for sounds to be compressed
+uint8_t current_ducking_mask[8]={0,0,0,1,1,0,0,0}; // enable for sounds to be compressed
+uint16_t current_roll_gap[8];  // similar to gap counter but shorter for stutter and roll effects
+uint8_t current_roll_count[8];  // counts up or down each time sample repeats while in roll
+
 uint32_t sample_write_end_timer=0;
 uint8_t  samples_backup[ sizeof(samples_store)];
 uint8_t  one_shot_backup[ sizeof(one_shot)];

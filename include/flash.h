@@ -288,7 +288,7 @@ void controller_process(void){ // process incoming controller info ,16 bit addre
 			// FX starts at 5000 ie 5110  , phaser=5010 delay=511
 
 			if (controller_address>5000) controller_address-=4896;
-			if ((controller_address>884)||(controller_address<110)) {  // if checksum is ok but data is bad
+			if ((controller_address>888)||(controller_address<110)) {  // if checksum is ok but data is bad
 			usart3_rx_temp[4]=0;
 			usart3_rx_temp[0]=0;usart3_rx_temp[1]=0;
 			usart3_rx_counter=(usart3_rx_counter+1)&3;
@@ -303,7 +303,7 @@ void controller_process(void){ // process incoming controller info ,16 bit addre
 			uint8_t midi_generated[3]={153,1,127};  //trigger sampple playback
 			uint8_t sample_select=((controller_address/100)-1)&7; // 0-3 for now
 			uint8_t part_select=(((controller_address%100)/10)-1)&7; // part edited
-			uint8_t feat_select=((controller_address%100)%10); // select between start, end, pitch,gap
+			uint8_t feat_select=((controller_address%100)%10); // select between start, end, pitch,gap, roll speed ,roll repeat
 			uint8_t playing_now=1;
 			uint8_t replace_sample=sample_select;
 			uint32_t speed=0;
@@ -313,22 +313,29 @@ void controller_process(void){ // process incoming controller info ,16 bit addre
 				case 0:one_shot[sample_select].start[part_select]=sample_address_calculate(replace_sample,controller_value); break; // start change enter
 				case 1:one_shot[sample_select].length[part_select]=controller_value;
 				one_shot[sample_select].end[part_select]=sample_address_calculate(replace_sample,controller_value);break; // end  enter
-				//case 2:
-				//one_shot[sample_select].speed[part_select]=(0x10000*MAX_Rate)-((controller_value&127)<<10);break;// copy ratebreak;//pitch or playback speed
+/*
+				case 2:
+				one_shot[sample_select].speed[part_select]=(0x10000*MAX_Rate)-((controller_value&127)<<10);break;// copy ratebreak;//pitch or playback speed
+*/
 				case 2:
 					if (controller_value>103) speed=(CNT_list[controller_value]<<1); else speed= (controller_value+1)<<10; // 103-127 (2 octaves) 0-103 fine tuned speed 65 default
 					one_shot[sample_select].speed[part_select]=speed;break;// copy ratebreak;//pitch or playback speed
 
 				case 3:one_shot[sample_select].gap[part_select]=controller_value;break; // following gap length
-				case 4:lfo1_rate=controller_value;play_set=0;break;
-				case 5:delay_time=controller_value;play_set=0;break;
+
+				case 4 :one_shot[sample_select].roll[part_select]=((one_shot[sample_select].roll[part_select]&112)+(controller_value&15));break;  // roll length (length of time between repeats)
+				case 5 :one_shot[sample_select].roll[part_select]=(one_shot[sample_select].roll[part_select]&15)+ ((controller_value&7)<<4);break;// roll repeat (0-7) times repeated
+
+
+				//case 4:lfo1_rate=controller_value;play_set=0;break;
+				//case 5:delay_time=controller_value;play_set=0;break;
 
 				default:break;
 			} // end of feat select
 
-    		//one_play[sample_select].pointer=one_shot[sample_select].start[part_select];
-    		//one_play[sample_select].position=0;
-    		//one_play[sample_select].playback_rate=one_shot[sample_select].speed[part_select];
+/*    		one_play[sample_select].pointer=one_shot[sample_select].start[part_select];
+    		one_play[sample_select].position=0;
+    		one_play[sample_select].playback_rate=one_shot[sample_select].speed[part_select];*/
 
 
 

@@ -290,7 +290,7 @@ while(1)
  			} // process samples  300uS atm
 
  		 if ( usart3_rx_temp[4]) controller_process();
- 		 if(ADSR_timer>7) {audio_gain_global(); ADSR_TIM_writer();gap_control();ADSR_timer=0;} else ADSR_timer++; // 22.6us*64*8 = 11.6 ms
+ 		 if(ADSR_timer>7) {audio_gain_global(); roll_control();ADSR_TIM_writer();ADSR_timer=0;} else ADSR_timer++; // 22.6us*64*8 = 11.6 ms
  		 	 //unsure how accurate this is
 
  		 	 if ((!psram_busy)&&(!spi_process_counter)) spi_process_counter=1;  // starts spi processing, can block
@@ -304,12 +304,14 @@ while(1)
 	  }
 
 
+		  if (mtc_clock!=mtc_clock_buf) {gap_control(); mtc_clock_buf=mtc_clock;}  // timed by 24/quater
+
 
 		  if ((!spi_read_flag) && (!spi_write_flag) && (spi_process_counter)&&(!psram_busy)) spi_message_process();
 
 		  if (usart4_rx_counter>9){uart4_command_process();}  // look for commands on uart4
 
-
+		  if(mtc_clock>65000) mtc_clock=0;  //reset on full count
 
 		  if( uart_receive_timer[3] ) uart_receive_end(); // detect no transmission
 
@@ -359,9 +361,9 @@ void USART2_IRQHandler(void)  // midi in
   if(usart_interrupt_flag_get(USART2, USART_RDBF_FLAG) != RESET)
   {
     /* read one byte from the receive data register */
-
-	  usart2_rx_buffer[usart2_rx_counter] = usart_data_receive(USART2);  // filter midi channel here first
-
+	  uint8_t temp=0;
+	  temp = usart_data_receive(USART2);  // filter midi channel here first
+	  if(temp==248) {mtc_clock++;return;} else usart2_rx_buffer[usart2_rx_counter] = temp; // bypass on midi timing signal
 
 	  (usart2_rx_buffer[0]==note_on+midi_channel || usart2_rx_buffer[0]==c_change+4 || usart2_rx_buffer[0]==note_on+9 ||
 			  usart2_rx_buffer[0]==c_change+9) ?  usart2_rx_counter++:usart2_rx_counter;                       // not receiving cc 185
@@ -389,6 +391,7 @@ void UART4_IRQHandler(void)  //file transfer and commands , not quick
 	//  usart_interrupt_enable(USART2, USART_RDBF_INT, FALSE);
 	         //   uart_receive_char(usart_data_receive(UART4));
 	  usart4_rx_buffer[usart4_rx_counter] = usart_data_receive(UART4);  //
+
 	  if (usart4_rx_counter>=10) memcpy(command_buffer,usart4_rx_buffer+(usart4_rx_counter-10),10); // look for commands
 
 		    if(usart4_rx_counter >126 ) // buffer full
