@@ -68,12 +68,18 @@ void program_change(uint8_t pc_value){  // this is ok , getting garbage from seq
 		memcpy(in_sample_holder_2,temp,1200);
 	}
 
-	void control_change(uint8_t channel,uint8_t cc , uint8_t value){       // midi control change processing, needs a fifo buffer of som etype to avoid too much process
+void control_change(uint8_t channel,uint8_t cc , uint8_t value){       // midi control change processing, needs a fifo buffer of som etype to avoid too much process
+	if (channel==4) return;
+
 	//MIDI CC
 	//	0 	Bank Select (MSB)  for patch banks , 7-volume, 5-portamento time
 	// 73 -Attack ,   72 -Release ,71 -VCF REsonance , 74 -VCF cutoff freq,  91 -Reverb , 84-portamento, 94-detune, 95-phaser, 70-sound variation,
 	//92 -tremolo, 75-79 generic fx settings , may use it for delay unit
+	// 123 is some random pitch cc maybe
+
 	if (value<4) value=0;  // some pot issues
+	if(value>127) value=127;
+/*
 		if (channel==4){
 
 		if (value<4) value=0; //compansate for bad pots
@@ -82,7 +88,7 @@ void program_change(uint8_t pc_value){  // this is ok , getting garbage from seq
 	if(cc==5)  delay_time=value&127; // delay length
 	//pot2
 
- if 	(cc==19) master_tune=value&127;  // tune
+    if 	(cc==19) master_tune=value&127;  // tune
 
 	if(cc==77)  cc_77=value&127;// pot 4 , stutter or second note pitch
 	if(cc==78)  cc_78=value&127;// pot 4 , stutter or second note pitch
@@ -90,40 +96,28 @@ void program_change(uint8_t pc_value){  // this is ok , getting garbage from seq
 
 	//lfo1_depth=127-lfo1_depth;
 	} // end of main channel
+*/
 	if ((channel!=4)&&(cc<122)){ // not picking up
+		// cc90-97
 
-		if ((cc>89)&& (cc<98)) {cc_list_extra[cc-90]=value&127;  //input extra settings , pitch, length  etc  0-3 (90-93) is pitch for now
-		samples_store[cc-90].speed=value&127;  //  stores last playback speed
-		one_play[cc-90].playback_rate=(0x10000*MAX_Rate)-((value&127)<<10);  // writes new playback rate
-		}
-		if ((cc>97)&& (cc<106)) {
-			uint8_t n=cc-98;
-		samples_store[n].length=value&127;  //  stores last playback speed
-		//one_shot[n].end[0]=samples_store[n].ram_addr+((samples_store[n].size_bytes*samples_store[n].length)>>7); //calculates end part , broken now
+		if (cc==90)
 
-		}
+			{float depth=value*2;
+					depth=(pow(1.04,depth)*32)+1500;
+					{if (value>125) depth=32765;}
+					{if (depth>32765) depth=32765;}
 
+			freq_point[0]=(depth); freq_point[1]=(((1<<15)-freq_point[0]));}
 
 
-		if(cc==77){
-		if (samples_store[value>>3].used)  current_playing_sample[0]=value>>3;}
-		//if(cc==78){ phase_delay_level=(value&127)>>1;}
 
-		if(cc==76)  cc_76=value&127;// feedback
-		samples_store[current_playing_sample[0]].speed=cc_76;
-		if (cc==7) cc_7=value&127; // audio level
-		if (cc==78) lfo1_rate=(value<<4)+1;
 
-		float depth=cc_7;
-		//	depth=pow(1.04,depth);  // smooth log 1.04 is about the best for 128,  1.022 for 255
-			lfo1_depth=depth;
-			if(lfo1_depth>127) lfo1_depth=127;
 
 
 
 
 	} //end of samples/drums cc
-	printf(" %d ",cc);
+	//printf(" %d ",freq_point[0]);  // can cause clicking if called often
 	} //  end off cc process
 
 
@@ -244,7 +238,7 @@ uint8_t incoming_message[3];    //
 
 		        uint8_t selected_note=drum_note_hold[1]%24;   //   might do 3 octaves , 2 octave part 0 and 1 , 1 octave for pure single poly drum playback
 		        uint8_t last_part=current_playing_part[selected_note%12]; // save last playing part
-		        printf("sound playing %d \n",selected_note);
+		        printf("\n sound playing %d\n",selected_note);
 	        	if (selected_note>11) {selected_note-=12;current_playing_part[selected_note]=1;  } // switch to part 1 or to part 0
 
 	        	else {current_playing_part[selected_note]=0;}
@@ -484,7 +478,7 @@ void gap_control(void){ // run at certain intervals maybe non constant or non li
 }
 
 
-void roll_control(void) {   // fast repeat/roll effect on playback , rate and length  0-15 : 0-7  ,get from single value
+/*void roll_control(void) {   // fast repeat/roll effect on playback , rate and length  0-15 : 0-7  ,get from single value
 
 
 	for (int i = 0; i < 8; ++i) {
@@ -504,8 +498,25 @@ void roll_control(void) {   // fast repeat/roll effect on playback , rate and le
 	}
 
 
-}
+}*/
+void roll_control(void) {// fast repeat/roll effect on playback , rate and length  0-15 : 0-7  ,get from single value
+    for (int i = 0; i < 8; ++i) {
+        if (!current_roll_count[i]) continue;
 
+        uint8_t r = one_shot[i].roll[current_playing_part[i]];
+        if (current_roll_count[i] >= (r >> 4)) {
+            current_roll_count[i] = 0;
+            continue;
+        }
+
+        if (++current_roll_gap[i] > (r & 15) * 2) {
+            current_roll_gap[i] = 0;
+            one_play[i].pointer = one_shot[i].start[current_playing_part[i]];
+            one_play[i].position = 0;
+            current_roll_count[i]++;
+        }
+    }
+}
 
 /*void oneshot_looper(void) {    //  oc test version
     for (uint8_t i = 0;  i < 8; i++) {

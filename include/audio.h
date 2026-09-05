@@ -19,8 +19,9 @@ int16_t resample_hermite_oneshot(const int16_t* sample_data,
 
 void next_sample(void){  // this runs always , sound in generated when ADSR_out is on , wav_pointer shows sample pos in sample holder
 
-
-	uint32_t counter=wav_pointer[0]>>8;  // /256
+	uint16_t delay_adder=32;
+	if (delay_pointer[0]<256) delay_adder=0;
+	uint32_t counter=wav_pointer[0]>>8;  // click on the first read
 	uint32_t counter2=wav_pointer[1]>>8;
 
 	//uint32_t one_shot_counter=one_shot_position &((audio_buffer_size*65536)-1);// phase
@@ -91,15 +92,7 @@ void next_sample(void){  // this runs always , sound in generated when ADSR_out 
 
 	for (int var = 0; var < poly_limit; ++var) {
 	if ((current_playing_sample[var]==1) ) {temp2+=(sample_grab(var)>>current_ducking_level[var]);			;divider++;} // might have to expand
-	}
-
-	//if(current_playing_sample[0]) {temp2=one_play[0].buf[(one_play[0].position>>16)];divider++;}    // 30us  , getting corrupted now on 0 sample(new)
-	//if(current_playing_sample[1]) {temp4=one_play[1].buf[(one_play[1].position>>16)];divider++;}
-	//if(current_playing_sample[2]) {temp5=one_play[2].buf[(one_play[2].position>>16)];divider++;}
-	//if(current_playing_sample[3]) {temp6=one_play[3].buf[(one_play[3].position>>16)];divider++;}
-	//if(current_playing_sample[3]) {temp6=resample_linear(one_play[3].buf,one_play[3].position); divider++;} //drums
-	//temp2=temp4+temp5+temp2+temp6;
-
+	}  // might use ducking for all audio level control
 
 
 	//temp2=temp2*(4-divider);
@@ -109,15 +102,18 @@ void next_sample(void){  // this runs always , sound in generated when ADSR_out 
 	//temp2=((flash_sample_buf[next_sample_tracker]*ADSR_out[2])>>7); //246/198  us
 	//temp2=flash_sample_buf[next_sample_tracker];
 	//temp2=flash_sample_buf[one_shot_counter>>16];
-
-
+    filter_accus[0]=((temp2*freq_point[0])+(filter_accus[0]*freq_point[1]))>>15;
+    filter_accus[1]=(((filter_accus[0]*freq_point[0])+(filter_accus[1]*freq_point[1]))>>15); //1
+    filter_accus[2]=(( filter_accus[1]*freq_point[0])+(filter_accus[2]*freq_point[1]))>>15;
+    filter_accus[3]=(((filter_accus[2]*freq_point[0])+(filter_accus[3]*freq_point[1]))>>15); //1
+    temp2=filter_accus[3];
 	//temp2=(temp2*ADSR_out[2])>>15;  // might control initial level from adsr_out to control clipping
 	////////   mixer  ////
 
 	//temp=temp2; //testing
-	temp=((temp3+temp)); // only with fx
-	temp=(temp*current_velocity)>>7;
-	temp=temp+(temp2/2);
+	//temp=((temp3+temp)); // only with fx
+	//temp=(temp*current_velocity)>>7;
+	temp=temp+(temp2); // no right shift yet
 //	if (temp>(1<<22))     {multi-=4; }
 
 	//temp*=output_gain;  // separate control for each , this on eis about 0.7 with 3 notes
@@ -139,8 +135,8 @@ void next_sample(void){  // this runs always , sound in generated when ADSR_out 
 feedback=50; // testing
 //delay_time=0;  //testing
 #define SHIFT 7     // ×128 / ÷128
-	if (delay_time>2) {     // bit heavy
-
+	if (delay_time>2) {     // bit heavy ,
+		//also needs an incoming limiter
 		//temp=(temp*(128-(feedback/4)))+(delayed*feedback);  // reduces signal of feedback
 
 		//temp=temp*(128-(feedback/4))+(delayed*feedback);  // reduces signal of feedback
@@ -148,18 +144,18 @@ feedback=50; // testing
 
 
 		//int32_t delayed = (int16_t) ram_read(delay);  // major slow down needs to be different
-		int32_t delayed = ram_out[next_sample_tracker]*4;  // for reading
-		//int32_t delayed_2 = ram_out[(next_sample_tracker+16)&63]*4;
-		int32_t delayed_2 =delayed;
+		int32_t delayed = ram_out[next_sample_tracker]*4;  // for reading  , up to 128 samples
+		int32_t delayed_2 = ram_out[(next_sample_tracker+delay_adder)]*4;
+		//int32_t delayed_2 =delayed;
 		int32_t fb_contrib = delayed * (int32_t)feedback;
 		int32_t accumulator = (int32_t)temp* (128-(feedback/4));  // incoming
 		accumulator += fb_contrib;
-		temp3=accumulator>>SHIFT;
+		temp4=accumulator>>SHIFT;
 		//temp3*=output_gain2; //
 		//if (temp3>(1<<15)) output_gain2*=0.9;
 	//	if (temp3>(1<<14)) output_gain2*=0.9; // delay input limiter
 
-		delay_filter=(delay_filter+temp3)/8;
+		delay_filter=(delay_filter+temp4)/8; // smoothing
 
 		ram_in[next_sample_tracker]=delay_filter; // write back stops here, maybe lower signal and then gain
 		//ram_write(delay_2,(int16_t) delay_filter); // write back stops here
@@ -168,8 +164,8 @@ feedback=50; // testing
 		int32_t mix  = dry + wet;
 		int32_t wet_2  =delayed_2      * 50;
 		int32_t mix_2  = dry + wet_2;
-		temp3=mix>>6;
-		temp=mix_2>>6;
+		temp3=mix>>6;  // L
+		temp=mix_2>>6; // R
 
 
 
@@ -195,11 +191,6 @@ feedback=50; // testing
 	temp3+=phase2;
 	}
 
-	//temp_out=(temp>>5)+2048;
-
-
-	//current_velocity=temp_sample;
-	//current_velocity=100;
 	temp=(temp)>>(4+phaser_enable); // basic note velocity , not exact based on last value sent
 	//temp=temp>>5;
 
@@ -208,13 +199,13 @@ feedback=50; // testing
 	temp+=2047;
 	temp3+=2047;
 
-	ccr2_out=(ccr2_out+temp)>>1;
+	ccr2_out=(ccr2_out+temp)>>1; // smoother
 	ccr1_out=(ccr1_out+temp3)>>1;
 	ccr2_out=temp;
 	ccr1_out=temp3;
 
 	//ccr_buf[ccr_counter_2]=((uint32_t)ccr2_out << 16) | (uint32_t)ccr1_out;
-	audio_out_buf[ccr_counter_2]=((uint32_t)ccr2_out << 16) | (uint32_t)ccr1_out;  // write to temp buffer
+	audio_out_buf[ccr_counter_2]=((uint32_t)ccr2_out << 16) | (uint32_t)ccr1_out;  // write to temp buffer , might run a limiter after
 	//ccr_buf[ccr_counter_2+1]=ccr1_out;
 
 
@@ -235,13 +226,6 @@ feedback=50; // testing
 	//ADSR_counter_position[0]=0;
 	//ADSR_out_1=envelopes_store[0];
 	next_sample_ready=2;
-
-   //if ((delay_pointer[0]&127)==0)  {ram_page_read(delay_pointer[0]); memcpy (delay_buffer,ram_page_read_buf,256);} // ream from ram
-
-//	 if ((delay_pointer[1]&127)==0)  { memcpy (ram_page_write_buf+4,delay_buffer_2,256);ram_page_write(0);} //write to ram
-	//if ((delay_pointer[0]&127)==0)  {ram_page_read(0); memcpy (delay_buffer,ram_page_read_buf,256);} // ream from ram
-
-  // if ((delay_pointer[1]&127)==0)  { memcpy (ram_page_write_buf+4,delay_buffer_2,256);ram_page_write(delay_pointer[1]);} //write to ram
 
 	for (i=0;i<poly;i++){
 	one_play[i].position+=one_play[i].playback_rate;  // use this now calculate playback position
@@ -327,7 +311,7 @@ void audio_gain_global(void){  // needs to be around adsr
 		uint32_t delay_pointer1=delay+(delay_time*delay_time_multiplier);  // adds length between read and write for write back
 
 		uint32_t delay_2=delay_pointer1&(delay_buffer_size-1); // loops pointer number , for writing back
-		uint32_t delay_3=(delay_pointer1+delay_time_multiplier)&(delay_buffer_size-1); // extra position for writing back
+		//uint32_t delay_3=(delay_pointer1+delay_time_multiplier)&(delay_buffer_size-1); // extra position for writing back
 		//uint16_t delay_3=delay_pointer1&(delay_buffer_size-1);
 		delay_pointer[1]=delay_2; // write back
 
@@ -574,18 +558,76 @@ void ducking_control(void){  // creates current_ducking_level for audio
 	}
 
 
+}
 
 
 
+int32_t soft_clip(int32_t x) {
+    if (x > 32767) return 32767 - ((x - 32767) >> 2);
+    if (x < -32768) return -32768 - ((x + 32768) >> 2);
+    return x;
+}
 
+int32_t soft_clip_cubic(int32_t x) {
+    // Input should be roughly in -1.5 .. 1.5 range (scaled)
+    int32_t x3 = (x * x >> 15) * x >> 15;
+    return x - (x3 >> 2);          // tune the >> 2
+}
 
+int32_t apply_gain_soft(int32_t sample, int32_t gain)
+{
+    // Apply gain
+    int32_t x = (sample * gain) >> 15;
 
+    // Cheap & good sounding soft clip (cubic approximation)
+    // Works great in int32
+    if (x > 32767)  x = 32767;
+    if (x < -32768) x = -32768;
 
+    // Optional nicer soft clip (still cheap):
+    // x = x - (x*x*x >> 30);   // very mild saturation
+    // or the classic:
+    // int32_t x2 = (x * x) >> 15;
+    // x = x + ((x * x2) >> 16);   // adjust coefficients to taste
 
+    return x;
+}
 
+// Call this every sample (or every 4–8 samples for cheaper version)
+int32_t compute_gain(int32_t *channels, int num_ch, int32_t current_gain)
+{
+    // 1. Find peak or RMS-ish across all channels
+    int32_t peak = 0;
+    for (int i = 0; i < num_ch; i++) {
+        int32_t a = channels[i] >= 0 ? channels[i] : -channels[i];
+        if (a > peak) peak = a;
+    }
 
+    // Optional: simple envelope follower (attack/release)
+    static int32_t env = 0;
+    if (peak > env)
+        env += (peak - env) >> 3;          // fast attack
+    else
+        env += (peak - env) >> 6;          // slower release
 
+    // 2. Soft knee gain computer (everything in Q15 / Q16)
+    // Threshold example: 0.7 of full scale (you can change)
+    const int32_t thresh = 23000;          // ~0.7 * 32767
+    const int32_t knee   = 4000;           // soft knee width
 
+    int32_t gain = 32767;                  // unity
 
+    if (env > thresh - knee) {
+        // Soft region
+        int32_t over = env - (thresh - knee);
+        // Simple quadratic soft knee (very cheap)
+        int32_t reduction = (over * over) >> 12;   // tune the shift
+        gain = 32767 - reduction;
+        if (gain < 4096) gain = 4096;      // never go completely silent
+    }
 
+    // 3. Smooth the gain itself (important!)
+    current_gain += (gain - current_gain) >> 4;   // smooth factor
+
+    return current_gain;
 }

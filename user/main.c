@@ -138,7 +138,8 @@ int main(void)
 	//52 onwards
 	memcpy(samples_store,samples_backup, sizeof(samples_backup));  // backup samples struct
 	memcpy(one_shot,one_shot_backup, sizeof(one_shot_backup));  // backup samples struct
-
+	sanitize_one_shots();
+/*
 	for (int sample=0;sample<8;sample++){  // check for  missing or bad data
 	for (int part=0;part<8;part++){
 		if (one_shot[sample].start[part]<samples_store[sample].ram_addr)
@@ -156,6 +157,7 @@ int main(void)
 
 	}
 	}
+*/
 
 //	for (int sample=0;sample<poly_limit;sample++){ // if one is turned off  ,load up next after the poly limit , this is temp
 //
@@ -365,7 +367,7 @@ void USART2_IRQHandler(void)  // midi in
 	  temp = usart_data_receive(USART2);  // filter midi channel here first
 	  if(temp==248) {mtc_clock++;return;} else usart2_rx_buffer[usart2_rx_counter] = temp; // bypass on midi timing signal
 
-	  (usart2_rx_buffer[0]==note_on+midi_channel || usart2_rx_buffer[0]==c_change+4 || usart2_rx_buffer[0]==note_on+9 ||
+	  (usart2_rx_buffer[0]==note_on+midi_channel ||  usart2_rx_buffer[0]==note_on+9 || usart2_rx_buffer[0]==c_change+9 ||
 			  usart2_rx_buffer[0]==c_change+9) ?  usart2_rx_counter++:usart2_rx_counter;                       // not receiving cc 185
 
 

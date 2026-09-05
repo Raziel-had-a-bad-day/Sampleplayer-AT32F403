@@ -303,6 +303,8 @@ int32_t phase_delay[64];  // stores played samples
 uint8_t phase_delay_level=0;
 int data_log=0;
 static char command_buffer[16]; // stores incoming uart commands
+int32_t filter_accus[4]; // filter accu
+uint16_t freq_point[2]={32000,1};// filter level
 
 uint32_t sample_address_calculate(uint8_t sample,uint8_t length){   //Calculate an address
 	length&=127;
@@ -496,4 +498,36 @@ int32_t sample_grab(uint8_t sample) {
  {return one_play[sample].buf[(one_play[sample].position>>16)];}
 
 
+}
+
+void sanitize_one_shots(void) {  // check for bad data in one_shot
+    for (int s = 0; s < 8; s++) {
+        const uint32_t base = samples_store[s].ram_addr;
+        const uint32_t max  = base + samples_store[s].size_bytes;
+
+        for (int p = 0; p < 8; p++) {
+            uint32_t *start = &one_shot[s].start[p];
+            uint32_t *end   = &one_shot[s].end[p];
+
+            // start limits
+            if (*start < base || *start > 16000000u)
+                *start = base;
+
+            // end limits
+            if (*end < *start || *end > max)
+                *end = base;          // or *end = *start;  ← change easily here
+
+            // length
+            if (one_shot[s].length[p] > 127)
+                one_shot[s].length[p] = 127;
+
+            // speed
+            if (one_shot[s].speed[p] > 131072)
+                one_shot[s].speed[p] = 65535;
+
+            // ── add new limits here ──
+            // if (one_shot[s].roll[p] > 0xFF) one_shot[s].roll[p] = 0;
+            // if (one_shot[s].something[p] > LIMIT) ...
+        }
+    }
 }
