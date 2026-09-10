@@ -79,24 +79,6 @@ void control_change(uint8_t channel,uint8_t cc , uint8_t value){       // midi c
 
 	if (value<4) value=0;  // some pot issues
 	if(value>127) value=127;
-/*
-		if (channel==4){
-
-		if (value<4) value=0; //compansate for bad pots
-		if (cc==72)  {ADSR_settings[1]=value&127;memset(envelopes_store,0,256);envelopes_preprocess(0);}// this will have to be fully recalculated ,will be slow
-	// pot 1
-	if(cc==5)  delay_time=value&127; // delay length
-	//pot2
-
-    if 	(cc==19) master_tune=value&127;  // tune
-
-	if(cc==77)  cc_77=value&127;// pot 4 , stutter or second note pitch
-	if(cc==78)  cc_78=value&127;// pot 4 , stutter or second note pitch
-	if (cc==7) current_velocity=value&127; // audio level
-
-	//lfo1_depth=127-lfo1_depth;
-	} // end of main channel
-*/
 	if ((channel!=4)&&(cc<122)){ // not picking up
 		// cc90-97
 
@@ -107,11 +89,42 @@ void control_change(uint8_t channel,uint8_t cc , uint8_t value){       // midi c
 					{if (value>125) depth=32765;}
 					{if (depth>32765) depth=32765;}
 
-			freq_point[0]=(depth); freq_point[1]=(((1<<15)-freq_point[0]));}
+			freq_point[0]=(depth); freq_point[1]=(((1<<15)-freq_point[0]));
+			//filt_f=value*32;
+		//svf_set(&Filtering, 44100, filt_f,filt_q);
+			//filt_f=Filter_int.f[value];
+			filt_f=Filtering.f[value];
+			// When the single pot changes the range:
+			//static uint8_t pot_low;
+			//static uint8_t pot_high;
 
 
+			if (value>8)
+				lfo_set_high(&lfo, value, mtc_clock);  // set high value
+			else
+				lfo_set_high(&lfo, value, mtc_clock);  // set only low value;
+			}
 
+		if (cc==91){
+			////filt_q=0.707+(value*0.01);
+			//svf_set(&Filtering, 44100, filt_f, filt_q);
+			//filt_q=Filter_int.q[value];
+			filt_q=Filtering.q[value];
+		}
+		if (cc==92){
+			static uint32_t lfo_interval;
+			lfo_interval= 24*(1<<(value/16));
+			lfo_set_rate(&lfo,lfo_interval, mtc_clock);
 
+			}
+		if (cc>93) {   // adjust sample length
+			uint8_t sample_selected=cc-93; // samples 1-5 atm
+			uint8_t part_selected=sound_mask.playing_part[sample_selected];
+			one_shot[sample_selected].length[part_selected]=value;
+			//one_play[sample_selected].pointer=one_shot[sample_selected].start[part_selected];  // jumpt to start
+			one_shot[sample_selected].end[part_selected]=sample_address_calculate(sample_selected,value);
+
+		}
 
 
 
@@ -154,7 +167,7 @@ uint8_t incoming_message[3];    //
 		if (incoming_message[0] > 127) {
 		    switch(incoming_message[0]) {
 		        case note_on + midi_channel:
-		        case note_on + 9: // extra drum channel
+
 		            memcpy(midi_hold[NOTE], incoming_message, 3);
 		            midi_hold[NOTE][3] = 4;
 		            break;
@@ -165,7 +178,7 @@ uint8_t incoming_message[3];    //
 		            break;
 
 		        case c_change + midi_channel:
-		        case c_change + 9:  // extra cc channel
+
 		            memcpy(midi_hold[CC], incoming_message, 3);
 		            midi_hold[CC][3] = 4;
 		            break;
@@ -176,7 +189,7 @@ uint8_t incoming_message[3];    //
 		if (incoming_message[1] > 127) {
 		    switch(incoming_message[1]) {
 		        case note_on + midi_channel:
-		        case note_on + 9:
+
 		            memcpy(midi_msg[NOTE], &incoming_message[1], 2);
 		            midi_msg[NOTE][3] = 1;
 		            break;
@@ -187,7 +200,7 @@ uint8_t incoming_message[3];    //
 		            break;
 
 		        case c_change + midi_channel:
-		        case c_change + 9:
+
 		            memcpy(midi_msg[CC], &incoming_message[1], 2);
 		            midi_msg[CC][3] = 1;
 		            break;
@@ -198,7 +211,7 @@ uint8_t incoming_message[3];    //
 		if (incoming_message[2] > 127) {
 		    switch(incoming_message[1]) {
 		        case note_on + midi_channel:
-		        case note_on + 9:
+
 		            midi_msg[NOTE][0] = incoming_message[1];
 		            midi_msg[NOTE][3] = 2;
 		            break;
@@ -209,7 +222,7 @@ uint8_t incoming_message[3];    //
 		            break;
 
 		        case c_change + midi_channel:
-		        case c_change + 9:
+
 		            midi_msg[CC][0] = incoming_message[1];
 		            midi_msg[CC][3] = 2;
 		            break;
@@ -237,39 +250,39 @@ uint8_t incoming_message[3];    //
 		        uint8_t i;
 
 		        uint8_t selected_note=drum_note_hold[1]%24;   //   might do 3 octaves , 2 octave part 0 and 1 , 1 octave for pure single poly drum playback
-		        uint8_t last_part=current_playing_part[selected_note%12]; // save last playing part
+		        uint8_t last_part=sound_mask.playing_part[selected_note%12]; // save last playing part
 		        printf("\n sound playing %d\n",selected_note);
-	        	if (selected_note>11) {selected_note-=12;current_playing_part[selected_note]=1;  } // switch to part 1 or to part 0
+	        	if (selected_note>11) {selected_note-=12;sound_mask.playing_part[selected_note]=1;  } // switch to part 1 or to part 0
 
-	        	else {current_playing_part[selected_note]=0;}
+	        	else {sound_mask.playing_part[selected_note]=0;}
 
-		       // if (selected_note>3) {memset(current_playing_sample,0,16); selected_note&=3;} //stops all samples and only plays the next one
+		       // if (selected_note>3) {memset(sound_mask.playing_sample,0,16); selected_note&=3;} //stops all samples and only plays the next one
 		        if (one_shot[selected_note].length[0]) { // ignore if no sample
 		        	uint8_t set_note=selected_note;
 
 
 
-		        	uint8_t part_select=current_playing_part[set_note]; // expand this
+		        	uint8_t part_select=sound_mask.playing_part[set_note]; // expand this
 
 
-		        	 switch (current_playing_sample[set_note]) {
+		        	 switch (sound_mask.playing_sample[set_note]) {
 
 		        		case 0 : {  // if not playing
-		        			current_playing_gap[set_note]=0;
-		        			current_playing_sample[set_note]=1;  //select sample but only if available
-		        			current_playing_gap[set_note]=0; // reset gap to start
+		        			sound_mask.playing_gap[set_note]=0;
+		        			sound_mask.playing_sample[set_note]=1;  //select sample but only if available
+		        			sound_mask.playing_gap[set_note]=0; // reset gap to start
 			        		one_play[set_note].pointer=one_shot[set_note].start[part_select];
 			        		one_play[set_note].position=0;  // reset to start
 
 		        		} break;
 		        		case 1  :  // normally turn off sound if same part is pressed
-	        			if (last_part==current_playing_part[selected_note]) {
+	        			if (last_part==sound_mask.playing_part[selected_note]) {
 
-		        		current_playing_sample[set_note]=0; // turn off
+		        		sound_mask.playing_sample[set_note]=0; // turn off
 		        		one_play[set_note].pointer=one_shot[set_note].start[part_select];
 		        		one_play[set_note].position=0; } // reset to start
-		        	 else {current_playing_gap[set_note]=0; // keep playing newly selected part
-	        			current_playing_sample[set_note]=1;  //select sample but only if available
+		        	 else {sound_mask.playing_gap[set_note]=0; // keep playing newly selected part
+	        			sound_mask.playing_sample[set_note]=1;  //select sample but only if available
 
 		        		one_play[set_note].pointer=one_shot[set_note].start[part_select];
 		        		one_play[set_note].position=0;  // reset to start
@@ -278,13 +291,13 @@ uint8_t incoming_message[3];    //
 
 	        			break;
 		        		case 2  :
-		        			if (last_part==current_playing_part[selected_note]) {
+		        			if (last_part==sound_mask.playing_part[selected_note]) {
 
-			        		current_playing_sample[set_note]=0; // turn off
+			        		sound_mask.playing_sample[set_note]=0; // turn off
 			        		one_play[set_note].pointer=one_shot[set_note].start[part_select];
 			        		one_play[set_note].position=0; } // reset to start
-			        	 else {current_playing_gap[set_note]=0; // keep playing newly selected part
-		        			current_playing_sample[set_note]=1;  //select sample but only if available
+			        	 else {sound_mask.playing_gap[set_note]=0; // keep playing newly selected part
+		        			sound_mask.playing_sample[set_note]=1;  //select sample but only if available
 
 			        		one_play[set_note].pointer=one_shot[set_note].start[part_select];
 			        		one_play[set_note].position=0;  // reset to start
@@ -389,7 +402,7 @@ void oneshot_sequencer(void){ // control oneshot progress for main loop, 0 lengt
   	 uint8_t finish=0;
 
   	 for (i=0;i<4;i++){  // control progress off samples
-  		 part_playing=current_playing_part[i];   // current part progress of the sample
+  		 part_playing=sound_mask.playing_part[i];   // current part progress of the sample
   		 next_part=0;
   		 finish=0;
 
@@ -398,7 +411,7 @@ void oneshot_sequencer(void){ // control oneshot progress for main loop, 0 lengt
   		if (!one_shot[i].length[part_playing+1]) next_part=0; // bad data
   		 //one_shot[i].playback_rate=(0x10000*MAX_Rate)-(cc_list_extra[i]<<10);  // modify pitch, limited by buffer size
 
-  		 if(current_playing_sample[i]){ // advance position
+  		 if(sound_mask.playing_sample[i]){ // advance position
   			 uint16_t temp=(one_play[i].position>>16)<<1;  // clear last bit as well , has to be even
   			 if ((temp)>(128*MAX_Rate)) temp=(128*MAX_Rate); // this thing gets screwed up a lot
   			 one_play[i].pointer+=temp;
@@ -406,10 +419,10 @@ void oneshot_sequencer(void){ // control oneshot progress for main loop, 0 lengt
   			if (one_play[i].playback_rate<1024) one_play[i].playback_rate=64000;
   		 }  // advance only in enabled
   		 if ((one_play[i].pointer+(128*MAX_Rate)) >(one_shot[i].end[part_playing])) finish=1; // enable finish or jump to next start
-  		 if (finish && (!next_part)){one_play[i].pointer=one_shot[i].start[part_playing];one_play[i].position=0;current_playing_sample[i]=0;
-  		 	 	 current_playing_part[i]=0;finish=0;}  //reset sample to start, disable
+  		 if (finish && (!next_part)){one_play[i].pointer=one_shot[i].start[part_playing];one_play[i].position=0;sound_mask.playing_sample[i]=0;
+  		 	 	 sound_mask.playing_part[i]=0;finish=0;}  //reset sample to start, disable
   		 if (finish && next_part){  // select next step if available
-  			current_playing_part[i]++; // move one shot to next part set
+  			sound_mask.playing_part[i]++; // move one shot to next part set
   			part_playing++;
   			one_play[i].pointer=one_shot[i].start[part_playing]; // move to start of the next
   			one_play[i].playback_rate=one_shot[i].speed[part_playing];// copy rate
@@ -434,25 +447,25 @@ void oneshot_looper(void){ // loop sample until triggered again , maybe have lig
 
 
   	 for (i=0;i<8;i++){  // control progress off samples
-  		 part_playing=current_playing_part[i];   // current part progress of the sample
+  		 part_playing=sound_mask.playing_part[i];   // current part progress of the sample
   		 next_part=0;
   		 finish=0;
   		 advance=0;
 
-  		 if(current_playing_sample[i]){ // advance position
+  		 if(sound_mask.playing_sample[i]){ // advance position
 
   			if ((one_play[i].pointer+(128*MAX_Rate)) <(one_shot[i].end[part_playing])) advance=1; // this should always run if within limits
 
   			 if (advance){
-  				current_playing_sample[i]=1;
+  				sound_mask.playing_sample[i]=1;
   			 uint16_t temp=(one_play[i].position>>16)<<1;  // clear last bit as well , has to be even
   			 if ((temp)>(128*MAX_Rate)) temp=(128*MAX_Rate); // this thing gets screwed up a lot
   			 one_play[i].pointer+=temp;  // advance
   			one_play[i].playback_rate=one_shot[i].speed[part_playing];// copy rate
   			if (one_play[i].playback_rate<1024) one_play[i].playback_rate=64000;
   			 } // end of advance
-  			 else { memset(one_play[i].buf,0,128);current_playing_sample[i]=2;} // clear playing buf and moves to gap mode
-  			//else {current_playing_sample[i]=2;} // move to gap but not clear yet
+  			 else { memset(one_play[i].buf,0,128);sound_mask.playing_sample[i]=2;} // clear playing buf and moves to gap mode
+  			//else {sound_mask.playing_sample[i]=2;} // move to gap but not clear yet
   	 }
   		 one_play[i].position&=0xFFFF; // needs to zero here
 
@@ -470,8 +483,8 @@ void gap_control(void){ // run at certain intervals maybe non constant or non li
 
 	for (int i = 0; i < 8; ++i) {  // runs always ,resets one_play to start on full count , only affected by mtc_clock
 
-		if (current_playing_gap[i]<(one_shot[i].gap[current_playing_part[i]]*16)) current_playing_gap[i]++;
-			else {current_playing_gap[i]=0;one_play[i].pointer=one_shot[i].start[current_playing_part[i]];
+		if (sound_mask.playing_gap[i]<(one_shot[i].gap[sound_mask.playing_part[i]]*16)) sound_mask.playing_gap[i]++;
+			else {sound_mask.playing_gap[i]=0;one_play[i].pointer=one_shot[i].start[sound_mask.playing_part[i]];
 		one_play[i].position=0;current_roll_count[i]=1;}// reset to start at full count
 
 	}
@@ -484,12 +497,12 @@ void gap_control(void){ // run at certain intervals maybe non constant or non li
 	for (int i = 0; i < 8; ++i) {
 
 		if (current_roll_count[i]){   // this get triggered elsewhere
-		if (current_roll_count[i]<((one_shot[i].roll[current_playing_part[i]   ]>>4))) {       // only run until finished counting roll
+		if (current_roll_count[i]<((one_shot[i].roll[sound_mask.playing_part[i]   ]>>4))) {       // only run until finished counting roll
 
-		if (current_roll_gap[i]<((one_shot[i].roll[current_playing_part[i]   ]&15)*2) )      current_roll_gap[i]++;
+		if (current_roll_gap[i]<((one_shot[i].roll[sound_mask.playing_part[i]   ]&15)*2) )      current_roll_gap[i]++;
 
 
-		else {current_roll_gap[i]=0;one_play[i].pointer=one_shot[i].start[current_playing_part[i]];
+		else {current_roll_gap[i]=0;one_play[i].pointer=one_shot[i].start[sound_mask.playing_part[i]];
 		one_play[i].position=0;	current_roll_count[i]++; 			}// reset to start and count repeats
 		}
 		else current_roll_count[i]=0;
@@ -503,7 +516,7 @@ void roll_control(void) {// fast repeat/roll effect on playback , rate and lengt
     for (int i = 0; i < 8; ++i) {
         if (!current_roll_count[i]) continue;
 
-        uint8_t r = one_shot[i].roll[current_playing_part[i]];
+        uint8_t r = one_shot[i].roll[sound_mask.playing_part[i]];
         if (current_roll_count[i] >= (r >> 4)) {
             current_roll_count[i] = 0;
             continue;
@@ -511,7 +524,7 @@ void roll_control(void) {// fast repeat/roll effect on playback , rate and lengt
 
         if (++current_roll_gap[i] > (r & 15) * 2) {
             current_roll_gap[i] = 0;
-            one_play[i].pointer = one_shot[i].start[current_playing_part[i]];
+            one_play[i].pointer = one_shot[i].start[sound_mask.playing_part[i]];
             one_play[i].position = 0;
             current_roll_count[i]++;
         }
@@ -521,9 +534,9 @@ void roll_control(void) {// fast repeat/roll effect on playback , rate and lengt
 /*void oneshot_looper(void) {    //  oc test version
     for (uint8_t i = 0;  i < 8; i++) {
         // If this sample slot isn't active, skip to next immediately
-        if (!current_playing_sample[i]) continue;
+        if (!sound_mask.playing_sample[i]) continue;
 
-        uint8_t part = current_playing_part[i];
+        uint8_t part = sound_mask.playing_part[i];
         uint16_t max_buffer_size = 128 * MAX_Rate;
 
         // Check if we have room left in the current loop/part
@@ -546,7 +559,7 @@ void roll_control(void) {// fast repeat/roll effect on playback , rate and lengt
         } else {
             // End of part reached: Clear buffer and mark as finished (state 2)
             memset(one_play[i].buf, 0, 128);
-            current_playing_sample[i] = 2;
+            sound_mask.playing_sample[i] = 2;
         }
 
         // Reset position mask for next iteration/cycle
@@ -562,11 +575,11 @@ void oneshot_looper(void)   // qwen version
 
     for (uint8_t i = 0; i < 8U; ++i) {
          Nothing to do if this channel isn’t currently playing
-        if (!current_playing_sample[i])
+        if (!sound_mask.playing_sample[i])
             continue;
 
          Current part information
-        uint8_t const part   = current_playing_part[i];
+        uint8_t const part   = sound_mask.playing_part[i];
         uint32_t const end   = one_shot[i].end[part];
 
          Determine whether we can move the pointer forward.
@@ -574,7 +587,7 @@ void oneshot_looper(void)   // qwen version
                 (one_play[i].pointer + STEP_LIMIT) < end;
 
         if (can_advance) {
-            current_playing_sample[i] = 1;     // still playing
+            sound_mask.playing_sample[i] = 1;     // still playing
 
              Advance by an even amount derived from the high bits of position
             uint32_t advance = (one_play[i].position >> 16) * 2U;
@@ -590,7 +603,7 @@ void oneshot_looper(void)   // qwen version
         } else {
              We're past this part: clear buffer and mark as finished.
             memset(one_play[i].buf, 0, sizeof(one_play[i].buf));
-            current_playing_sample[i] = 2;     // finished
+            sound_mask.playing_sample[i] = 2;     // finished
         }
 
          Keep the low‑16 bits of position – the high bits are used for stepping

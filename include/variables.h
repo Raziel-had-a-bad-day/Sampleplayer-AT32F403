@@ -24,7 +24,7 @@
 #define poly_limit 6 //total playable audio channels atm from psram , one_play limit
 #define note_on 144
 #define p_change 192
-#define midi_channel 4  // current midi channel
+#define midi_channel 9  // current midi channel
 #define delay_buffer_size 16384 //int16
 #define wav_multi 255*cycle_length
 #define delay_time_multiplier delay_buffer_size/32
@@ -45,6 +45,7 @@
 #define MAX_SAMPLES     100
 #define MAX_Rate 2  // max speed of sample playback
 #define download_buffer 254+2  // current download buffer size for samples playback
+#define  M_PI  3.1415926535897932384626433
 extern i2c_handle_type hi2c3;
 uint8_t countSetBits(uint8_t number) { // count bits in byte
 	uint8_t count = 0;
@@ -275,9 +276,32 @@ typedef struct  {
   uint8_t delayLevel[4];
 } settings;
 settings sample_edit;  // holds values for sample editor, controlled externally through I2C
+typedef struct {
+    float source[64];        // frequency coefficient
+    float source_dry[64]; // bypass filter
+    float lpfilter[64];        // resonance (damping)
+    float delay[128]; // stereo
+    float amp[64];
+    int32_t output[64];
+
+} Sound;
+Sound sound_buf; // holds intermediate audio buffers
+
+typedef struct {
+		uint8_t filter[8];
+		uint8_t ducking[8];
+		uint8_t ducking_level[8];
+		uint8_t playing_sample[8];
+		uint8_t playing_part[8];
+		uint16_t playing_gap[8];
+
+} mask;
+mask sound_mask={0,0,0,0,1,1,1,1,
+				0,0,0,1,1,0,0,0};
 
 
 
+; // holds all audio masks
 
 uint32_t table_count = 0;
 uint32_t current_write_pos = 0;     // on W25Q, saved in internal flash
@@ -292,6 +316,7 @@ uint8_t current_ducking_level[8]; // sets the divider for ducking, this is dynam
 uint8_t current_ducking_mask[8]={0,0,0,1,1,0,0,0}; // enable for sounds to be compressed
 uint16_t current_roll_gap[8];  // similar to gap counter but shorter for stutter and roll effects
 uint8_t current_roll_count[8];  // counts up or down each time sample repeats while in roll
+uint8_t current_filter_mask[8]={0,0,0,0,1,1,1,1};
 
 uint32_t sample_write_end_timer=0;
 uint8_t  samples_backup[ sizeof(samples_store)];
@@ -313,6 +338,7 @@ uint32_t sample_address_calculate(uint8_t sample,uint8_t length){   //Calculate 
 	temp=samples_store[sample].ram_addr+((samples_store[sample].size_bytes*length)>>7);
 	return temp;
 }
+float sound_process_buf[128];
 
 const uint16_t sine_lut[600]={
 
@@ -531,3 +557,126 @@ void sanitize_one_shots(void) {  // check for bad data in one_shot
         }
     }
 }
+typedef struct {
+    float f[128];        // frequency coefficient
+    float q[128];        // resonance (damping)
+    float low, band;
+} SVF;
+SVF Filtering; // set
+float filt_f=1;  // set f
+float filt_q=0.707; // set resonance
+/*
+typedef struct {
+	int32_t f[128];        // frequency coefficient
+	int32_t q[128];        // resonance (damping)
+	int32_t low, band;
+} SVFI;
+SVFI Filter_int; // set
+*/
+/*void svf_set(SVF *s, float sample_rate, float cutoff, float resonance)   // calc coeff and res , might convert to table
+{
+    // resonance typically 0.0 … 1.0 (or higher)
+    // higher resonance → more peak
+    s->f = 2.0f * sinf(M_PI * cutoff / sample_rate);
+    s->q = 1.0f / resonance;   // or map resonance the way you like
+}*/
+
+void preload_filter(void){  // stick with float , int is worse
+	for (int a = 0; a < 128; ++a) {
+	Filtering.f[a]= 2.0f * sinf(M_PI * (a*32) / 44100); //f
+		Filtering.q[a]=1.0f/(0.707+(a*0.01));  // q
+	};
+
+}
+/*
+void preload_filter_int(void){
+	for (int a = 0; a < 128; ++a) {
+	Filter_int.f[a]= (2.0f * sinf(M_PI * (a*32) / 44100)*64000); //f
+		Filter_int.q[a]=(1.0f/(0.707f+(a*0.01f))*64000);  // q
+	};
+
+}
+*/
+
+
+
+float svf_lp(SVF *s, float in)
+{
+    float high = in - s->low - filt_q * s->band;
+    s->band += filt_f * high;
+    s->low  += filt_f * s->band;
+    return s->low;
+}
+int32_t soft_clip(int32_t x) {
+    if (x > 32767) return 32767 - ((x - 32767) >> 2);
+    if (x < -32768) return -32768 - ((x + 32768) >> 2);
+    return x;
+}
+float soft_clip_f1(float x) {
+    if (x > 32767) return 32767 - ((x - 32767) /2);
+    if (x < -32768) return -32768 - ((x + 32768) /2);
+    return x;
+}
+
+
+int32_t peak_out=31800;
+#define limit 31800  // max level  for limiting
+void soft_clip_f(float *in,int size){  // runs normalise on float buffer, int is a bit faster, but needs a  preset gain setting really
+
+	float temp=1;
+	float gain=1;
+	float peak=peak_out;
+	float limit2=-limit;
+
+	for (int var = 0; var < size; var+=1){  //find peak
+		temp=in[var];
+
+		if ((temp > limit) || (temp<limit2))  {
+
+		if ((+temp)>peak)  peak=+temp;
+		}
+
+		}
+
+
+
+	//if (peak<=limit) return;
+	peak_out=peak;
+	gain=limit/peak;
+
+	for (int var = 0; var < size; var+=1) {  // apply gain
+		temp=in[var];
+		in[var]=temp*gain;  // 12 bit out, still distorts
+	}
+
+}
+
+
+/*
+
+int32_t svf_lp(SVFI *s, int32_t in)
+{
+    int32_t high = (in - s->low - s->q * s->band)>>16;
+    s->band +=( s->f * high)>>16;
+    s->low  += s->f * s->band;
+    return (s->low)>>16;
+}*/
+//int32_t svf_lp(SVFI *s, int32_t in)
+//{
+//    int32_t high = (in - s->low - ((filt_q * s->band)>>16));
+//    s->band +=(( filt_f * high)>>16);
+//    //s->band= (s->band)>>1;
+//    s->low  +=  ((filt_f * s->band)>>16);
+//    //s->low=s->low>>1;
+//    return s->low;
+//}
+
+
+
+/*float svf_lp(SVF *s, float in)
+{
+    float high = in - s->low - s->q * s->band;
+    s->band += s->f * high;
+    s->low  += s->f * s->band;
+    return s->low;
+}*/

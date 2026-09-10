@@ -481,7 +481,7 @@ void wk_nvic_config(void)
 	  gpio_pin_remap_config(UART4_GMUX_0010, TRUE);
 
 	  /* configure param */
-	  usart_init(UART4, 115200, USART_DATA_8BITS, USART_STOP_1_BIT);
+	  usart_init(UART4, 1000000, USART_DATA_8BITS, USART_STOP_1_BIT);
 	  usart_transmitter_enable(UART4, TRUE);
 	  usart_receiver_enable(UART4, TRUE);
 	  usart_parity_selection_config(UART4, USART_PARITY_NONE);

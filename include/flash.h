@@ -307,7 +307,7 @@ void controller_process(void){ // process incoming controller info ,16 bit addre
 			uint8_t playing_now=1;
 			uint8_t replace_sample=sample_select;
 			uint32_t speed=0;
-			current_playing_part[sample_select]=part_select;
+			sound_mask.playing_part[sample_select]=part_select;
 			if (!samples_store[sample_select].used) replace_sample=poly_limit; //replace with another sample if missing
 			switch (feat_select) { // modify values for sample , this works ok
 				case 0:one_shot[sample_select].start[part_select]=sample_address_calculate(replace_sample,controller_value); break; // start change enter
@@ -342,7 +342,7 @@ void controller_process(void){ // process incoming controller info ,16 bit addre
 			if (play_set){
 			if (!one_shot[sample_select].start[part_select]) one_shot[sample_select].start[part_select]=samples_store[sample_select].ram_addr; // in case start is 0
 			for (int var = 0; var < 8; ++var) {
-				if (current_playing_sample[var]) playing_now=0;
+				if (sound_mask.playing_sample[var]) playing_now=0;
 			}
 			if (part_select==1) sample_select+=5;
 

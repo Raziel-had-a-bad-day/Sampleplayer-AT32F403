@@ -17,222 +17,157 @@ int16_t resample_hermite_oneshot(const int16_t* sample_data,
                                  uint32_t* phase,          // 16.16 fixed point
                                  uint32_t increment);
 
+
+
+
+
+
+
+
+void sound_source(void) // loads and mixes samples,converts to float
+{
+    for (int i = 0; i < audio_buffer_size; ++i)
+    {
+        float temp2 = 0.0f;
+        float temp3 = 0.0f;
+
+        // Voice 0
+        if (sound_mask.playing_sample[0] == 1) {
+            float s = (float)(one_play[0].buf[one_play[0].position >> 16] >> sound_mask.ducking_level[0]);
+            if (sound_mask.filter[0]) temp2 += s; else temp3 += s;
+        }
+        one_play[0].position += one_play[0].playback_rate;
+        if (one_play[0].position > 8388607) one_play[0].position = 8388607;
+
+        // Voice 1
+        if (sound_mask.playing_sample[1] == 1) {
+            float s = (float)(one_play[1].buf[one_play[1].position >> 16] >> sound_mask.ducking_level[1]);
+            if (sound_mask.filter[1]) temp2 += s; else temp3 += s;
+        }
+        one_play[1].position += one_play[1].playback_rate;
+        if (one_play[1].position > 8388607) one_play[1].position = 8388607;
+
+        // Voice 2
+        if (sound_mask.playing_sample[2] == 1) {
+            float s = (float)(one_play[2].buf[one_play[2].position >> 16] >> sound_mask.ducking_level[2]);
+            if (sound_mask.filter[2]) temp2 += s; else temp3 += s;
+        }
+        one_play[2].position += one_play[2].playback_rate;
+        if (one_play[2].position > 8388607) one_play[2].position = 8388607;
+
+        // Voice 3
+        if (sound_mask.playing_sample[3] == 1) {
+            float s = (float)(one_play[3].buf[one_play[3].position >> 16] >> sound_mask.ducking_level[3]);
+            if (sound_mask.filter[3]) temp2 += s; else temp3 += s;
+        }
+        one_play[3].position += one_play[3].playback_rate;
+        if (one_play[3].position > 8388607) one_play[3].position = 8388607;
+
+        // Voice 4
+        if (sound_mask.playing_sample[4] == 1) {
+            float s = (float)(one_play[4].buf[one_play[4].position >> 16] >> sound_mask.ducking_level[4]);
+            if (sound_mask.filter[4]) temp2 += s; else temp3 += s;
+        }
+        one_play[4].position += one_play[4].playback_rate;
+        if (one_play[4].position > 8388607) one_play[4].position = 8388607;
+
+        // Voice 5
+        if (sound_mask.playing_sample[5] == 1) {
+            float s = (float)(one_play[5].buf[one_play[5].position >> 16] >> sound_mask.ducking_level[5]);
+            if (sound_mask.filter[5]) temp2 += s; else temp3 += s;
+        }
+        one_play[5].position += one_play[5].playback_rate;
+        if (one_play[5].position > 8388607) one_play[5].position = 8388607;
+
+        sound_buf.source[i]     = temp2;   // now float
+        sound_buf.source_dry[i] = temp3;
+    }
+}
+void sound_filter(void){  //runs filter on buffer
+
+	for (int i = 0; i < audio_buffer_size; ++i) {
+		sound_buf.lpfilter[i]=svf_lp(&Filtering,sound_buf.source[i])+sound_buf.source_dry[i]; //filter
+
+}
+} //end of sound source
+
+void sound_delay(void){  //runs filter on buffer , DO NOT MIX FLOAT AND INT MULTI !!! (+100uS for 2 float multi here)
+	uint8_t feedback=5; // testing
+	int32_t temp4;
+	uint16_t delay_adder=32;
+	int32_t temp;
+	if (delay_pointer[0]<256) delay_adder=0;
+	#define SHIFT 7     // ×128 / ÷128
+
+	for (int i = 0; i < audio_buffer_size; ++i) {
+		temp=sound_buf.lpfilter[i];
+		temp4=0;
+
+
+	//delay_time=0;  //testing
+
+		   // bit heavy ,
+			//also needs an incoming limiter
+			//temp=(temp*(128-(feedback/4)))+(delayed*feedback);  // reduces signal of feedback
+
+			//temp=temp*(128-(feedback/4))+(delayed*feedback);  // reduces signal of feedback
+			//if ((temp>32767) || (temp<-32767))  {output_gain*=0.9;}
+
+
+			//int32_t delayed = (int16_t) ram_read(delay);  // major slow down needs to be different
+			int32_t delayed = ram_out[i]*4;  // for reading  , up to 128 samples
+			int32_t delayed_2 = ram_out[(i+delay_adder)]*4;
+			//int32_t delayed_2 =delayed;
+			int32_t fb_contrib = delayed * (int32_t)feedback;
+			int32_t accumulator = (int32_t)temp* (128-(feedback/4));  // incoming
+			accumulator += fb_contrib;
+			temp4=accumulator>>SHIFT;
+			//temp3*=output_gain2; //
+			//if (temp3>(1<<15)) output_gain2*=0.9;
+		//	if (temp3>(1<<14)) output_gain2*=0.9; // delay input limiter
+
+			delay_filter=(delay_filter+temp4)/8; // smoothing
+
+			ram_in[i]=delay_filter; // write back stops here, maybe lower signal and then gain
+			//ram_write(delay_2,(int16_t) delay_filter); // write back stops here
+
+
+			sound_buf.delay[i*2]  = (temp+delayed);
+
+			sound_buf.delay[(i*2)+1]  = (temp+delayed_2);
+
+
+
+
+
+
+	}
+	} //end of sound delay
+
+
 void next_sample(void){  // this runs always , sound in generated when ADSR_out is on , wav_pointer shows sample pos in sample holder
 
-	uint16_t delay_adder=32;
-	if (delay_pointer[0]<256) delay_adder=0;
-	uint32_t counter=wav_pointer[0]>>8;  // click on the first read
-	uint32_t counter2=wav_pointer[1]>>8;
-
-	//uint32_t one_shot_counter=one_shot_position &((audio_buffer_size*65536)-1);// phase
-
-	uint8_t phase_lfo=(next_sample_tracker+(63-((lfo1_out)>>4)))&63;
-	int32_t phase2=0;
-	int32_t phase1=0;
-	uint32_t one_shot_counter=one_play[0].position; // 63
-	//uint32_t one_shot_counter=one_shot_position &((audio_buffer_size*65536)-1);// phase
 
 	int32_t temp=0;
 	uint8_t i;
 	int32_t temp3=0;
-	int32_t temp2=0;
-	int32_t temp4=0;
-	int32_t temp5=0;
-	int32_t temp6=0;
-	uint16_t phaser=lfo1_out;
-	int32_t temp_sample=0;
-	uint8_t divider=0;
-	int16_t* pointer = in_sample_holder;
-	int16_t* pointer2 = in_sample_holder_2;
+	static uint32_t ccr_1;
+	static uint32_t ccr_2;
 
-
-	//uint32_t pointer3=SPIM_START_ADDR+one_shot_pointer;
-	//int32_t pointer3=user_data_start+one_shot_pointer;
-
-
-	int32_t feedback=cc_76;
-	uint16_t temp_out;
-	//uint32_t multi=8;
-	//if(ADSR_counter_position[0]>cc_76)  pointer=in_sample_holder_2;
-	//ADSR_out_1=64000;   // should play a note non stop
-	/////////// sound 0 ///////////////
-	if (counter>(cycle_length-1)) {counter=599;overload_flag++;} // just in case
-
-
-	phaser=counter+phaser;phaser&=511;  // this could be using different lfo shapes
-//	if(phaser>599) phaser=phaser-599;phaser&=511;
-	counter=(counter*2);
-	temp_sample=pointer[counter];   //casting the correct way
-	temp3=((temp_sample*ADSR_out[0])>>15);   // modify signal with adsr signed * unsigned
-	temp_sample=pointer[counter2*2];
-	temp=((temp_sample*ADSR_out[1])>>19);   // quieter
-
-
-	//temp_sample=(temp_sample+pointer[phaser<<1])/2;
-
-
-	//temp=temp_sample; //testing only
-
-
-
-	//////////////////    sound 1  //////////////
-
-
-/*	counter=wav_pointer[1]>>8;
-	if (counter>(cycle_length-1)) counter=599; // just in case
-	counter=(counter*2);
-	temp_sample=pointer2[counter];
-
-	temp=((temp_sample*ADSR_out[1])>>17);*/
-	//////////////////   one shot wave playback   //////////
-
-	//temp2=resample_hermite_oneshot(flash_sample_buf,audio_buffer_size,&one_play_counter,one_play_playback_rate);
-	//temp2=resample_hermite_loop(flash_sample_buf,audio_buffer_size,&one_play_counter,(1<<16));
-
-
-	for (int var = 0; var < poly_limit; ++var) {
-	if ((current_playing_sample[var]==1) ) {temp2+=(sample_grab(var)>>current_ducking_level[var]);			;divider++;} // might have to expand
-	}  // might use ducking for all audio level control
-
-
-	//temp2=temp2*(4-divider);
-	//temp2=temp2*2;
-	//temp2=resample_hermite(flash_sample_buf,one_shot_counter);// 305/257us
-	//temp2=resample_hermite_float(flash_sample_buf,one_shot_counter);// 328/257us
-	//temp2=((flash_sample_buf[next_sample_tracker]*ADSR_out[2])>>7); //246/198  us
-	//temp2=flash_sample_buf[next_sample_tracker];
-	//temp2=flash_sample_buf[one_shot_counter>>16];
-    filter_accus[0]=((temp2*freq_point[0])+(filter_accus[0]*freq_point[1]))>>15;
-    filter_accus[1]=(((filter_accus[0]*freq_point[0])+(filter_accus[1]*freq_point[1]))>>15); //1
-    filter_accus[2]=(( filter_accus[1]*freq_point[0])+(filter_accus[2]*freq_point[1]))>>15;
-    filter_accus[3]=(((filter_accus[2]*freq_point[0])+(filter_accus[3]*freq_point[1]))>>15); //1
-    temp2=filter_accus[3];
-	//temp2=(temp2*ADSR_out[2])>>15;  // might control initial level from adsr_out to control clipping
-	////////   mixer  ////
-
-	//temp=temp2; //testing
-	//temp=((temp3+temp)); // only with fx
-	//temp=(temp*current_velocity)>>7;
-	temp=temp+(temp2); // no right shift yet
-//	if (temp>(1<<22))     {multi-=4; }
-
-	//temp*=output_gain;  // separate control for each , this on eis about 0.7 with 3 notes
-
-	//if (temp>(1<<15)) output_gain*=0.9;  //  needs to be near mixer
-
-	//if (temp2>(1<<10)) side_gain*=0.9999;  //sidechain , this can be elsewhere
-	//if (temp2>(1<<2))    sidechain_accu=((sidechain_accu*255)+temp2)>>8;  // dc accu ,slow rise
-
-	//if(side_gain<0.5) side_gain=0.5;
-	//side_gain=1-side_gain;
-
-	//temp*=side_gain;
-
-	if (stutter_flip) temp=0;
-
-
-		temp3=temp;
-feedback=50; // testing
-//delay_time=0;  //testing
-#define SHIFT 7     // ×128 / ÷128
-	if (delay_time>2) {     // bit heavy ,
-		//also needs an incoming limiter
-		//temp=(temp*(128-(feedback/4)))+(delayed*feedback);  // reduces signal of feedback
-
-		//temp=temp*(128-(feedback/4))+(delayed*feedback);  // reduces signal of feedback
-		//if ((temp>32767) || (temp<-32767))  {output_gain*=0.9;}
-
-
-		//int32_t delayed = (int16_t) ram_read(delay);  // major slow down needs to be different
-		int32_t delayed = ram_out[next_sample_tracker]*4;  // for reading  , up to 128 samples
-		int32_t delayed_2 = ram_out[(next_sample_tracker+delay_adder)]*4;
-		//int32_t delayed_2 =delayed;
-		int32_t fb_contrib = delayed * (int32_t)feedback;
-		int32_t accumulator = (int32_t)temp* (128-(feedback/4));  // incoming
-		accumulator += fb_contrib;
-		temp4=accumulator>>SHIFT;
-		//temp3*=output_gain2; //
-		//if (temp3>(1<<15)) output_gain2*=0.9;
-	//	if (temp3>(1<<14)) output_gain2*=0.9; // delay input limiter
-
-		delay_filter=(delay_filter+temp4)/8; // smoothing
-
-		ram_in[next_sample_tracker]=delay_filter; // write back stops here, maybe lower signal and then gain
-		//ram_write(delay_2,(int16_t) delay_filter); // write back stops here
-		int32_t dry  = (int32_t)temp   * 50;   // these can be elminated
-		int32_t wet  =delayed      * 50;
-		int32_t mix  = dry + wet;
-		int32_t wet_2  =delayed_2      * 50;
-		int32_t mix_2  = dry + wet_2;
-		temp3=mix>>6;  // L
-		temp=mix_2>>6; // R
-
-
-
-	}  // Delay read
-
-
-	// stereo flanger
-
-
-	if (temp>(1<<15)) {audio_gain_cut[0]++;audio_gain_cut[1]++;}
-	if (temp3>(1<<15)) {audio_gain_cut[0]++;audio_gain_cut[1]++;}
-
-
-	if (phaser_enable){  // turn off on 0
-	phase_delay [next_sample_tracker]=temp2;
-	phase1=(phase_delay[phase_lfo]+temp2)/2;
-	phase2=(phase_delay[(32+phase_lfo)&63]+temp2)/2;
-	if (phase2>(1<<15)||phase1>(1<<15) ) audio_gain_cut[2]++;
-
-
-	temp+=phase1;// mix back
-
-	temp3+=phase2;
-	}
-
-	temp=(temp)>>(4+phaser_enable); // basic note velocity , not exact based on last value sent
-	//temp=temp>>5;
-
-		temp3=temp3>>(4+phaser_enable);
-		//temp3=sine_testing[next_sample_tracker];temp=temp3;   // grab sample from flash
-	temp+=2047;
-	temp3+=2047;
-
-	ccr2_out=(ccr2_out+temp)>>1; // smoother
-	ccr1_out=(ccr1_out+temp3)>>1;
-	ccr2_out=temp;
-	ccr1_out=temp3;
-
+	for (i=0;i<audio_buffer_size*2;i+=2){  // 100uS atm
+	temp=(int32_t)sound_buf.delay[i];
+	temp3=(int32_t)sound_buf.delay[i+1];
+	temp=soft_clip(temp)>>5;
+	temp3=soft_clip(temp3)>>5;
+		temp+=2047;
+		temp3+=2047;
+		ccr_2=(ccr_2+temp)>>1; // smoother
+		ccr_1=(ccr_1+temp3)>>1;
 	//ccr_buf[ccr_counter_2]=((uint32_t)ccr2_out << 16) | (uint32_t)ccr1_out;
-	audio_out_buf[ccr_counter_2]=((uint32_t)ccr2_out << 16) | (uint32_t)ccr1_out;  // write to temp buffer , might run a limiter after
-	//ccr_buf[ccr_counter_2+1]=ccr1_out;
+	audio_out_buf[i/2]=((uint32_t)ccr_2 << 16) | (uint32_t)ccr_1;  // write to temp buffer , might run a limiter after
 
-
-	//ccr1_out=temp3+2048;// for testing
-	for (i=0;i<3;i++){ // advance data pointer, for freq generation , all notes
-
-		wav_pointer[i]=wav_pointer[i]+CNT_list_selected[i];
-		if (wav_pointer[i]>wav_multi) {wav_pointer[i]=wav_pointer[i]-wav_multi;
-		zero_cross[i]=1;
-		}
-
-	}
-
-
-//	if ( (wav_pointer[0]<1000)&& note_trigger ) {zero_cross[0]=1;} // this works good
-//	if ( (wav_pointer[1]<1000)&& note_trigger ) {zero_cross[1]=1;} // this works good
-
-	//ADSR_counter_position[0]=0;
-	//ADSR_out_1=envelopes_store[0];
-	next_sample_ready=2;
-
-	for (i=0;i<poly;i++){
-	one_play[i].position+=one_play[i].playback_rate;  // use this now calculate playback position
-	if(one_play[i].position>(((64*MAX_Rate)-1)<<16)) one_play[i].position=(((64*MAX_Rate)-1)<<16); // limit to download buffer size
-			}
-
-
+	 	}
+	 	next_sample_ready=2;
 		}
 
 
@@ -248,7 +183,7 @@ void ADSR_TIM_writer(void){   // single note for now  10ms ,16 bit ,could be smo
 
 	//uint32_t countup=tmr_counter_value_get(TMR6);
 	uint16_t counter=ADSR_counter_position[0];
-	uint32_t length=(samples_store[current_playing_sample[0]].size_bytes>>9);
+	uint32_t length=(samples_store[sound_mask.playing_sample[0]].size_bytes>>9);
 	uint32_t temp;
 	if (length<129) length=129;
 
@@ -543,16 +478,16 @@ uint16_t lfo_out(){   // creates and lfo output/  one step
 	return output;
 
 }
-void ducking_control(void){  // creates current_ducking_level for audio
+void ducking_control(void){  // creates sound_mask.ducking_level for audio
 	uint8_t duck=0;
 	for (int var = 0; var < 8; ++var) {
 
 		if (current_ducking_mask[var]) {  // only test ducking slaves
 			duck=0;
 			for (int i = 0; i< 8; ++i) {
-				if ((var!=i) && (current_playing_sample[i]==1) && (!current_ducking_mask[i])) duck=1;  // do not activate by other active ducking
+				if ((var!=i) && (sound_mask.playing_sample[i]==1) && (!current_ducking_mask[i])) duck=1;  // do not activate by other active ducking
 			}
-			if (duck) current_ducking_level[var]=current_ducking_mask[var]&3; else current_ducking_level[var]=0;
+			if (duck) sound_mask.ducking_level[var]=current_ducking_mask[var]&3; else sound_mask.ducking_level[var]=0;
 		}
 
 	}
@@ -562,11 +497,6 @@ void ducking_control(void){  // creates current_ducking_level for audio
 
 
 
-int32_t soft_clip(int32_t x) {
-    if (x > 32767) return 32767 - ((x - 32767) >> 2);
-    if (x < -32768) return -32768 - ((x + 32768) >> 2);
-    return x;
-}
 
 int32_t soft_clip_cubic(int32_t x) {
     // Input should be roughly in -1.5 .. 1.5 range (scaled)
@@ -631,3 +561,236 @@ int32_t compute_gain(int32_t *channels, int num_ch, int32_t current_gain)
 
     return current_gain;
 }
+/*
+void sound_source(void){  // loads and mixes samples,converts to float
+
+	int32_t temp2=0;
+	int32_t temp3=0;
+	for (int i = 0; i < audio_buffer_size; ++i) {
+	temp2=0;
+	temp3=0;
+	for (int var = 0; var < poly_limit; ++var) {
+	if ((sound_mask.playing_sample[var]==1) && sound_mask.filter[var]) {temp2+=(sample_grab(var)>>sound_mask.ducking_level[var]);} // might have to expand
+	if ((sound_mask.playing_sample[var]==1) && !sound_mask.filter[var]) {temp3+=(sample_grab(var)>>sound_mask.ducking_level[var]);}// dry mix
+
+
+
+	one_play[var].position+=one_play[var].playback_rate;  // use this now calculate playback position
+
+		if(one_play[var].position>8388607) one_play[var].position=8388607;
+
+	}
+
+	// might use ducking for all audio level control
+	sound_buf.source[i]=temp2; //source is ok
+	sound_buf.source_dry[i]=temp3; //source is ok
+
+}
+} //end of sound source
+*/
+/*void next_sample(void){  // this runs always , sound in generated when ADSR_out is on , wav_pointer shows sample pos in sample holder
+
+	// will split this up into several stages, for more control and speed , generate audio, then fx, then adsr,mix,
+	//+maybe or change
+
+	//uint16_t delay_adder=32;
+	//if (delay_pointer[0]<256) delay_adder=0;
+	//uint32_t counter=wav_pointer[0]>>8;  // click on the first read
+	//uint32_t counter2=wav_pointer[1]>>8;
+
+	//uint32_t one_shot_counter=one_shot_position &((audio_buffer_size*65536)-1);// phase
+
+	//uint8_t phase_lfo=(next_sample_tracker+(63-((lfo1_out)>>4)))&63;
+	//int32_t phase2=0;
+	//int32_t phase1=0;
+	//uint32_t one_shot_counter=one_play[0].position; // 63
+	//uint32_t one_shot_counter=one_shot_position &((audio_buffer_size*65536)-1);// phase
+
+	int32_t temp=0;
+	uint8_t i;
+	int32_t temp3=0;
+	uint8_t next_double=next_sample_tracker*2;
+	//int32_t temp2=0;
+	//int32_t temp4=0;
+	//int32_t temp5=0;
+	//int32_t temp6=0;
+	//uint16_t phaser=lfo1_out;
+	//int32_t temp_sample=0;
+
+	//int16_t* pointer = in_sample_holder;
+	//int16_t* pointer2 = in_sample_holder_2;
+
+
+	//uint32_t pointer3=SPIM_START_ADDR+one_shot_pointer;
+	//int32_t pointer3=user_data_start+one_shot_pointer;
+
+
+	//int32_t feedback=cc_76;
+	//uint16_t temp_out;
+	//uint32_t multi=8;
+	//if(ADSR_counter_position[0]>cc_76)  pointer=in_sample_holder_2;
+	//ADSR_out_1=64000;   // should play a note non stop
+	/////////// sound 0 ///////////////
+	//if (counter>(cycle_length-1)) {counter=599;overload_flag++;} // just in case
+
+
+
+	phaser=counter+phaser;phaser&=511;  // this could be using different lfo shapes
+//	if(phaser>599) phaser=phaser-599;phaser&=511;
+	counter=(counter*2);
+	temp_sample=pointer[counter];   //casting the correct way
+	temp3=((temp_sample*ADSR_out[0])>>15);   // modify signal with adsr signed * unsigned
+	temp_sample=pointer[counter2*2];
+	temp=((temp_sample*ADSR_out[1])>>19);   // quieter
+
+
+
+	//temp_sample=(temp_sample+pointer[phaser<<1])/2;
+
+
+	//temp=temp_sample; //testing only
+
+
+
+	//////////////////    sound 1  //////////////
+
+
+	counter=wav_pointer[1]>>8;
+	if (counter>(cycle_length-1)) counter=599; // just in case
+	counter=(counter*2);
+	temp_sample=pointer2[counter];
+
+	temp=((temp_sample*ADSR_out[1])>>17);
+	//////////////////   one shot wave playback   //////////
+
+	//temp2=resample_hermite_oneshot(flash_sample_buf,audio_buffer_size,&one_play_counter,one_play_playback_rate);
+	//temp2=resample_hermite_loop(flash_sample_buf,audio_buffer_size,&one_play_counter,(1<<16));
+
+	//temp2=temp2*(4-divider);
+	//temp2=temp2*2;
+	//temp2=resample_hermite(flash_sample_buf,one_shot_counter);// 305/257us
+	//temp2=resample_hermite_float(flash_sample_buf,one_shot_counter);// 328/257us
+	//temp2=((flash_sample_buf[next_sample_tracker]*ADSR_out[2])>>7); //246/198  us
+	//temp2=flash_sample_buf[next_sample_tracker];
+	//temp2=flash_sample_buf[one_shot_counter>>16];
+
+
+    filter_accus[0]=((temp2*freq_point[0])+(filter_accus[0]*freq_point[1]))>>15;
+    filter_accus[1]=(((filter_accus[0]*freq_point[0])+(filter_accus[1]*freq_point[1]))>>15); //1
+    filter_accus[2]=(( filter_accus[1]*freq_point[0])+(filter_accus[2]*freq_point[1]))>>15;
+    filter_accus[3]=(((filter_accus[2]*freq_point[0])+(filter_accus[3]*freq_point[1]))>>15); //1
+    temp2=filter_accus[3];
+
+
+	//temp2=(temp2*ADSR_out[2])>>15;  // might control initial level from adsr_out to control clipping
+	////////   mixer  ////
+
+	//temp=temp2; //testing
+	//temp=((temp3+temp)); // only with fx
+	//temp=(temp*current_velocity)>>7;
+	//temp2=sound_buf.filter[next_sample_tracker];
+	//temp=temp+(temp2); // no right shift yet
+//	if (temp>(1<<22))     {multi-=4; }
+
+	//temp*=output_gain;  // separate control for each , this on eis about 0.7 with 3 notes
+
+	//if (temp>(1<<15)) output_gain*=0.9;  //  needs to be near mixer
+
+	//if (temp2>(1<<10)) side_gain*=0.9999;  //sidechain , this can be elsewhere
+	//if (temp2>(1<<2))    sidechain_accu=((sidechain_accu*255)+temp2)>>8;  // dc accu ,slow rise
+
+	//if(side_gain<0.5) side_gain=0.5;
+	//side_gain=1-side_gain;
+
+	//temp*=side_gain;
+
+	//if (stutter_flip) temp=0;
+
+
+
+
+	// stereo flanger
+
+
+
+
+
+	if (phaser_enable){  // turn off on 0
+	phase_delay [next_sample_tracker]=temp2;
+	phase1=(phase_delay[phase_lfo]+temp2)/2;
+	phase2=(phase_delay[(32+phase_lfo)&63]+temp2)/2;
+	if (phase2>(1<<15)||phase1>(1<<15) ) audio_gain_cut[2]++;
+
+
+	temp+=phase1;// mix back
+
+	temp3+=phase2;
+	}
+
+	//if (temp>(1<<15)) {audio_gain_cut[0]++;audio_gain_cut[1]++;}
+	//if (temp3>(1<<15)) {audio_gain_cut[0]++;audio_gain_cut[1]++;}
+
+	float temp_f1;  // float version
+	float temp_f2;
+	temp_f1=sound_buf.delay[next_double];
+	temp_f2=sound_buf.delay[next_double+1];
+	temp_f1=soft_clip_f1(temp_f1)/32;
+	temp_f2=soft_clip_f1(temp_f2)/32;
+	temp_f1+=2047;
+		temp_f2+=2047;
+		ccr1_out=temp_f1;
+		ccr2_out=temp_f2;
+
+
+	//temp=soft_clip(temp);
+	//temp3=soft_clip(temp3);  // this works, not as heavy as a full process , but not good enough
+	//temp=(temp)>>5; // needs a bit more or still clips maybe roundiong
+	//temp=temp>>5;
+
+		///temp3=temp3>>5;
+		//temp3=sine_testing[next_sample_tracker];temp=temp3;   // grab sample from flash
+	temp=(int32_t)sound_buf.delay[next_double];
+	temp3=(int32_t)sound_buf.delay[next_double+1];
+	temp=soft_clip(temp)>>5;
+	temp3=soft_clip(temp3)>>5;
+
+
+		temp+=2047;
+		temp3+=2047;
+	ccr2_out=(ccr2_out+temp)>>1; // smoother
+	ccr1_out=(ccr1_out+temp3)>>1;
+	ccr2_out=temp;
+	ccr1_out=temp3;
+
+	//ccr_buf[ccr_counter_2]=((uint32_t)ccr2_out << 16) | (uint32_t)ccr1_out;
+	audio_out_buf[ccr_counter_2]=((uint32_t)ccr2_out << 16) | (uint32_t)ccr1_out;  // write to temp buffer , might run a limiter after
+	//ccr_buf[ccr_counter_2+1]=ccr1_out;
+
+
+	//ccr1_out=temp3+2048;// for testing
+
+	for (i=0;i<3;i++){ // advance data pointer, for freq generation , all notes
+
+		wav_pointer[i]=wav_pointer[i]+CNT_list_selected[i];
+		if (wav_pointer[i]>wav_multi) {wav_pointer[i]=wav_pointer[i]-wav_multi;
+		zero_cross[i]=1;
+		}
+
+	}
+
+
+
+//	if ( (wav_pointer[0]<1000)&& note_trigger ) {zero_cross[0]=1;} // this works good
+//	if ( (wav_pointer[1]<1000)&& note_trigger ) {zero_cross[1]=1;} // this works good
+
+	//ADSR_counter_position[0]=0;
+	//ADSR_out_1=envelopes_store[0];
+	next_sample_ready=2;
+
+	for (i=0;i<poly;i++){
+	one_play[i].position+=one_play[i].playback_rate;  // use this now calculate playback position
+	if(one_play[i].position>(((64*MAX_Rate)-1)<<16)) one_play[i].position=(((64*MAX_Rate)-1)<<16); // limit to download buffer size
+			}
+
+
+		}*/

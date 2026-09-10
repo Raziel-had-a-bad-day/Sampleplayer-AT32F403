@@ -39,6 +39,7 @@
 #include "out.bin.h"     // only enable for initial upload, binary ->.h file for samples
 
 #include "variables.h"
+#include "amplitude.h"
 //#include "sampler_loader.h"
 #include "flash.h"
 #include "ram.h"
@@ -81,7 +82,7 @@ int main(void)
    wk_usart3_init();
 	SPI2_CS_HIGH;  // disable for ram for now
 
-	uart_print_init(115200);
+	uart_print_init(1000000);  // 1mbit ok 115k bad for audio
 
 	//  uart_print_init(115200);
 
@@ -97,6 +98,15 @@ int main(void)
    wk_dma1_channel3_init(); // TX
 
 
+void time_start_handler(void){ // for measuring processing time
+	start_time=tmr_counter_value_get(TMR6);
+}
+void time_stop_handler(void){ // returnes elapsed time
+int32_t temp=elapsed_time;
+	stop_time=tmr_counter_value_get(TMR6);
+if(stop_time>start_time) temp=stop_time-start_time; else temp=0; // return elapsed time for testing
+if ((temp) && (temp>elapsed_time)) {elapsed_time=temp;printf("t=%d uS",elapsed_time);}
+}
   /* wk_dma_channel_config(DMA1_CHANNEL3,
                          (uint32_t)&SPI4->dt,
                           (uint32_t)ram_page_write_buf,
@@ -139,35 +149,7 @@ int main(void)
 	memcpy(samples_store,samples_backup, sizeof(samples_backup));  // backup samples struct
 	memcpy(one_shot,one_shot_backup, sizeof(one_shot_backup));  // backup samples struct
 	sanitize_one_shots();
-/*
-	for (int sample=0;sample<8;sample++){  // check for  missing or bad data
-	for (int part=0;part<8;part++){
-		if (one_shot[sample].start[part]<samples_store[sample].ram_addr)
-			one_shot[sample].start[part]=samples_store[sample].ram_addr;
-		if (one_shot[sample].start[part]>16000000)
-			one_shot[sample].start[part]=samples_store[sample].ram_addr;
-		if (one_shot[sample].end[part]<one_shot[sample].start[part])
-			one_shot[sample].end[part]=samples_store[sample].ram_addr;
-		if (one_shot[sample].end[part]>(one_shot[sample].start[part]+samples_store[sample].size_bytes))
-			one_shot[sample].end[part]=samples_store[sample].ram_addr;
 
-		if (one_shot[sample].length[part]>127) one_shot[sample].length[part]=0;
-		if (one_shot[sample].speed[part]>131072)
-				one_shot[sample].speed[part]=65535;
-
-	}
-	}
-*/
-
-//	for (int sample=0;sample<poly_limit;sample++){ // if one is turned off  ,load up next after the poly limit , this is temp
-//
-//		if (!samples_store[sample].used) {
-//
-//			 one_shot[sample].start[0]=samples_store[poly_limit].ram_addr;
-//			 one_shot[sample].end[0]=one_shot[poly_limit].start[0]+samples_store[poly_limit].size_bytes;
-//					}
-//
-//	}
 	envelopes_preprocess(0);
 	envelopes_preprocess(1);
 	envelopes_preprocess(2);
@@ -250,6 +232,11 @@ SPI4_CS_HIGH;
 
 flash_to_ram_mirror ();
 
+preload_filter();//svf_set(&Filtering, 44100, 1200, 1.2);
+
+lfo_init(&lfo, 0.0f, 100.0f, 500);   // initial low, high, rate
+lfo_set_range(&lfo, 0, 127, 0);
+
 //samples_store[0].size_bytes=321048;
 //  maybe implement skip back function , record 30sec to mem and than skip back when needed
 
@@ -274,22 +261,24 @@ while(1)
 */
 
 	 // if((ccr_counter>=audio_buffer_size)) {  // process 16*2 samples, runs always
-		  if((dac_ready)) {  // process 16*2 samples, runs always
+		  if((dac_ready)) {  // process 64 samples, runs always
 
+			  time_start_handler();
+			  // basic sound is 180us ,delay adds 50us
+			  delay_calc(); // 1uS
 
- 			// basic sound is 180us ,delay adds 50us
- 		 		delay_calc();
- 		 	  start_time=tmr_counter_value_get(TMR6);
- 		 	 	 // about 1200us available before it goes bad
- 		 	oneshot_looper(); // process oneshot data
- 		 	ducking_control();
- 		 for (i=0;i<audio_buffer_size;i++){  // 64 atm moment, 250us with linear +40us with hermite resample
- 			// tmr_counter[i]=tmr_counter_value_get(TMR7);
- 			 next_sample_tracker=i;  // just counts up inside the buf
- 			 ccr_counter_2=i;
- 			 next_sample();  // 8 *256 (inc delay r/w) 11mbits
+			  // about 1200us available before it goes bad
+			  oneshot_looper(); // process oneshot data , 35uS with all notes on
 
- 			} // process samples  300uS atm
+			  ducking_control(); // this can also do mute or levels etc if float
+			  sound_source();  //160uS
+
+			  sound_filter(); // 55 uS
+
+			  sound_delay(); // 50uS
+
+ 			 next_sample();  // 64uS
+
 
  		 if ( usart3_rx_temp[4]) controller_process();
  		 if(ADSR_timer>7) {audio_gain_global(); roll_control();ADSR_TIM_writer();ADSR_timer=0;} else ADSR_timer++; // 22.6us*64*8 = 11.6 ms
@@ -297,16 +286,21 @@ while(1)
 
  		 	 if ((!psram_busy)&&(!spi_process_counter)) spi_process_counter=1;  // starts spi processing, can block
 
- 		 	 	 stop_time=tmr_counter_value_get(TMR6);
- 		  	 	if(stop_time>start_time) elapsed_time=stop_time-start_time; else elapsed_time=0; // return elapsed time for testing
- 		  	 	// sitting at 510us , 580us with FX
 		 		memset(flash_sample_buf,0,2048);  // clear
 		 		ccr_counter=0;
 		 		dac_ready=0;
-	  }
+		 		 time_stop_handler();
+	  } // end of audio process 430uS max
 
+		  if (mtc_clock!=mtc_clock_buf) {gap_control(); mtc_clock_buf=mtc_clock;
 
-		  if (mtc_clock!=mtc_clock_buf) {gap_control(); mtc_clock_buf=mtc_clock;}  // timed by 24/quater
+		  //val=fade_update(&fade, t);t+=20;
+		  //filt_f=Filtering.f[val];
+		  //uint32_t mtc = mtc_clock;        // your time source (bars/ticks/etc)
+		  int val = lfo_update(&lfo,  mtc_clock);
+		  filt_f=Filtering.f[val];
+
+		  }  // timed by 24/quater
 
 
 		  if ((!spi_read_flag) && (!spi_write_flag) && (spi_process_counter)&&(!psram_busy)) spi_message_process();
@@ -367,8 +361,8 @@ void USART2_IRQHandler(void)  // midi in
 	  temp = usart_data_receive(USART2);  // filter midi channel here first
 	  if(temp==248) {mtc_clock++;return;} else usart2_rx_buffer[usart2_rx_counter] = temp; // bypass on midi timing signal
 
-	  (usart2_rx_buffer[0]==note_on+midi_channel ||  usart2_rx_buffer[0]==note_on+9 || usart2_rx_buffer[0]==c_change+9 ||
-			  usart2_rx_buffer[0]==c_change+9) ?  usart2_rx_counter++:usart2_rx_counter;                       // not receiving cc 185
+	  (usart2_rx_buffer[0]==note_on+midi_channel ||
+			  usart2_rx_buffer[0]==c_change+midi_channel) ?  usart2_rx_counter++:usart2_rx_counter;                       // not receiving cc 185
 
 
     if(usart2_rx_counter >(usart_buffer_size-1))
