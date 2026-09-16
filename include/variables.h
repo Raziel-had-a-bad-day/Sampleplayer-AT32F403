@@ -228,13 +228,16 @@ uint8_t i2c_rec_counter=0;
 uint8_t i2c_rec_flag=0;
 char c;
 
-typedef struct {  //need to store filename or some type of id
+
+
+
+typedef struct {  //need to store filename or some type of id , now only used for basic file info
 
     uint32_t ram_addr;      // start address
     uint32_t size_bytes;      // total size in bytes only
     uint8_t  used;				// 1 if used or maybe id
-    uint8_t speed;   // playback speed or tune 0-127
-    uint8_t length;  // 0-127 fade out point
+    uint8_t speed;   // playback speed or tune 0-127, not used
+    uint8_t length;  // 0-127 fade out point, not used
     uint8_t placeholder2;
     uint8_t placeholder3;
 } Samples;
@@ -246,25 +249,29 @@ typedef struct {
     uint8_t  reserved[11];
 } SampleHeader;
 
-typedef struct {
+typedef struct {  // this holds most of the sample control info , holds 4 diff settings atm
 
-    uint32_t start[8]; //memory start address, 8 parts for now for sequencing, calculated with offset
-    uint32_t end[8];  // end position ,dynamic, this is calculated from (sample size*(127-sample_store.length)/128)
-    uint32_t speed[8]; // pitch or playback speed 0-127 for seq
-    uint8_t gap[8]; // end gap for sequencer, maybe in 100ms increments
-    uint8_t length[8]; // length 0-127 , store from incoming
-    uint8_t roll[8]; // roll/repeat 0-15 roll speed[0:3] repeat 0-7 [4:7]
+    uint32_t start[4]; //memory start address, 4 parts for now for sequencing, calculated with offset
+    uint32_t end[4];  // end position ,dynamic, this is calculated from (sample size*(127-sample_store.length)/128)
+    uint32_t speed[4]; // pitch or playback speed 0-127 for seq
+    uint8_t gap[4]; // end gap for sequencer, maybe in 100ms increments
+    uint8_t length[4]; // length 0-127 , store from incoming
+    uint8_t roll[4]; // roll/repeat 0-15 roll speed[0:3] repeat 0-7 [4:7], not sure maybe change to type
+    uint16_t type; // sample type , normal=0 , start=1 ,break=2, solo=3, flip_flip control 1<<3, global fx 1<<4,more for later
+    				// 1<<5 cannot be replaced (ie main drum parts/loop ) otherwise flip_flop or random, no more than 1
+    				//[12:16] flip_flop sample select ie choose between one or the other for one_play(0-15)
 } sample_oneshot;
-sample_oneshot one_shot[8]; // controls reading from memory, might have to fill up during init , about 1k needed
+sample_oneshot one_shot[16]; // controls reading from memory, might have to fill up during init , about 1k needed
 
 typedef struct {
     uint32_t pointer;     // current mem address
     uint32_t playback_rate;// (0.5-2) <<16  speed of playback , this is calculated
     uint32_t position;      // (0-63)<<16  position within buffer
     int16_t  buf[256];    // read data
+    uint8_t source;  // controls which one_shot sample is selected
 
 } sample_oneplay;
-sample_oneplay one_play[8]; // holds temp data for playback
+sample_oneplay one_play[8]; // holds temp data for playback, limited by poly
 
 
 typedef struct  {
@@ -276,10 +283,11 @@ typedef struct  {
   uint8_t delayLevel[4];
 } settings;
 settings sample_edit;  // holds values for sample editor, controlled externally through I2C
+
 typedef struct {
-    float source[64];        // frequency coefficient
+    float source[512];        // outgoing
     float source_dry[64]; // bypass filter
-    float lpfilter[64];        // resonance (damping)
+    float lpfilter[512];        // resonance (damping)
     float delay[128]; // stereo
     float amp[64];
     int32_t output[64];
@@ -288,16 +296,20 @@ typedef struct {
 Sound sound_buf; // holds intermediate audio buffers
 
 typedef struct {
-		uint8_t filter[8];
-		uint8_t ducking[8];
-		uint8_t ducking_level[8];
-		uint8_t playing_sample[8];
-		uint8_t playing_part[8];
-		uint16_t playing_gap[8];
+		uint8_t filter[8];// controls output filter
+		uint8_t ducking[8]; // controls output ducking effect
+		uint8_t delay[8];
+		uint8_t muting[8];// controls output muting, might not need it
+		uint8_t ducking_level[8];// controls output ducking level
+		uint8_t playing_sample[8]; // output sample select ,similar to muting
+		uint8_t playing_part[8]; // output part playing
+		uint16_t playing_gap[8];// output playing gap
 
 } mask;
-mask sound_mask={0,0,0,0,1,1,1,1,
-				0,0,0,1,1,0,0,0};
+mask sound_mask={0,1,1,1,0,0,0,0,  // filter, set a max limit for this
+				0,0,0,0,0,0,0,0, // ducking
+				0,1,1,1,0,0,0,0 // delay
+}; // mirrors one_play
 
 
 
@@ -527,11 +539,11 @@ int32_t sample_grab(uint8_t sample) {
 }
 
 void sanitize_one_shots(void) {  // check for bad data in one_shot
-    for (int s = 0; s < 8; s++) {
+    for (int s = 0; s < 16; s++) {
         const uint32_t base = samples_store[s].ram_addr;
         const uint32_t max  = base + samples_store[s].size_bytes;
 
-        for (int p = 0; p < 8; p++) {
+        for (int p = 0; p < 4; p++) {
             uint32_t *start = &one_shot[s].start[p];
             uint32_t *end   = &one_shot[s].end[p];
 
@@ -540,16 +552,30 @@ void sanitize_one_shots(void) {  // check for bad data in one_shot
                 *start = base;
 
             // end limits
-            if (*end < *start || *end > max)
-                *end = base;          // or *end = *start;  ← change easily here
+            if (*end < (*start +5000)|| *end > max)
+                *end = max;          // or *end = *start;  ← change easily here
 
             // length
+
+
+
             if (one_shot[s].length[p] > 127)
                 one_shot[s].length[p] = 127;
-
+            if (one_shot[s].length[p] == 0)
+                one_shot[s].length[p] = 127;
             // speed
             if (one_shot[s].speed[p] > 131072)
                 one_shot[s].speed[p] = 65535;
+            if (one_shot[s].speed[p] < 1024)
+                one_shot[s].speed[p] = 65535;
+
+            if (one_shot[s].gap[p] > 127)
+              one_shot[s].gap[p] = 24;
+
+            if (one_shot[s].roll[p] > 32)
+               one_shot[s].roll[p] = 0;
+            if (one_shot[s].type > 65534)
+               one_shot[s].type = 0;
 
             // ── add new limits here ──
             // if (one_shot[s].roll[p] > 0xFF) one_shot[s].roll[p] = 0;
@@ -580,23 +606,15 @@ SVFI Filter_int; // set
     s->f = 2.0f * sinf(M_PI * cutoff / sample_rate);
     s->q = 1.0f / resonance;   // or map resonance the way you like
 }*/
-
+#define lp_sampling_rate 11025
 void preload_filter(void){  // stick with float , int is worse
 	for (int a = 0; a < 128; ++a) {
-	Filtering.f[a]= 2.0f * sinf(M_PI * (a*32) / 44100); //f
+	Filtering.f[a]= 2.0f * sinf(M_PI * (a*32) / 44100); //f totally screwed it sampling are is lower than 44k
 		Filtering.q[a]=1.0f/(0.707+(a*0.01));  // q
 	};
 
 }
-/*
-void preload_filter_int(void){
-	for (int a = 0; a < 128; ++a) {
-	Filter_int.f[a]= (2.0f * sinf(M_PI * (a*32) / 44100)*64000); //f
-		Filter_int.q[a]=(1.0f/(0.707f+(a*0.01f))*64000);  // q
-	};
 
-}
-*/
 
 
 
@@ -607,6 +625,62 @@ float svf_lp(SVF *s, float in)
     s->low  += filt_f * s->band;
     return s->low;
 }
+void  svf_lp_block_16(SVF *s, const float *in, float *out ){ // process 16 in 64 out
+
+	uint8_t n;
+	for (int i = 0; i < 16; i++){
+    	n=i*4;
+        float high = in[i] - s->low - filt_q * s->band;
+        s->band += filt_f * high;
+        s->low  += filt_f * s->band;
+    	out[n]=s->low;
+
+    	out[n+3]=out[n+2]=out[n+1]=out[n];
+
+
+    	    }
+
+
+
+/*    for (int i = 0; i < 16; i++){  // copy values
+    	out[i+16]=out[i+32]=out[i+48]=out[i];
+    }*/
+
+
+}
+
+void  svf_lp_block_64(SVF *s, const float *in, float *out ){ // process 16 in 64 out
+    for (int i = 0; i < 64; i++){
+
+        float high = in[i] - s->low - filt_q * s->band;
+        s->band += filt_f * high;
+        s->low  += filt_f * s->band;
+    	out[i]=s->low;
+
+    	    }
+   // memcpy(out+16,out,16);
+  //  memcpy(out+32,out,16);
+  //  memcpy(out+48,out,16);
+
+
+/*    for (int i = 0; i < 16; i++){  // copy values
+    	out[i+16]=out[i+32]=out[i+48]=out[i];
+    }*/
+
+
+}
+void decimate4_block_f32(const float *in, float *out) // 64 in 16 out
+{
+    for (int i = 0; i < 16; i++)
+    {
+        out[i] = (in[0] + in[1] + in[2] + in[3]) * 0.25f;
+        in += 4;
+    }
+}
+
+
+
+
 int32_t soft_clip(int32_t x) {
     if (x > 32767) return 32767 - ((x - 32767) >> 2);
     if (x < -32768) return -32768 - ((x + 32768) >> 2);
@@ -638,8 +712,6 @@ void soft_clip_f(float *in,int size){  // runs normalise on float buffer, int is
 
 		}
 
-
-
 	//if (peak<=limit) return;
 	peak_out=peak;
 	gain=limit/peak;
@@ -651,6 +723,42 @@ void soft_clip_f(float *in,int size){  // runs normalise on float buffer, int is
 
 }
 
+
+uint8_t source_select(uint8_t incoming)
+{
+    if (incoming == 0)
+        return 0;
+
+    uint8_t voice = incoming % poly_limit;      // always 0–5
+
+/*
+    // same exact sample → stop
+    if (one_play[voice].source == incoming) {
+        one_play[voice].source = 0;             // or clear loop/enable flag
+        return voice;
+    }
+*/
+
+    // new sample or different part → just assign
+    one_play[voice].source = incoming;
+    return voice;
+}
+
+
+// Very cheap boxcar decimator by 4
+float avg_buf[4];
+uint8_t avg_idx = 0;
+
+
+float decimate_by_4(float in)
+{
+    avg_buf[avg_idx++] = in;
+    if (avg_idx < 4) return 0.0f;          // not ready yet
+
+    avg_idx = 0;
+    float sum = avg_buf[0] + avg_buf[1] + avg_buf[2] + avg_buf[3];
+    return sum * 0.25f;                    // or sum >> 2 if fixed-point
+}
 
 /*
 

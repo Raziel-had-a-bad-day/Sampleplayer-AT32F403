@@ -82,7 +82,7 @@ int main(void)
    wk_usart3_init();
 	SPI2_CS_HIGH;  // disable for ram for now
 
-	uart_print_init(1000000);  // 1mbit ok 115k bad for audio
+	uart_print_init(500000);  // 1mbit ok 115k bad for audio
 
 	//  uart_print_init(115200);
 
@@ -171,8 +171,18 @@ if ((temp) && (temp>elapsed_time)) {elapsed_time=temp;printf("t=%d uS",elapsed_t
 		if (samples_store[i].size_bytes)  current_sample_save++;  // count up sample save position from stored, continued saving until the end
 
 	}
+uint32_t test_up=0;
+	for (int var = 0; var < 16; ++var) {
+		if (samples_store[var].used){
+			if ((samples_store[var].ram_addr+samples_store[var].size_bytes)>test_up)
+			test_up=samples_store[var].ram_addr+samples_store[var].size_bytes;
+			usart4_total_counter=test_up;
 
+		}
+	}
 
+	usart4_total_counter=test_up;
+	flash_counter_write(usart4_total_counter); //write max location back
 
 	sample_select[0]=600;
 	read_adr= user_data_start +sample_select[0];
@@ -289,7 +299,7 @@ while(1)
 		 		memset(flash_sample_buf,0,2048);  // clear
 		 		ccr_counter=0;
 		 		dac_ready=0;
-		 		 time_stop_handler();
+		 		  time_stop_handler();
 	  } // end of audio process 430uS max
 
 		  if (mtc_clock!=mtc_clock_buf) {gap_control(); mtc_clock_buf=mtc_clock;
@@ -297,6 +307,7 @@ while(1)
 		  //val=fade_update(&fade, t);t+=20;
 		  //filt_f=Filtering.f[val];
 		  //uint32_t mtc = mtc_clock;        // your time source (bars/ticks/etc)
+		 lfo.low=10;
 		  int val = lfo_update(&lfo,  mtc_clock);
 		  filt_f=Filtering.f[val];
 

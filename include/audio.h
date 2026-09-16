@@ -17,8 +17,14 @@ int16_t resample_hermite_oneshot(const int16_t* sample_data,
                                  uint32_t* phase,          // 16.16 fixed point
                                  uint32_t increment);
 
+// start_sample=  unmutes all sounds when played ,disables temp global fx, maybe one only, play rarely
+// break_sample = mutes all and only plays one sample , holds mute,rare
+//solo_sample just unmutes a single sample while playing ,also disables global fx,
+//normal_sample no mute or global fx setting
 
-
+//fx_sample = enables a global temp fx(ie stutter or a crossfade )  while playing until start sample plays again or a break sample
+// crossfade sample pair assign , 2 samples,slow crossfade, maybe an 8 bar flip-flop list of all samples with enable
+// use a global mute , global low pass override , global delay override , maybe use cc switching
 
 
 
@@ -26,6 +32,9 @@ int16_t resample_hermite_oneshot(const int16_t* sample_data,
 
 void sound_source(void) // loads and mixes samples,converts to float
 {
+
+
+
     for (int i = 0; i < audio_buffer_size; ++i)
     {
         float temp2 = 0.0f;
@@ -34,61 +43,172 @@ void sound_source(void) // loads and mixes samples,converts to float
         // Voice 0
         if (sound_mask.playing_sample[0] == 1) {
             float s = (float)(one_play[0].buf[one_play[0].position >> 16] >> sound_mask.ducking_level[0]);
-            if (sound_mask.filter[0]) temp2 += s; else temp3 += s;
-        }
+            sound_buf.source[i]=s;
+        }else sound_buf.source[i]=0;
         one_play[0].position += one_play[0].playback_rate;
-        if (one_play[0].position > 8388607) one_play[0].position = 8388607;
+      //  if (one_play[0].position > 8388607) one_play[0].position = 8388607;
 
         // Voice 1
         if (sound_mask.playing_sample[1] == 1) {
             float s = (float)(one_play[1].buf[one_play[1].position >> 16] >> sound_mask.ducking_level[1]);
-            if (sound_mask.filter[1]) temp2 += s; else temp3 += s;
-        }
+            sound_buf.source[i+64]=s;
+        }else sound_buf.source[i+64]=0;
         one_play[1].position += one_play[1].playback_rate;
-        if (one_play[1].position > 8388607) one_play[1].position = 8388607;
+      //  if (one_play[1].position > 8388607) one_play[1].position = 8388607;
 
         // Voice 2
         if (sound_mask.playing_sample[2] == 1) {
             float s = (float)(one_play[2].buf[one_play[2].position >> 16] >> sound_mask.ducking_level[2]);
-            if (sound_mask.filter[2]) temp2 += s; else temp3 += s;
-        }
+            sound_buf.source[i+128]=s;
+        }else sound_buf.source[i+128]=0;
         one_play[2].position += one_play[2].playback_rate;
-        if (one_play[2].position > 8388607) one_play[2].position = 8388607;
+       // if (one_play[2].position > 8388607) one_play[2].position = 8388607;
 
         // Voice 3
         if (sound_mask.playing_sample[3] == 1) {
             float s = (float)(one_play[3].buf[one_play[3].position >> 16] >> sound_mask.ducking_level[3]);
-            if (sound_mask.filter[3]) temp2 += s; else temp3 += s;
-        }
+            sound_buf.source[i+192]=s;
+        }else sound_buf.source[i+192]=0;
         one_play[3].position += one_play[3].playback_rate;
-        if (one_play[3].position > 8388607) one_play[3].position = 8388607;
+     //   if (one_play[3].position > 8388607) one_play[3].position = 8388607;
 
         // Voice 4
         if (sound_mask.playing_sample[4] == 1) {
             float s = (float)(one_play[4].buf[one_play[4].position >> 16] >> sound_mask.ducking_level[4]);
-            if (sound_mask.filter[4]) temp2 += s; else temp3 += s;
-        }
+            sound_buf.source[i+256]=s;
+        }else sound_buf.source[i+256]=0;
         one_play[4].position += one_play[4].playback_rate;
-        if (one_play[4].position > 8388607) one_play[4].position = 8388607;
+     //   if (one_play[4].position > 8388607) one_play[4].position = 8388607;
 
         // Voice 5
         if (sound_mask.playing_sample[5] == 1) {
             float s = (float)(one_play[5].buf[one_play[5].position >> 16] >> sound_mask.ducking_level[5]);
-            if (sound_mask.filter[5]) temp2 += s; else temp3 += s;
-        }
+            sound_buf.source[i+320]=s;
+        }else sound_buf.source[i+320]=0;
         one_play[5].position += one_play[5].playback_rate;
-        if (one_play[5].position > 8388607) one_play[5].position = 8388607;
+      //  if (one_play[5].position > 8388607) one_play[5].position = 8388607;
 
-        sound_buf.source[i]     = temp2;   // now float
-        sound_buf.source_dry[i] = temp3;
+     //   sound_buf.source[i]     = temp2;   // now float
+      //  sound_buf.source_dry[i] = temp3;  // bypass filter , might just bypass and run 6 channels and mix later
+
     }
 }
-void sound_filter(void){  //runs filter on buffer
 
-	for (int i = 0; i < audio_buffer_size; ++i) {
-		sound_buf.lpfilter[i]=svf_lp(&Filtering,sound_buf.source[i])+sound_buf.source_dry[i]; //filter
-
+static int16_t test_filter[512];
+static int32_t test_accus[8];
+int smull(int a, int b, int c, int d)
+{
+   // b is unused, kept only to match the original
+    int retval;
+    __asm__("smmul %0, %1, %2"
+      : "=r"(retval)
+      : "r"(c), "r"(d)
+      : // no clobbers
+    );
+    return retval;
 }
+
+
+void sound_filter(void){  //runs filter on buffer . 4 in 4 out
+// downsample to 11k and run 4 filters in paralell instead , bypass if cutoff is set to full
+float temp[64];
+float s=0;
+memset(sound_buf.lpfilter,0,512);
+/*for (int i = 0; i < audio_buffer_size; i++) {
+
+s=0;
+for (int var = 0; var < 6; ++var) { // mix for filter in from output, eventually just have fixed lines
+
+	if(sound_mask.filter[var])
+		s=s+sound_buf.source[var][i];
+}
+	temp[i]=s;}*/
+
+
+if(sound_mask.filter[0]){  //  filter option
+decimate4_block_f32(  sound_buf.source,temp); //downsample
+svf_lp_block_16(&Filtering,temp
+		,sound_buf.lpfilter); // lpf
+}
+if(sound_mask.filter[1]){  //  filter option
+decimate4_block_f32(  sound_buf.source+64,temp); //downsample
+svf_lp_block_16(&Filtering,temp
+		,sound_buf.lpfilter+64); // lpf
+}
+if(sound_mask.filter[2]){  //  filter option
+decimate4_block_f32(  sound_buf.source+128,temp); //downsample
+svf_lp_block_16(&Filtering,temp
+		,sound_buf.lpfilter+128); // lpf
+}
+if(sound_mask.filter[3]){  //  filter option
+decimate4_block_f32(  sound_buf.source+192,temp); //downsample
+svf_lp_block_16(&Filtering,temp
+		,sound_buf.lpfilter+192); // lpf
+}
+if(sound_mask.filter[4]){  //  filter option
+decimate4_block_f32(  sound_buf.source+256,temp); //downsample
+svf_lp_block_16(&Filtering,temp
+		,sound_buf.lpfilter+256); // lpf
+}
+
+if(sound_mask.filter[5]){  //  filter option
+decimate4_block_f32(  sound_buf.source+320,temp); //downsample
+svf_lp_block_16(&Filtering,temp
+		,sound_buf.lpfilter+320); // lpf
+} // will mix back maybe in stereo ,unsure
+
+for (int var = 0; var < 6; ++var) { // mix for filter in from output, eventually just have fixed lines
+
+	if(sound_mask.filter[var])
+		memcpy(sound_buf.source+(var<<6),sound_buf.lpfilter+(var<<6),64); // simply replace audio with filtered or move pointer ?
+}
+
+
+
+/*for (int i = 0; i <64; ++i){
+	sound_buf.lpfilter[i]=sound_buf.lpfilter[i]+sound_buf.source_dry[i];
+
+}*/
+
+//svf_lp_block(&Filtering,sound_buf.source,sound_buf.lpfilter+64);
+//svf_lp_block(&Filtering,sound_buf.source,sound_buf.lpfilter+128);
+//svf_lp_block(&Filtering,sound_buf.source,sound_buf.lpfilter+196);
+
+	//for (int i = 0; i < 256; ++i) {
+	//	test_filter[i]=svf_lp(&Filtering,test_filter[i]+sound_buf.source_dry[i&63]); //filter , pretty slow
+/*
+
+	for (int var = 0; var < 256; ++var) {
+		test_filter[var]=var;
+
+	}
+
+	for (int i = 0; i < 256; ++i){  // same speed as svf_lp
+
+		test_accus[0]=((test_filter[i]*freq_point[0])+(test_accus[0]*freq_point[1])>>15);
+
+		//__asm__("SMULL %0, %2, %3" : "=r0"(test_accus[0]) : "r2"(test_accus[0])):"r3"(freq_point[0]))  ;
+		//smull (test_accus[0],0,test_accus[0],freq_point[0]);
+
+		//__asm__("LSL %0, %1, #15" : "=r"(test_accus[0]) : "r"(test_accus[0]));
+
+
+	    test_accus[1]=(((test_accus[0]*freq_point[0])+(test_accus[1]*freq_point[1]))>>15); //1
+	    test_accus[2]=(( test_accus[1]*freq_point[0])+(test_accus[2]*freq_point[1]))>>15;
+	    test_accus[3]=(((test_accus[2]*freq_point[0])+(test_accus[3]*freq_point[1]))>>15); //1
+	    test_filter[i]=test_accus[3];
+
+
+
+
+
+	}
+
+*/
+
+
+
+
 } //end of sound source
 
 void sound_delay(void){  //runs filter on buffer , DO NOT MIX FLOAT AND INT MULTI !!! (+100uS for 2 float multi here)
@@ -96,20 +216,32 @@ void sound_delay(void){  //runs filter on buffer , DO NOT MIX FLOAT AND INT MULT
 	int32_t temp4;
 	uint16_t delay_adder=32;
 	int32_t temp;
+	float temp_hold[64];
+	float s=0;
+
+
+
+
 	if (delay_pointer[0]<256) delay_adder=0;
 	#define SHIFT 7     // ×128 / ÷128
 
 	for (int i = 0; i < audio_buffer_size; ++i) {
-		temp=sound_buf.lpfilter[i];
+		//temp=sound_buf.lpfilter[i];
 		temp4=0;
 
+		s=0;
+		temp=0;
+		for (int var = 0; var < 6; ++var) { // dry sound mix for output , this can add up quickly ,careful
+			if(!sound_mask.delay[var])
+				s=s+sound_buf.source[(var<<6)+i];else temp=temp+sound_buf.source[(var<<6)+i];
+
+		}
 
 	//delay_time=0;  //testing
 
 		   // bit heavy ,
 			//also needs an incoming limiter
 			//temp=(temp*(128-(feedback/4)))+(delayed*feedback);  // reduces signal of feedback
-
 			//temp=temp*(128-(feedback/4))+(delayed*feedback);  // reduces signal of feedback
 			//if ((temp>32767) || (temp<-32767))  {output_gain*=0.9;}
 
@@ -132,16 +264,14 @@ void sound_delay(void){  //runs filter on buffer , DO NOT MIX FLOAT AND INT MULT
 			//ram_write(delay_2,(int16_t) delay_filter); // write back stops here
 
 
-			sound_buf.delay[i*2]  = (temp+delayed);
+			sound_buf.delay[i*2]  = (temp+delayed+s);
 
-			sound_buf.delay[(i*2)+1]  = (temp+delayed_2);
-
-
-
-
-
+			sound_buf.delay[(i*2)+1]  = (temp+delayed_2+s);
 
 	}
+
+
+
 	} //end of sound delay
 
 
@@ -561,6 +691,8 @@ int32_t compute_gain(int32_t *channels, int num_ch, int32_t current_gain)
 
     return current_gain;
 }
+
+
 /*
 void sound_source(void){  // loads and mixes samples,converts to float
 
@@ -675,7 +807,7 @@ void sound_source(void){  // loads and mixes samples,converts to float
 	//temp2=flash_sample_buf[one_shot_counter>>16];
 
 
-    filter_accus[0]=((temp2*freq_point[0])+(filter_accus[0]*freq_point[1]))>>15;
+    test_accus[0]=((temp2*freq_point[0])+(filter_accus[0]*freq_point[1]))>>15;
     filter_accus[1]=(((filter_accus[0]*freq_point[0])+(filter_accus[1]*freq_point[1]))>>15); //1
     filter_accus[2]=(( filter_accus[1]*freq_point[0])+(filter_accus[2]*freq_point[1]))>>15;
     filter_accus[3]=(((filter_accus[2]*freq_point[0])+(filter_accus[3]*freq_point[1]))>>15); //1

@@ -413,6 +413,32 @@ void uart4_command_process(void){
 	save_timer=66000;  //delete records
 	return;  // quit on clear
 	}
+	if (strncmp(text, "dlast", 5) == 0) { //clear last sample (in case corrupt)
+ //erase all when full then start from zero
+		usart4_rx_reset=1;
+		printf("deleting last sample on list \n");
+
+	for (int i = 15; i >total_sample_count; i--){
+
+		if (samples_store[i].used){
+
+			samples_store[i].used=0;
+			usart4_total_counter=samples_store[i].ram_addr;
+			flash_counter_write(usart4_total_counter);
+
+		samples_store[i].ram_addr=0;samples_store[i].size_bytes=0;
+		usart4_rx_counter=0;  //clear just in case random data
+		usart4_rx_counter=0;  //clear just in case random data
+
+		psram_busy=0;
+		psram_sample_write=0;
+		one_shot_var=0;
+		save_timer=66000;  //delete records
+		return;  // quit on clear
+					}
+
+	}}
+
 
 	if (strncmp(text, "save", 4) == 0) { //copy selected sample from ram to flash  ie copy 1 16
 		usart4_rx_counter=0;
@@ -504,7 +530,7 @@ void ram_to_flash(void){  // copies samples to flash from ram, for now all of it
 
 	 }// end of flash to ram
 
-void flash_to_ram_mirror (void){ // just copy the entire flash to ram ,16 mbyte
+void flash_to_ram_mirror (void){ // just copy the entire flash to ram ,8 mbyte atm
 	 uint8_t test=0;
 	 printf("Copying flash to ram. Let's go. \n");
 	 for (uint32_t  i = psram_sample_start; i < 8388608; i+=256){
@@ -524,14 +550,14 @@ void ram_to_flash_mirror (void){ // just copy the entire flash to ram ,500kb ,bl
 	 // missing data in chunks but  random
 	 	 uint32_t aligned=(flash_backup_start+psram_sample_start)&0xFFFF0000; // start copying on a 64kb block , not a problem
 
-	for (uint32_t  i = aligned ; i < (655360+aligned); i+=256){ // 600kB for now, should be enough
+	for (uint32_t  i = aligned ; i < (3014656+aligned); i+=256){ // 3 Mbyte for now, should be enough
 
 		 ram_page_read(i,256+2,1,usart4_int_buffer);//read ram,dma  data is good
 
 		 while (spi_read_flag);
 		 // block erase  64kb = 2000ms max  ;
 		  address=i;
-		 uint8_t transmit[260]={0x03,(uint8_t)(address>>16),(uint8_t)(address>>8),(uint8_t)(address),3,4,5,6,7,8,9,10 };
+		 uint8_t transmit[260]={0x03,(uint8_t)(address>>16),(uint8_t)(address>>8),(uint8_t)(address&255),3,4,5,6,7,8,9,10 };
 		 memcpy(transmit+4,usart4_int_buffer,256);
 
 		 if ((i&65535)==0){ // 64k block erase,  working ok , total about 2-3s

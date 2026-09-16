@@ -301,8 +301,8 @@ void controller_process(void){ // process incoming controller info ,16 bit addre
 
 			printf(" %d   ",controller_address);printf(" %d  \n",controller_value);
 			uint8_t midi_generated[3]={153,1,127};  //trigger sampple playback
-			uint8_t sample_select=((controller_address/100)-1)&7; // 0-3 for now
-			uint8_t part_select=(((controller_address%100)/10)-1)&7; // part edited
+			uint8_t sample_select=((controller_address/100)-1)&15; // 0-3 for now
+			uint8_t part_select=(((controller_address%100)/10)-1)&3; // part edited
 			uint8_t feat_select=((controller_address%100)%10); // select between start, end, pitch,gap, roll speed ,roll repeat
 			uint8_t playing_now=1;
 			uint8_t replace_sample=sample_select;

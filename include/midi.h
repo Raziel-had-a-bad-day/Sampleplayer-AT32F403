@@ -70,7 +70,8 @@ void program_change(uint8_t pc_value){  // this is ok , getting garbage from seq
 
 void control_change(uint8_t channel,uint8_t cc , uint8_t value){       // midi control change processing, needs a fifo buffer of som etype to avoid too much process
 	if (channel==4) return;
-
+	uint8_t sample_selected; // samples 1-5 atm
+	uint8_t part_selected;
 	//MIDI CC
 	//	0 	Bank Select (MSB)  for patch banks , 7-volume, 5-portamento time
 	// 73 -Attack ,   72 -Release ,71 -VCF REsonance , 74 -VCF cutoff freq,  91 -Reverb , 84-portamento, 94-detune, 95-phaser, 70-sound variation,
@@ -82,9 +83,9 @@ void control_change(uint8_t channel,uint8_t cc , uint8_t value){       // midi c
 	if ((channel!=4)&&(cc<122)){ // not picking up
 		// cc90-97
 
-		if (cc==90)
+/*		if (cc==90)
 
-			{float depth=value*2;
+			{float depth=value*2;   // control low pass
 					depth=(pow(1.04,depth)*32)+1500;
 					{if (value>125) depth=32765;}
 					{if (depth>32765) depth=32765;}
@@ -117,9 +118,29 @@ void control_change(uint8_t channel,uint8_t cc , uint8_t value){       // midi c
 			lfo_set_rate(&lfo,lfo_interval, mtc_clock);
 
 			}
+		*/
+		if (94>cc && cc>89) {   // adjust sample length
+			sample_selected=cc-89; // samples 1-5 atm
+			part_selected=sound_mask.playing_part[sample_selected];
+			one_shot[sample_selected].speed[part_selected]=value*1024;
+			one_play[sample_selected].playback_rate=one_shot[sample_selected].speed[part_selected];
+
+			//one_play[sample_selected].pointer=one_shot[sample_selected].start[part_selected];  // jumpt to start
+			//one_shot[sample_selected].end[part_selected]=sample_address_calculate(sample_selected,value);
+
+		}
+
+
+
+
+
+
+
+
+
 		if (cc>93) {   // adjust sample length
-			uint8_t sample_selected=cc-93; // samples 1-5 atm
-			uint8_t part_selected=sound_mask.playing_part[sample_selected];
+			sample_selected=cc-93; // samples 1-5 atm
+			part_selected=sound_mask.playing_part[sample_selected];
 			one_shot[sample_selected].length[part_selected]=value;
 			//one_play[sample_selected].pointer=one_shot[sample_selected].start[part_selected];  // jumpt to start
 			one_shot[sample_selected].end[part_selected]=sample_address_calculate(sample_selected,value);
@@ -244,7 +265,8 @@ uint8_t incoming_message[3];    //
 		        }
 		    }
 
-		    if (midi_hold[NOTE][0] == 153)    // Channel 10 (0x99) - Drums
+		    if (midi_hold[NOTE][0] == 153)    // Channel 10 (0x99) - Drums now main
+		    	// needs to trigger any number of samples , assign one_play.source here (unless flip_flop)
 		    {
 		        memcpy(drum_note_hold, midi_hold[NOTE], 3); // not doing anything
 		        uint8_t i;
@@ -252,14 +274,20 @@ uint8_t incoming_message[3];    //
 		        uint8_t selected_note=drum_note_hold[1]%24;   //   might do 3 octaves , 2 octave part 0 and 1 , 1 octave for pure single poly drum playback
 		        uint8_t last_part=sound_mask.playing_part[selected_note%12]; // save last playing part
 		        printf("\n sound playing %d\n",selected_note);
-	        	if (selected_note>11) {selected_note-=12;sound_mask.playing_part[selected_note]=1;  } // switch to part 1 or to part 0
+		        uint8_t change_part=0;
+		        // selected note= selected sample !
+		        if (selected_note>11) {selected_note-=12;change_part=1;}  // limit to 12 for now
+	    		       uint8_t play_note=source_select(selected_note); // get an available sample , return one_play
 
-	        	else {sound_mask.playing_part[selected_note]=0;}
+			      sound_mask.playing_part[play_note]=change_part;
 
 		       // if (selected_note>3) {memset(sound_mask.playing_sample,0,16); selected_note&=3;} //stops all samples and only plays the next one
-		        if (one_shot[selected_note].length[0]) { // ignore if no sample
-		        	uint8_t set_note=selected_note;
+		     //   if (one_shot[one_play[play_note].source].length[0])
+		        if(samples_store[selected_note].used)
 
+		        { // ignore if no sample
+		        	uint8_t set_note=play_note;
+		        	selected_note=one_play[play_note].source;
 
 
 		        	uint8_t part_select=sound_mask.playing_part[set_note]; // expand this
@@ -271,35 +299,35 @@ uint8_t incoming_message[3];    //
 		        			sound_mask.playing_gap[set_note]=0;
 		        			sound_mask.playing_sample[set_note]=1;  //select sample but only if available
 		        			sound_mask.playing_gap[set_note]=0; // reset gap to start
-			        		one_play[set_note].pointer=one_shot[set_note].start[part_select];
+			        		one_play[set_note].pointer=one_shot[selected_note].start[part_select];
 			        		one_play[set_note].position=0;  // reset to start
 
 		        		} break;
 		        		case 1  :  // normally turn off sound if same part is pressed
-	        			if (last_part==sound_mask.playing_part[selected_note]) {
+	        			if (last_part==sound_mask.playing_part[play_note]) {
 
 		        		sound_mask.playing_sample[set_note]=0; // turn off
-		        		one_play[set_note].pointer=one_shot[set_note].start[part_select];
+		        		one_play[set_note].pointer=one_shot[selected_note].start[part_select];
 		        		one_play[set_note].position=0; } // reset to start
 		        	 else {sound_mask.playing_gap[set_note]=0; // keep playing newly selected part
 	        			sound_mask.playing_sample[set_note]=1;  //select sample but only if available
 
-		        		one_play[set_note].pointer=one_shot[set_note].start[part_select];
+		        		one_play[set_note].pointer=one_shot[selected_note].start[part_select];
 		        		one_play[set_note].position=0;  // reset to start
 
 		        	 };
 
 	        			break;
 		        		case 2  :
-		        			if (last_part==sound_mask.playing_part[selected_note]) {
+		        			if (last_part==sound_mask.playing_part[play_note]) {
 
 			        		sound_mask.playing_sample[set_note]=0; // turn off
-			        		one_play[set_note].pointer=one_shot[set_note].start[part_select];
+			        		one_play[set_note].pointer=one_shot[selected_note].start[part_select];
 			        		one_play[set_note].position=0; } // reset to start
 			        	 else {sound_mask.playing_gap[set_note]=0; // keep playing newly selected part
 		        			sound_mask.playing_sample[set_note]=1;  //select sample but only if available
 
-			        		one_play[set_note].pointer=one_shot[set_note].start[part_select];
+			        		one_play[set_note].pointer=one_shot[selected_note].start[part_select];
 			        		one_play[set_note].position=0;  // reset to start
 
 			        	 };
@@ -310,7 +338,7 @@ uint8_t incoming_message[3];    //
 
 
 
-		        }
+		        } else  printf("\n no sample at note %d\n",selected_note);
 
 		        //ADSR_counter_position[2] = 0; // only trigger if there is data
 
@@ -354,7 +382,7 @@ uint8_t incoming_message[3];    //
 
 }
 
-void note_process(void){ // deals with assigning notes for sounds , basic for now
+void note_process(void){ // deals with assigning notes for sounds(only wavetable)  , basic for now ,disabled for now
 	uint8_t i;
 	uint8_t current_poly=2;// sets number of notes to process for now , samples done elsewhere
 	int note_2=0;
@@ -410,22 +438,23 @@ void oneshot_sequencer(void){ // control oneshot progress for main loop, 0 lengt
   		 if (one_shot[i].speed[part_playing+1]>128000) next_part=0; // bad data
   		if (!one_shot[i].length[part_playing+1]) next_part=0; // bad data
   		 //one_shot[i].playback_rate=(0x10000*MAX_Rate)-(cc_list_extra[i]<<10);  // modify pitch, limited by buffer size
-
+  		uint8_t source=one_play[i].source; // use it for selecting one_shot
   		 if(sound_mask.playing_sample[i]){ // advance position
+
   			 uint16_t temp=(one_play[i].position>>16)<<1;  // clear last bit as well , has to be even
   			 if ((temp)>(128*MAX_Rate)) temp=(128*MAX_Rate); // this thing gets screwed up a lot
   			 one_play[i].pointer+=temp;
-  			one_play[i].playback_rate=one_shot[i].speed[part_playing];// copy rate
+  			one_play[i].playback_rate=one_shot[source].speed[part_playing];// copy rate
   			if (one_play[i].playback_rate<1024) one_play[i].playback_rate=64000;
   		 }  // advance only in enabled
-  		 if ((one_play[i].pointer+(128*MAX_Rate)) >(one_shot[i].end[part_playing])) finish=1; // enable finish or jump to next start
-  		 if (finish && (!next_part)){one_play[i].pointer=one_shot[i].start[part_playing];one_play[i].position=0;sound_mask.playing_sample[i]=0;
+  		 if ((one_play[i].pointer+(128*MAX_Rate)) >(one_shot[source].end[part_playing])) finish=1; // enable finish or jump to next start
+  		 if (finish && (!next_part)){one_play[i].pointer=one_shot[source].start[part_playing];one_play[i].position=0;sound_mask.playing_sample[i]=0;
   		 	 	 sound_mask.playing_part[i]=0;finish=0;}  //reset sample to start, disable
   		 if (finish && next_part){  // select next step if available
   			sound_mask.playing_part[i]++; // move one shot to next part set
   			part_playing++;
-  			one_play[i].pointer=one_shot[i].start[part_playing]; // move to start of the next
-  			one_play[i].playback_rate=one_shot[i].speed[part_playing];// copy rate
+  			one_play[i].pointer=one_shot[source].start[part_playing]; // move to start of the next
+  			one_play[i].playback_rate=one_shot[source].speed[part_playing];// copy rate
   		 }
 
   		 // reset one shot pointer to start
@@ -446,7 +475,7 @@ void oneshot_looper(void){ // loop sample until triggered again , maybe have lig
   	 uint8_t advance=0;
 
 
-  	 for (i=0;i<8;i++){  // control progress off samples
+  	 for (i=0;i<8;i++){  // control progress of samples
   		 part_playing=sound_mask.playing_part[i];   // current part progress of the sample
   		 next_part=0;
   		 finish=0;

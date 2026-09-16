@@ -13,6 +13,7 @@ typedef struct {
 } lfo_t;
 lfo_t lfo;
 
+
 void lfo_init(lfo_t *l, float low, float high, uint32_t duration)
 {
     l->low         = low;
