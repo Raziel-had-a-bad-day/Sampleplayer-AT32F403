@@ -267,6 +267,7 @@ typedef struct {
     uint32_t pointer;     // current mem address
     uint32_t playback_rate;// (0.5-2) <<16  speed of playback , this is calculated
     uint32_t position;      // (0-63)<<16  position within buffer
+    uint8_t position_l; //0-63
     int16_t  buf[256];    // read data
     uint8_t source;  // controls which one_shot sample is selected
 
@@ -285,7 +286,7 @@ typedef struct  {
 settings sample_edit;  // holds values for sample editor, controlled externally through I2C
 
 typedef struct {
-    float source[512];        // outgoing
+	 float source[512];        // outgoing
     float source_dry[64]; // bypass filter
     float lpfilter[512];        // resonance (damping)
     float delay[128]; // stereo
@@ -293,14 +294,14 @@ typedef struct {
     int32_t output[64];
 
 } Sound;
-Sound sound_buf; // holds intermediate audio buffers
+Sound static sound_buf; // holds intermediate audio buffers
 
-typedef struct {
-		uint8_t filter[8];// controls output filter
-		uint8_t ducking[8]; // controls output ducking effect
-		uint8_t delay[8];
-		uint8_t muting[8];// controls output muting, might not need it
-		uint8_t ducking_level[8];// controls output ducking level
+typedef struct { // per voice
+		uint8_t filter[8];// controls output filter 0=off 1-127 = rate (?) or
+		uint8_t ducking[8]; // controls output ducking effect 0=none 1-3=on level ,controlled by other channels(slave) playing (or muting)
+		uint8_t delay[8];   // delay level per channel 0=bypass  1= on , maybe more for levels
+		uint8_t muting[8];// controls output muting,now the main sound on/off
+		uint8_t ducking_level[8];// controls output ducking level, dynamic
 		uint8_t playing_sample[8]; // output sample select ,similar to muting
 		uint8_t playing_part[8]; // output part playing
 		uint16_t playing_gap[8];// output playing gap
@@ -447,6 +448,24 @@ uint16_t sine_wave[128]={
 
 int16_t test_int[128];
 
+#define max_filter_steps 1024  // change for smoother control  on lpf filter
+
+uint32_t filter_clamp(uint32_t in){   // basic limiter for lp filter from the lfo
+
+	if(in>(max_filter_steps-1)) in=max_filter_steps-1; // limit max
+	if(in<(max_filter_steps/16)) in=max_filter_steps/16; //limit min
+	return in;
+}
+
+
+
+
+uint32_t map_log(uint32_t linear) {   // log curves , might need long
+    // x² curve, 0-127 → 0-127
+    uint32_t t = linear;
+    return (t * t) / (max_filter_steps);
+}
+
 void midi_note_pwm_calculator(void){    // calculates counter values for pwm
 
 	float freq_list[128]; // store frequencies
@@ -557,8 +576,6 @@ void sanitize_one_shots(void) {  // check for bad data in one_shot
 
             // length
 
-
-
             if (one_shot[s].length[p] > 127)
                 one_shot[s].length[p] = 127;
             if (one_shot[s].length[p] == 0)
@@ -584,8 +601,8 @@ void sanitize_one_shots(void) {  // check for bad data in one_shot
     }
 }
 typedef struct {
-    float f[128];        // frequency coefficient
-    float q[128];        // resonance (damping)
+    float f[max_filter_steps];        // frequency coefficient
+    float q[max_filter_steps];        // resonance (damping)
     float low, band;
 } SVF;
 SVF Filtering; // set
@@ -607,15 +624,39 @@ SVFI Filter_int; // set
     s->q = 1.0f / resonance;   // or map resonance the way you like
 }*/
 #define lp_sampling_rate 11025
+
+
+
+
 void preload_filter(void){  // stick with float , int is worse
-	for (int a = 0; a < 128; ++a) {
-	Filtering.f[a]= 2.0f * sinf(M_PI * (a*32) / 44100); //f totally screwed it sampling are is lower than 44k
-		Filtering.q[a]=1.0f/(0.707+(a*0.01));  // q
-	};
+	const float nyquist = lp_sampling_rate * 0.49f;
+	uint32_t max_steps=128; //sets number of steps for filter
+	for (int a = 0; a < max_filter_steps; ++a)  // to steppy , needs more steps
+	{
+	    uint32_t v=map_log(a);   // alt cutoff pot  freq curve
+	    if(v>(max_filter_steps-1)) v=max_filter_steps-1;
+		//float cutoff = (float)(v * (nyquist/(39*(v*0.304))));
+		float cutoff = (float)(v * (nyquist/max_filter_steps));
+	    // Clamp cutoff
+	    if (cutoff > nyquist) cutoff = nyquist;
+	    if (cutoff < 120.0f)   cutoff = 120.0f;
 
+	    // More stable Chamberlin 'f'
+	    // Using the exact frequency warping that keeps f in a safer range
+	    float f = 2.0f * sinf(M_PI * cutoff / lp_sampling_rate);
+
+	    // Hard safety limit – critical when sample rate is reduced
+	    if (f > 1.2f) f = 1.2f;		// 1.0–1.2 is the practical stable zone with higher Q
+	    if (f < 0.001f) f = 0.001f;
+
+	    Filtering.f[a] = f;
+
+
+	    float q=a*0.005f; // limit Q
+
+	    Filtering.q[a] = 1.0f / (0.707f + q); // "a" effects max Q
+	}
 }
-
-
 
 
 float svf_lp(SVF *s, float in)
@@ -625,30 +666,50 @@ float svf_lp(SVF *s, float in)
     s->low  += filt_f * s->band;
     return s->low;
 }
-void  svf_lp_block_16(SVF *s, const float *in, float *out ){ // process 16 in 64 out
 
-	uint8_t n;
+void  svf_lp_block_16(SVF *s, float *in, float *out ){ // process 16 in 64 out
+
+	//uint8_t n;
+	float temp;
 	for (int i = 0; i < 16; i++){
-    	n=i*4;
-        float high = in[i] - s->low - filt_q * s->band;
+	temp = (in[0] + in[1] + in[2] + in[3]) *0.25f;
+	//temp = (in[0] + in[1]) *0.5f;
+	//in += 2;
+	in += 4;
+        float high = temp - s->low - filt_q * s->band;
         s->band += filt_f * high;
         s->low  += filt_f * s->band;
-    	out[n]=s->low;
+    	//out[n]=s->low;
 
-    	out[n+3]=out[n+2]=out[n+1]=out[n];
-
+         out[3]=out[2]=out[1]=out[0]=s->low;;
+    	 out+=4;
+    	 // out[1]=out[0]=s->low;;
+    	   // 	 out+=2;
 
     	    }
 
 
+}
+void  svf_lp_block_32(SVF *s, float *in, float *out ){ // process 16 in 64 out
 
-/*    for (int i = 0; i < 16; i++){  // copy values
-    	out[i+16]=out[i+32]=out[i+48]=out[i];
-    }*/
+	//uint8_t n;
+	float temp;
+	for (int i = 0; i < 32; i++){
+
+	temp = (in[0] + in[1]) *0.5f;
+	in += 2;
+
+        float high = temp - s->low - filt_q * s->band;
+        s->band += filt_f * high;
+        s->low  += filt_f * s->band;
+
+    	  out[1]=out[0]=s->low;;
+    	    	 out+=2;
+
+    	    }
 
 
 }
-
 void  svf_lp_block_64(SVF *s, const float *in, float *out ){ // process 16 in 64 out
     for (int i = 0; i < 64; i++){
 
@@ -669,12 +730,17 @@ void  svf_lp_block_64(SVF *s, const float *in, float *out ){ // process 16 in 64
 
 
 }
-void decimate4_block_f32(const float *in, float *out) // 64 in 16 out
+void decimate4_block_f32(float *in, float *out) // 64 in 16 out
 {
-    for (int i = 0; i < 16; i++)
+
+    for (int i = 0; i < 64; i++)
     {
-        out[i] = (in[0] + in[1] + in[2] + in[3]) * 0.25f;
-        in += 4;
+       // out[i] = (uint32_t)(in[0] + in[1] + in[2] + in[3]) *0.25f;
+
+
+      //  in += 4;
+
+    	out[i]=in[i];
     }
 }
 

@@ -63,7 +63,10 @@ int32_t elapsed_time=0;
   */
 int main(void)
 {
-  system_clock_config();
+	waves();
+	uint16_t i;
+
+	system_clock_config();
 
 
  // systick_interrupt_config(98);
@@ -117,7 +120,7 @@ if ((temp) && (temp>elapsed_time)) {elapsed_time=temp;printf("t=%d uS",elapsed_t
 
   //dma_config_tx_only();
   //dma_config();
-	uint16_t i;
+
 /*	int _write(int fd, char *ptr, int len){  // need this for printf to work
 	  (void)fd;
 
@@ -244,8 +247,8 @@ flash_to_ram_mirror ();
 
 preload_filter();//svf_set(&Filtering, 44100, 1200, 1.2);
 
-lfo_init(&lfo, 0.0f, 100.0f, 500);   // initial low, high, rate
-lfo_set_range(&lfo, 0, 127, 0);
+lfo_init(&lfo, max_filter_steps/16, max_filter_steps, 512);   // initial low, high, rate
+lfo_set_range(&lfo, max_filter_steps/16, max_filter_steps, 0); // sets only the range not the rate
 
 //samples_store[0].size_bytes=321048;
 //  maybe implement skip back function , record 30sec to mem and than skip back when needed
@@ -273,7 +276,7 @@ while(1)
 	 // if((ccr_counter>=audio_buffer_size)) {  // process 16*2 samples, runs always
 		  if((dac_ready)) {  // process 64 samples, runs always
 
-			  time_start_handler();
+
 			  // basic sound is 180us ,delay adds 50us
 			  delay_calc(); // 1uS
 
@@ -281,17 +284,22 @@ while(1)
 			  oneshot_looper(); // process oneshot data , 35uS with all notes on
 
 			  ducking_control(); // this can also do mute or levels etc if float
-			  sound_source();  //160uS
 
-			  sound_filter(); // 55 uS
 
-			  sound_delay(); // 50uS
+			  sound_source();  //180uS all note playing , now down to 125uS all on
 
+			  sound_filter(); // pretty good 3 filters 48uS
+			  time_start_handler();
+			  sound_delay(); // 50uS(was) now 126uS :/
+			  time_stop_handler();
  			 next_sample();  // 64uS
 
 
  		 if ( usart3_rx_temp[4]) controller_process();
- 		 if(ADSR_timer>7) {audio_gain_global(); roll_control();ADSR_TIM_writer();ADSR_timer=0;} else ADSR_timer++; // 22.6us*64*8 = 11.6 ms
+ 		 if(ADSR_timer>7) {audio_gain_global();
+ 		 //roll_control();
+
+ 		 ADSR_TIM_writer();ADSR_timer=0;} else ADSR_timer++; // 22.6us*64*8 = 11.6 ms
  		 	 //unsure how accurate this is
 
  		 	 if ((!psram_busy)&&(!spi_process_counter)) spi_process_counter=1;  // starts spi processing, can block
@@ -299,7 +307,7 @@ while(1)
 		 		memset(flash_sample_buf,0,2048);  // clear
 		 		ccr_counter=0;
 		 		dac_ready=0;
-		 		  time_stop_handler();
+
 	  } // end of audio process 430uS max
 
 		  if (mtc_clock!=mtc_clock_buf) {gap_control(); mtc_clock_buf=mtc_clock;
@@ -307,8 +315,11 @@ while(1)
 		  //val=fade_update(&fade, t);t+=20;
 		  //filt_f=Filtering.f[val];
 		  //uint32_t mtc = mtc_clock;        // your time source (bars/ticks/etc)
-		 lfo.low=10;
-		  int val = lfo_update(&lfo,  mtc_clock);
+
+		  lfo.low=max_filter_steps/12;
+		  uint32_t val = lfo_update(&lfo,  mtc_clock);
+		  val=filter_clamp(val);
+
 		  filt_f=Filtering.f[val];
 
 		  }  // timed by 24/quater

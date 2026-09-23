@@ -38,7 +38,9 @@ void lfo_set_range(lfo_t *l, float new_low, float new_high, uint32_t now)
     l->high = new_high;
 
     // Smooth: start a new ramp from wherever we are right now
-    l->start_value = l->current;
+   // l->start_value = l->current;
+    l->start_value = l->high;
+
     l->start_time  = now;
     l->active      = true;
 }
@@ -54,8 +56,10 @@ void lfo_set_rate(lfo_t *l, uint32_t new_duration, uint32_t now)
 
     l->duration    = new_duration;
     // Recalculate so the remaining distance still finishes in the new duration
-    l->start_value = l->current;
+   // l->start_value = l->current;  //disabled
+    l->start_value = l->low; // just restart from high
     l->start_time  = now;
+
     l->active      = true;
 }
 

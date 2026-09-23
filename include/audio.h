@@ -32,67 +32,35 @@ int16_t resample_hermite_oneshot(const int16_t* sample_data,
 
 void sound_source(void) // loads and mixes samples,converts to float
 {
+// unroll everything here , makes a lot of diff , more so than int/float ( - 140 uS easy)
+	// Absolutely no for loops here !!
+	// 115uS with nothing playing
 
 
-
-    for (int i = 0; i < audio_buffer_size; ++i)
+      for (int i = 0; i < audio_buffer_size; ++i)   // no loops inside here
     {
-        float temp2 = 0.0f;
-        float temp3 = 0.0f;
+    	  //uint8_t *byte_ptr = (uint8_t *)&one_play[0].position + 2;
 
-        // Voice 0
-        if (sound_mask.playing_sample[0] == 1) {
-            float s = (float)(one_play[0].buf[one_play[0].position >> 16] >> sound_mask.ducking_level[0]);
-            sound_buf.source[i]=s;
-        }else sound_buf.source[i]=0;
-        one_play[0].position += one_play[0].playback_rate;
-      //  if (one_play[0].position > 8388607) one_play[0].position = 8388607;
+    	  sound_buf.source[i]=(one_play[0].buf[*((uint8_t *)&one_play[0].position + 2)]>> sound_mask.ducking_level[0]);// might use float , but here its slow, int mul is same as shift
+    	 // printf("position = 0x%08lX\n", (unsigned long)one_play[0].position);             //  or just do the mul later
 
-        // Voice 1
-        if (sound_mask.playing_sample[1] == 1) {
-            float s = (float)(one_play[1].buf[one_play[1].position >> 16] >> sound_mask.ducking_level[1]);
-            sound_buf.source[i+64]=s;
-        }else sound_buf.source[i+64]=0;
-        one_play[1].position += one_play[1].playback_rate;
-      //  if (one_play[1].position > 8388607) one_play[1].position = 8388607;
+    	  sound_buf.source[i+64]=(one_play[1].buf[*((uint8_t *)&one_play[1].position + 2)]>> sound_mask.ducking_level[1]);// might use float
+    	  sound_buf.source[i+128]=(one_play[2].buf[*((uint8_t *)&one_play[2].position + 2)] >> sound_mask.ducking_level[2]);// might use float
+    	  sound_buf.source[i+192]=(one_play[3].buf[*((uint8_t *)&one_play[3].position + 2)] >> sound_mask.ducking_level[3]);// might use float
+    	  sound_buf.source[i+256]=(one_play[4].buf[*((uint8_t *)&one_play[4].position + 2)] >> sound_mask.ducking_level[4]);// might use float
+    	  sound_buf.source[i+320]=(one_play[5].buf[*((uint8_t *)&one_play[5].position + 2)] >> sound_mask.ducking_level[5]);// might use float
 
-        // Voice 2
-        if (sound_mask.playing_sample[2] == 1) {
-            float s = (float)(one_play[2].buf[one_play[2].position >> 16] >> sound_mask.ducking_level[2]);
-            sound_buf.source[i+128]=s;
-        }else sound_buf.source[i+128]=0;
-        one_play[2].position += one_play[2].playback_rate;
-       // if (one_play[2].position > 8388607) one_play[2].position = 8388607;
-
-        // Voice 3
-        if (sound_mask.playing_sample[3] == 1) {
-            float s = (float)(one_play[3].buf[one_play[3].position >> 16] >> sound_mask.ducking_level[3]);
-            sound_buf.source[i+192]=s;
-        }else sound_buf.source[i+192]=0;
-        one_play[3].position += one_play[3].playback_rate;
-     //   if (one_play[3].position > 8388607) one_play[3].position = 8388607;
-
-        // Voice 4
-        if (sound_mask.playing_sample[4] == 1) {
-            float s = (float)(one_play[4].buf[one_play[4].position >> 16] >> sound_mask.ducking_level[4]);
-            sound_buf.source[i+256]=s;
-        }else sound_buf.source[i+256]=0;
-        one_play[4].position += one_play[4].playback_rate;
-     //   if (one_play[4].position > 8388607) one_play[4].position = 8388607;
-
-        // Voice 5
-        if (sound_mask.playing_sample[5] == 1) {
-            float s = (float)(one_play[5].buf[one_play[5].position >> 16] >> sound_mask.ducking_level[5]);
-            sound_buf.source[i+320]=s;
-        }else sound_buf.source[i+320]=0;
-        one_play[5].position += one_play[5].playback_rate;
-      //  if (one_play[5].position > 8388607) one_play[5].position = 8388607;
-
-     //   sound_buf.source[i]     = temp2;   // now float
-      //  sound_buf.source_dry[i] = temp3;  // bypass filter , might just bypass and run 6 channels and mix later
+    	  one_play[0].position += one_play[0].playback_rate;  // this is   ok  here
+    	  one_play[1].position += one_play[1].playback_rate;
+    	  one_play[2].position += one_play[2].playback_rate;
+    	  one_play[3].position += one_play[3].playback_rate;
+    	  one_play[4].position += one_play[4].playback_rate;
+    	  one_play[5].position += one_play[5].playback_rate;
 
     }
-}
+
+
+} //end of sound source
 
 static int16_t test_filter[512];
 static int32_t test_accus[8];
@@ -113,165 +81,102 @@ void sound_filter(void){  //runs filter on buffer . 4 in 4 out
 // downsample to 11k and run 4 filters in paralell instead , bypass if cutoff is set to full
 float temp[64];
 float s=0;
-memset(sound_buf.lpfilter,0,512);
-/*for (int i = 0; i < audio_buffer_size; i++) {
+//memset(sound_buf.lpfilter,0,512);  // doesnt work
 
-s=0;
-for (int var = 0; var < 6; ++var) { // mix for filter in from output, eventually just have fixed lines
+static float low[6];
+static float band[6];
 
-	if(sound_mask.filter[var])
-		s=s+sound_buf.source[var][i];
-}
-	temp[i]=s;}*/
+// need gain limit at high Q
 
+for (int var = 0; var < poly_limit; ++var) { // this works
 
-if(sound_mask.filter[0]){  //  filter option
-decimate4_block_f32(  sound_buf.source,temp); //downsample
-svf_lp_block_16(&Filtering,temp
-		,sound_buf.lpfilter); // lpf
-}
-if(sound_mask.filter[1]){  //  filter option
-decimate4_block_f32(  sound_buf.source+64,temp); //downsample
-svf_lp_block_16(&Filtering,temp
-		,sound_buf.lpfilter+64); // lpf
-}
-if(sound_mask.filter[2]){  //  filter option
-decimate4_block_f32(  sound_buf.source+128,temp); //downsample
-svf_lp_block_16(&Filtering,temp
-		,sound_buf.lpfilter+128); // lpf
-}
-if(sound_mask.filter[3]){  //  filter option
-decimate4_block_f32(  sound_buf.source+192,temp); //downsample
-svf_lp_block_16(&Filtering,temp
-		,sound_buf.lpfilter+192); // lpf
-}
-if(sound_mask.filter[4]){  //  filter option
-decimate4_block_f32(  sound_buf.source+256,temp); //downsample
-svf_lp_block_16(&Filtering,temp
-		,sound_buf.lpfilter+256); // lpf
-}
+	if(sound_mask.filter[var]){  //  filter option
 
-if(sound_mask.filter[5]){  //  filter option
-decimate4_block_f32(  sound_buf.source+320,temp); //downsample
-svf_lp_block_16(&Filtering,temp
-		,sound_buf.lpfilter+320); // lpf
-} // will mix back maybe in stereo ,unsure
-
-for (int var = 0; var < 6; ++var) { // mix for filter in from output, eventually just have fixed lines
-
-	if(sound_mask.filter[var])
-		memcpy(sound_buf.source+(var<<6),sound_buf.lpfilter+(var<<6),64); // simply replace audio with filtered or move pointer ?
-}
-
-
-
-/*for (int i = 0; i <64; ++i){
-	sound_buf.lpfilter[i]=sound_buf.lpfilter[i]+sound_buf.source_dry[i];
-
-}*/
-
-//svf_lp_block(&Filtering,sound_buf.source,sound_buf.lpfilter+64);
-//svf_lp_block(&Filtering,sound_buf.source,sound_buf.lpfilter+128);
-//svf_lp_block(&Filtering,sound_buf.source,sound_buf.lpfilter+196);
-
-	//for (int i = 0; i < 256; ++i) {
-	//	test_filter[i]=svf_lp(&Filtering,test_filter[i]+sound_buf.source_dry[i&63]); //filter , pretty slow
-/*
-
-	for (int var = 0; var < 256; ++var) {
-		test_filter[var]=var;
-
+		int var2=var*64;
+	Filtering.low=low[var];
+	Filtering.band=band[var];
+	svf_lp_block_16(&Filtering, sound_buf.source+var2
+			,sound_buf.source+var2); // lpf
+	low[var]=Filtering.low;
+	band[var]=Filtering.band;
 	}
 
-	for (int i = 0; i < 256; ++i){  // same speed as svf_lp
 
-		test_accus[0]=((test_filter[i]*freq_point[0])+(test_accus[0]*freq_point[1])>>15);
-
-		//__asm__("SMULL %0, %2, %3" : "=r0"(test_accus[0]) : "r2"(test_accus[0])):"r3"(freq_point[0]))  ;
-		//smull (test_accus[0],0,test_accus[0],freq_point[0]);
-
-		//__asm__("LSL %0, %1, #15" : "=r"(test_accus[0]) : "r"(test_accus[0]));
-
-
-	    test_accus[1]=(((test_accus[0]*freq_point[0])+(test_accus[1]*freq_point[1]))>>15); //1
-	    test_accus[2]=(( test_accus[1]*freq_point[0])+(test_accus[2]*freq_point[1]))>>15;
-	    test_accus[3]=(((test_accus[2]*freq_point[0])+(test_accus[3]*freq_point[1]))>>15); //1
-	    test_filter[i]=test_accus[3];
-
-
-
-
-
-	}
-
-*/
+}
 
 
 
 
 } //end of sound source
 
-void sound_delay(void){  //runs filter on buffer , DO NOT MIX FLOAT AND INT MULTI !!! (+100uS for 2 float multi here)
-	uint8_t feedback=5; // testing
+void sound_delay(void){  //runs filter on buffer , DO NOT MIX FLOAT AND INT MULTI !!! (+100uS for 2 float multi here) , might continue with 11k sample rate here
+	float feedback=0.5; // testing
 	int32_t temp4;
-	uint16_t delay_adder=32;
-	int32_t temp;
+	//uint16_t delay_adder=64; // clicking when enabled , reason being it cant get the data from the start when reading the end , maybe keep a local copy
+	float temp; // use float
 	float temp_hold[64];
-	float s=0;
+	float s=0; // float is better here than int32
+	static float delay_buf_temp;
+	static int16_t data_hold[256];
+	int16_t data_hold_2[64];
+	static int upcounter;
+	upcounter+=64;
+	upcounter&=255;
+	memcpy(data_hold_2,data_hold+upcounter,128);
 
-
-
-
-	if (delay_pointer[0]<256) delay_adder=0;
 	#define SHIFT 7     // ×128 / ÷128
 
-	for (int i = 0; i < audio_buffer_size; ++i) {
+	for (int i = 0; i < audio_buffer_size; ++i) { // large loop no loops inside
 		//temp=sound_buf.lpfilter[i];
 		temp4=0;
 
 		s=0;
 		temp=0;
-		for (int var = 0; var < 6; ++var) { // dry sound mix for output , this can add up quickly ,careful
-			if(!sound_mask.delay[var])
-				s=s+sound_buf.source[(var<<6)+i];else temp=temp+sound_buf.source[(var<<6)+i];
 
-		}
+
+		// #pragma GCC unroll 65534 // dont bother this function makes it worse
+
+		if(!sound_mask.delay[0])   // mix to delay in or bypass, unrolled
+					s=s+sound_buf.source[(0*64)+i];else temp=temp+sound_buf.source[(0*64)+i];
+		if(!sound_mask.delay[1])
+						s=s+sound_buf.source[(1*64)+i];else temp=temp+sound_buf.source[(1*64)+i];
+		if(!sound_mask.delay[2])
+						s=s+sound_buf.source[(2*64)+i];else temp=temp+sound_buf.source[(2*64)+i];
+		if(!sound_mask.delay[3])
+						s=s+sound_buf.source[(3*64)+i];else temp=temp+sound_buf.source[(3*64)+i];
+		if(!sound_mask.delay[4])
+						s=s+sound_buf.source[(4*64)+i];else temp=temp+sound_buf.source[(4*64)+i];
+		if(!sound_mask.delay[5])
+						s=s+sound_buf.source[(5*64)+i];else temp=temp+sound_buf.source[(5*64)+i];// input mixer
+
+
+		// using float multi is fairly cheap here , conversions are worse
 
 	//delay_time=0;  //testing
 
-		   // bit heavy ,
-			//also needs an incoming limiter
-			//temp=(temp*(128-(feedback/4)))+(delayed*feedback);  // reduces signal of feedback
-			//temp=temp*(128-(feedback/4))+(delayed*feedback);  // reduces signal of feedback
-			//if ((temp>32767) || (temp<-32767))  {output_gain*=0.9;}
-
-
-			//int32_t delayed = (int16_t) ram_read(delay);  // major slow down needs to be different
-			int32_t delayed = ram_out[i]*4;  // for reading  , up to 128 samples
-			int32_t delayed_2 = ram_out[(i+delay_adder)]*4;
+			float delayed = ram_out[i];  // for reading  , up to 128 samples
+			float delayed_2 = data_hold_2[i]; // delayed by 256 samples (5ms) , make it variable
 			//int32_t delayed_2 =delayed;
-			int32_t fb_contrib = delayed * (int32_t)feedback;
-			int32_t accumulator = (int32_t)temp* (128-(feedback/4));  // incoming
+			float fb_contrib = delayed * feedback; //actual feedback and delayed
+			float accumulator = temp;  // incoming dry
 			accumulator += fb_contrib;
-			temp4=accumulator>>SHIFT;
+			accumulator*=0.5f; // can control limiter here
 			//temp3*=output_gain2; //
 			//if (temp3>(1<<15)) output_gain2*=0.9;
 		//	if (temp3>(1<<14)) output_gain2*=0.9; // delay input limiter
 
-			delay_filter=(delay_filter+temp4)/8; // smoothing
-
-			ram_in[i]=delay_filter; // write back stops here, maybe lower signal and then gain
+		//	delay_buf_temp=(delay_buf_temp+accumulator)*0.5f; // smoothing
+			//data_hold[i]=delayed;
+			ram_in[i]=accumulator; // write back stops here, maybe lower signal and then gain
 			//ram_write(delay_2,(int16_t) delay_filter); // write back stops here
 
 
-			sound_buf.delay[i*2]  = (temp+delayed+s);
+			sound_buf.delay[i*2]  = (accumulator+delayed+s); // accu+delayed+dry sounds
 
-			sound_buf.delay[(i*2)+1]  = (temp+delayed_2+s);
-
+			sound_buf.delay[(i*2)+1]  = (accumulator+delayed_2+s);
 	}
 
-
-
+	memcpy(data_hold+upcounter,ram_in,128); // can be used for other processing
 	} //end of sound delay
 
 
@@ -301,6 +206,25 @@ void next_sample(void){  // this runs always , sound in generated when ADSR_out 
 		}
 
 
+void delay_calc(void){
+
+	delay_pointer[0]+=audio_buffer_size;  //reading , needs to read the start bit as well when finishing , maybe an extra read or loop around
+	//if(delay_pointer[0]>(16384-128))
+	delay_pointer[0] &=(delay_buffer_size-1);
+
+	uint32_t delay=delay_pointer[0]; // reading
+	uint32_t delay_pointer1=delay+((delay_time*delay_time_multiplier)&64512);  // adds length between read and write for write back, aligned
+
+	uint32_t delay_2=delay_pointer1&(delay_buffer_size-1); //
+
+
+
+	// loops pointer number , for writing back
+	//uint32_t delay_3=(delay_pointer1+delay_time_multiplier)&(delay_buffer_size-1); // extra position for writing back
+	//uint16_t delay_3=delay_pointer1&(delay_buffer_size-1);
+	delay_pointer[1]=delay_2; // writing back
+
+}
 
 
 void ADSR_TIM_writer(void){   // single note for now  10ms ,16 bit ,could be smoother , 400 samples ish , might change to line up with sample process
@@ -367,20 +291,6 @@ void audio_gain_global(void){  // needs to be around adsr
 
 }
 
-	void delay_calc(void){
-
-		delay_pointer[0]+=audio_buffer_size;  //reading , counts up samples
-		delay_pointer[0] &=(delay_buffer_size-1);
-
-		uint32_t delay=delay_pointer[0]; // reading
-		uint32_t delay_pointer1=delay+(delay_time*delay_time_multiplier);  // adds length between read and write for write back
-
-		uint32_t delay_2=delay_pointer1&(delay_buffer_size-1); // loops pointer number , for writing back
-		//uint32_t delay_3=(delay_pointer1+delay_time_multiplier)&(delay_buffer_size-1); // extra position for writing back
-		//uint16_t delay_3=delay_pointer1&(delay_buffer_size-1);
-		delay_pointer[1]=delay_2; // write back
-
-	}
 
 	// 4-point Hermite interpolation (recommended)
 	// 4-point Hermite interpolation for int16_t samples
@@ -610,15 +520,17 @@ uint16_t lfo_out(){   // creates and lfo output/  one step
 }
 void ducking_control(void){  // creates sound_mask.ducking_level for audio
 	uint8_t duck=0;
-	for (int var = 0; var < 8; ++var) {
+	for (int var = 0; var < poly_limit; ++var) {
 
-		if (current_ducking_mask[var]) {  // only test ducking slaves
+		 if( sound_mask.muting[var]==1) sound_mask.ducking_level[var]=16; else sound_mask.ducking_level[var]=0; // for now using this for muting
+		 if( sound_mask.playing_sample[var]==2) sound_mask.ducking_level[var]=16;
+/*		if (current_ducking_mask[var]) {  // only test ducking slaves
 			duck=0;
 			for (int i = 0; i< 8; ++i) {
 				if ((var!=i) && (sound_mask.playing_sample[i]==1) && (!current_ducking_mask[i])) duck=1;  // do not activate by other active ducking
 			}
 			if (duck) sound_mask.ducking_level[var]=current_ducking_mask[var]&3; else sound_mask.ducking_level[var]=0;
-		}
+		}*/
 
 	}
 
