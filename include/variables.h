@@ -545,16 +545,9 @@ void waves(void) {
 
     }
 
-
-
-
 }
 int32_t sample_grab(uint8_t sample) {
-
-
  {return one_play[sample].buf[(one_play[sample].position>>16)];}
-
-
 }
 
 void sanitize_one_shots(void) {  // check for bad data in one_shot
@@ -603,26 +596,15 @@ void sanitize_one_shots(void) {  // check for bad data in one_shot
 typedef struct {
     float f[max_filter_steps];        // frequency coefficient
     float q[max_filter_steps];        // resonance (damping)
-    float low, band;
+    float cutoff[8]; // cutoff store per filter
+    float res_q[8];  // resonance per filter
+    float low[8];
+	float band[8]; // needs several slots this than can hold data
 } SVF;
-SVF Filtering; // set
+SVF Filtering; // needs settings for each
 float filt_f=1;  // set f
 float filt_q=0.707; // set resonance
-/*
-typedef struct {
-	int32_t f[128];        // frequency coefficient
-	int32_t q[128];        // resonance (damping)
-	int32_t low, band;
-} SVFI;
-SVFI Filter_int; // set
-*/
-/*void svf_set(SVF *s, float sample_rate, float cutoff, float resonance)   // calc coeff and res , might convert to table
-{
-    // resonance typically 0.0 … 1.0 (or higher)
-    // higher resonance → more peak
-    s->f = 2.0f * sinf(M_PI * cutoff / sample_rate);
-    s->q = 1.0f / resonance;   // or map resonance the way you like
-}*/
+
 #define lp_sampling_rate 11025
 
 
@@ -659,93 +641,46 @@ void preload_filter(void){  // stick with float , int is worse
 }
 
 
-float svf_lp(SVF *s, float in)
+/*float svf_lp(SVF *s, float in)
 {
     float high = in - s->low - filt_q * s->band;
     s->band += filt_f * high;
     s->low  += filt_f * s->band;
     return s->low;
-}
+}*/
 
-void  svf_lp_block_16(SVF *s, float *in, float *out ){ // process 16 in 64 out
+void  svf_lp_block_16(SVF *s, float *in, float *out, int f){ // process 16 in 64 out
 
 	//uint8_t n;
 	float temp;
 	for (int i = 0; i < 16; i++){
 	temp = (in[0] + in[1] + in[2] + in[3]) *0.25f;
-	//temp = (in[0] + in[1]) *0.5f;
-	//in += 2;
+
 	in += 4;
-        float high = temp - s->low - filt_q * s->band;
-        s->band += filt_f * high;
-        s->low  += filt_f * s->band;
-    	//out[n]=s->low;
-
-         out[3]=out[2]=out[1]=out[0]=s->low;;
+        float high = temp - s->low[f] - s->res_q[f] * s->band[f];
+        s->band[f] += s->cutoff[f] * high;
+        s->low[f]  += s->cutoff[f] * s->band[f];
+         out[3]=out[2]=out[1]=out[0]=s->low[f];;
     	 out+=4;
-    	 // out[1]=out[0]=s->low;;
-    	   // 	 out+=2;
-
     	    }
 
-
 }
-void  svf_lp_block_32(SVF *s, float *in, float *out ){ // process 16 in 64 out
+/*void  svf_lp_block_32(SVF *s, float *in, float *out ){ // process 16 in 64 out
 
 	//uint8_t n;
 	float temp;
 	for (int i = 0; i < 32; i++){
-
 	temp = (in[0] + in[1]) *0.5f;
 	in += 2;
-
         float high = temp - s->low - filt_q * s->band;
         s->band += filt_f * high;
         s->low  += filt_f * s->band;
 
     	  out[1]=out[0]=s->low;;
     	    	 out+=2;
-
     	    }
 
-
-}
-void  svf_lp_block_64(SVF *s, const float *in, float *out ){ // process 16 in 64 out
-    for (int i = 0; i < 64; i++){
-
-        float high = in[i] - s->low - filt_q * s->band;
-        s->band += filt_f * high;
-        s->low  += filt_f * s->band;
-    	out[i]=s->low;
-
-    	    }
-   // memcpy(out+16,out,16);
-  //  memcpy(out+32,out,16);
-  //  memcpy(out+48,out,16);
-
-
-/*    for (int i = 0; i < 16; i++){  // copy values
-    	out[i+16]=out[i+32]=out[i+48]=out[i];
-    }*/
-
-
-}
-void decimate4_block_f32(float *in, float *out) // 64 in 16 out
-{
-
-    for (int i = 0; i < 64; i++)
-    {
-       // out[i] = (uint32_t)(in[0] + in[1] + in[2] + in[3]) *0.25f;
-
-
-      //  in += 4;
-
-    	out[i]=in[i];
-    }
-}
-
-
-
+}*/
 
 int32_t soft_clip(int32_t x) {
     if (x > 32767) return 32767 - ((x - 32767) >> 2);

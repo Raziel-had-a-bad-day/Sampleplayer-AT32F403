@@ -247,9 +247,10 @@ flash_to_ram_mirror ();
 
 preload_filter();//svf_set(&Filtering, 44100, 1200, 1.2);
 
-lfo_init(&lfo, max_filter_steps/16, max_filter_steps, 512);   // initial low, high, rate
+lfo_init(&lfo, max_filter_steps/16, max_filter_steps, 36);   // initial low, high, rate
 lfo_set_range(&lfo, max_filter_steps/16, max_filter_steps, 0); // sets only the range not the rate
-
+Filtering.cutoff[0]=Filtering.cutoff[1]=Filtering.cutoff[2]=Filtering.cutoff[3]=Filtering.cutoff[4]=Filtering.cutoff[5]=Filtering.f[max_filter_steps/2];
+Filtering.res_q[0]=Filtering.res_q[1]=Filtering.res_q[2]=Filtering.res_q[3]=Filtering.res_q[4]=Filtering.res_q[5]=Filtering.q[100]; // dont use below clamp
 //samples_store[0].size_bytes=321048;
 //  maybe implement skip back function , record 30sec to mem and than skip back when needed
 
@@ -287,8 +288,8 @@ while(1)
 
 
 			  sound_source();  //180uS all note playing , now down to 125uS all on
-
-			  sound_filter(); // pretty good 3 filters 48uS
+			  time_start_handler();
+			  sound_filter(); // pretty good 3 filters 55uS
 			  time_start_handler();
 			  sound_delay(); // 50uS(was) now 126uS :/
 			  time_stop_handler();
@@ -320,7 +321,7 @@ while(1)
 		  uint32_t val = lfo_update(&lfo,  mtc_clock);
 		  val=filter_clamp(val);
 
-		  filt_f=Filtering.f[val];
+		  Filtering.cutoff[0]=Filtering.cutoff[1]=Filtering.cutoff[2]=Filtering.cutoff[3]=Filtering.cutoff[4]=Filtering.cutoff[5]=Filtering.f[val];;
 
 		  }  // timed by 24/quater
 
@@ -329,7 +330,7 @@ while(1)
 
 		  if (usart4_rx_counter>9){uart4_command_process();}  // look for commands on uart4
 
-		  if(mtc_clock>65000) mtc_clock=0;  //reset on full count
+		  if(mtc_clock>49151) mtc_clock=0;  //reset on full count
 
 		  if( uart_receive_timer[3] ) uart_receive_end(); // detect no transmission
 

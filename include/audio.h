@@ -79,29 +79,16 @@ int smull(int a, int b, int c, int d)
 
 void sound_filter(void){  //runs filter on buffer . 4 in 4 out
 // downsample to 11k and run 4 filters in paralell instead , bypass if cutoff is set to full
-float temp[64];
-float s=0;
-//memset(sound_buf.lpfilter,0,512);  // doesnt work
-
-static float low[6];
-static float band[6];
 
 // need gain limit at high Q
 
 for (int var = 0; var < poly_limit; ++var) { // this works
 
 	if(sound_mask.filter[var]){  //  filter option
-
 		int var2=var*64;
-	Filtering.low=low[var];
-	Filtering.band=band[var];
 	svf_lp_block_16(&Filtering, sound_buf.source+var2
-			,sound_buf.source+var2); // lpf
-	low[var]=Filtering.low;
-	band[var]=Filtering.band;
+			,sound_buf.source+var2,var); // lpf
 	}
-
-
 }
 
 
@@ -147,7 +134,7 @@ void sound_delay(void){  //runs filter on buffer , DO NOT MIX FLOAT AND INT MULT
 		if(!sound_mask.delay[4])
 						s=s+sound_buf.source[(4*64)+i];else temp=temp+sound_buf.source[(4*64)+i];
 		if(!sound_mask.delay[5])
-						s=s+sound_buf.source[(5*64)+i];else temp=temp+sound_buf.source[(5*64)+i];// input mixer
+						s=s+sound_buf.source[(5*64)+i];else temp=temp+sound_buf.source[(5*64)+i];// input mixer, good but eats a lot
 
 
 		// using float multi is fairly cheap here , conversions are worse
@@ -155,7 +142,7 @@ void sound_delay(void){  //runs filter on buffer , DO NOT MIX FLOAT AND INT MULT
 	//delay_time=0;  //testing
 
 			float delayed = ram_out[i];  // for reading  , up to 128 samples
-			float delayed_2 = data_hold_2[i]; // delayed by 256 samples (5ms) , make it variable
+			float delayed_2 = data_hold_2[i]; // delayed by 256 samples (5ms) , make it variable , modulation etc
 			//int32_t delayed_2 =delayed;
 			float fb_contrib = delayed * feedback; //actual feedback and delayed
 			float accumulator = temp;  // incoming dry

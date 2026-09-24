@@ -122,7 +122,7 @@ void control_change(uint8_t channel,uint8_t cc , uint8_t value){       // midi c
 			uint32_t filter_select=(max_filter_steps/127)*value;
 			filter_select=filter_clamp(filter_select);
 
-			filt_q=Filtering.q[filter_select];
+			Filtering.res_q[0]=Filtering.res_q[1]=Filtering.res_q[2]=Filtering.res_q[3]=Filtering.res_q[4]=Filtering.res_q[5]=Filtering.q[filter_select];
 		}
 		if (cc==92){    // rate
 			static uint32_t lfo_interval; // sets the count up rate
@@ -137,8 +137,8 @@ void control_change(uint8_t channel,uint8_t cc , uint8_t value){       // midi c
 
 			}
 
-/*		if (94>cc && cc>89) {   // adjust sample length
-			sample_selected=cc-89; // samples 1-5 atm
+		if (107>cc && cc>102) {   // adjust pitch
+			sample_selected=cc-102; // samples 1-5 atm
 			part_selected=sound_mask.playing_part[sample_selected];
 			one_shot[sample_selected].speed[part_selected]=value*1024;
 			one_play[sample_selected].playback_rate=one_shot[sample_selected].speed[part_selected];
@@ -146,7 +146,7 @@ void control_change(uint8_t channel,uint8_t cc , uint8_t value){       // midi c
 			//one_play[sample_selected].pointer=one_shot[sample_selected].start[part_selected];  // jumpt to start
 			//one_shot[sample_selected].end[part_selected]=sample_address_calculate(sample_selected,value);
 
-		}*/
+		}
 
 
 		if (cc>93 && cc<99) {   // adjust sample length
@@ -157,7 +157,7 @@ void control_change(uint8_t channel,uint8_t cc , uint8_t value){       // midi c
 			one_shot[sample_selected].end[part_selected]=sample_address_calculate(sample_selected,value);
 
 		}
-		if (cc>98 && cc<103) {   // adjust sample length
+		if (cc>98 && cc<103) {   // adjust gap length
 			sample_selected=cc-98; // samples 1-5 atm
 			part_selected=sound_mask.playing_part[sample_selected];
 			one_shot[sample_selected].gap[part_selected]=(uint8_t)(value*0.1875);
